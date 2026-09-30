@@ -10,7 +10,7 @@ const navItems = [
   { href: '/dashboard', label: 'Resumen', icon: LayoutDashboard },
   { href: '/dashboard/bandeja', label: 'Mi Bandeja', icon: Inbox },
   { href: '/dashboard/expedientes/nuevo', label: 'Nuevo Expediente', icon: FilePlus2 },
-  { href: '/consulta-publica', label: 'Consulta Pública', icon: Search },
+  { href: '/dashboard/consulta', label: 'Consulta Pública', icon: Search },
 ]
 
 export function Sidebar() {
@@ -34,8 +34,8 @@ export function Sidebar() {
               href={item.href}
               className={cn(
                 "flex items-center px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
-                isActive 
-                  ? "bg-primary text-primary-foreground shadow-sm" 
+                isActive
+                  ? "bg-primary text-primary-foreground shadow-sm"
                   : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
               )}
             >

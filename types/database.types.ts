@@ -25,6 +25,11 @@ export interface Database {
         Insert: { id?: string; cut?: string | null; remitente_nombres: string; remitente_dni_ruc: string; telefono?: string | null; correo?: string | null; asunto: string; folios?: number; estado?: string; area_actual_id?: string | null; registrado_por?: string | null; fecha_creacion?: string; fecha_actualizacion?: string }
         Update: { id?: string; cut?: string | null; remitente_nombres?: string; remitente_dni_ruc?: string; telefono?: string | null; correo?: string | null; asunto?: string; folios?: number; estado?: string; area_actual_id?: string | null; registrado_por?: string | null; fecha_creacion?: string; fecha_actualizacion?: string }
       }
+      adjuntos: {
+        Row: { id: string; expediente_id: string; nombre_archivo: string; ruta_almacenamiento: string; tipo_mime: string | null; peso_bytes: number | null; subido_por: string | null; fecha_subida: string }
+        Insert: { id?: string; expediente_id: string; nombre_archivo: string; ruta_almacenamiento: string; tipo_mime?: string | null; peso_bytes?: number | null; subido_por?: string | null; fecha_subida?: string }
+        Update: { id?: string; expediente_id?: string; nombre_archivo?: string; ruta_almacenamiento?: string; tipo_mime?: string | null; peso_bytes?: number | null; subido_por?: string | null; fecha_subida?: string }
+      }
     }
   }
 }

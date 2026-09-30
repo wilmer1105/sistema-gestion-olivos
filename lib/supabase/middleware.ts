@@ -33,6 +33,13 @@ export async function updateSession(request: NextRequest) {
   const isDashboardRoute = request.nextUrl.pathname.startsWith('/dashboard')
   const isAuthRoute = request.nextUrl.pathname.startsWith('/login')
 
+  // Redirigir a consulta pública si intenta ir a la consulta del dashboard sin sesión
+  if (request.nextUrl.pathname.startsWith('/dashboard/consulta') && !user) {
+    const consultaUrl = request.nextUrl.clone()
+    consultaUrl.pathname = '/consulta'
+    return NextResponse.redirect(consultaUrl)
+  }
+
   // Redirigir a login si intenta ir al dashboard sin autenticación
   if (isDashboardRoute && !user) {
     const loginUrl = request.nextUrl.clone()
