@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { derivacionSchema, type DerivacionInput } from '@/lib/validators/derivacion.schema'
@@ -29,6 +29,14 @@ export function DerivacionModal({ expedienteId, areas }: Props) {
   const [open, setOpen] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+
+  const areaItems: Record<string, string> = useMemo(() => {
+    const map: Record<string, string> = {}
+    for (const a of areas) {
+      map[String(a.id)] = a.siglas ? `${a.nombre} (${a.siglas})` : a.nombre
+    }
+    return map
+  }, [areas])
 
   const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm<DerivacionInput>({
     resolver: zodResolver(derivacionSchema) as any,
@@ -72,7 +80,12 @@ export function DerivacionModal({ expedienteId, areas }: Props) {
         <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-4 pt-4">
           <div className="space-y-2">
             <Label className={errors.area_destino_id ? "text-destructive" : ""}>Área de Destino</Label>
-            <Select disabled={isPending} onValueChange={(val: any) => setValue('area_destino_id', val || '')}>
+            <Select 
+              items={areaItems}
+              itemToStringLabel={(val: any) => (val ? areaItems[String(val)] || String(val) : '')}
+              disabled={isPending} 
+              onValueChange={(val: any) => setValue('area_destino_id', val || '')}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Seleccione la unidad orgánica" />
               </SelectTrigger>

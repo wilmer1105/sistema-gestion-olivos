@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { FileText, Paperclip } from 'lucide-react'
 import { PdfViewerModal } from '@/components/shared/PdfViewerModal'
+import { BackButton } from '@/components/shared/BackButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -45,6 +46,11 @@ export default async function ExpedienteDetailPage({ params }: { params: Promise
   return (
     <div className="space-y-6">
       
+      {/* Botón de retorno al panel anterior */}
+      <div>
+        <BackButton fallbackUrl="/dashboard/bandeja" label="Volver a la bandeja" />
+      </div>
+
       {/* Cabecera y Acciones */}
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div>

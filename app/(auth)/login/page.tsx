@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import Link from 'next/link'
 import { Building2, Loader2, ShieldAlert } from 'lucide-react'
 
 import { loginAction } from '@/app/actions/auth'
@@ -82,9 +83,17 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password" className={errors.password ? "text-destructive" : ""}>
-              Contraseña
-            </Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password" className={errors.password ? "text-destructive" : ""}>
+                Contraseña
+              </Label>
+              <Link
+                href="/forgot-password"
+                className="text-xs text-primary hover:underline font-medium"
+              >
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
             <Input 
               id="password" 
               type="password" 

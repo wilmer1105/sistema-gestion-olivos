@@ -20,7 +20,7 @@ export default function RootLayout({
     <html lang="es">
       <body className={inter.className}>
         {children}
-        {/* Aquí agregamos un Toaster genérico si Shadcn creó el componente adecuado, si falla luego lo ajustamos */}
+        <Toaster />
       </body>
     </html>
   )

@@ -31,7 +31,7 @@ export async function updateSession(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   const isDashboardRoute = request.nextUrl.pathname.startsWith('/dashboard')
-  const isAuthRoute = request.nextUrl.pathname.startsWith('/login')
+  const isAuthRoute = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/forgot-password')
 
   // Redirigir a consulta pública si intenta ir a la consulta del dashboard sin sesión
   if (request.nextUrl.pathname.startsWith('/dashboard/consulta') && !user) {

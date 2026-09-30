@@ -2,7 +2,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { loginSchema, type LoginInput } from '@/lib/validators/auth.schema'
+import { loginSchema, forgotPasswordSchema, type LoginInput, type ForgotPasswordInput } from '@/lib/validators/auth.schema'
 import { redirect } from 'next/navigation'
 
 export async function loginAction(data: LoginInput) {
@@ -34,3 +34,23 @@ export async function logoutAction() {
   await supabase.auth.signOut()
   redirect('/login')
 }
+
+export async function forgotPasswordAction(data: ForgotPasswordInput) {
+  const parseResult = forgotPasswordSchema.safeParse(data)
+  if (!parseResult.success) {
+    return { error: 'Debe ingresar un correo electrónico válido' }
+  }
+
+  try {
+    const supabase = await createClient()
+    const { error } = await supabase.auth.resetPasswordForEmail(data.email)
+
+    if (error) {
+      return { error: error.message || 'No se pudo procesar la solicitud de recuperación' }
+    }
+
+    return { success: true }
+  } catch (err: any) {
+    return { error: err?.message || 'Error inesperado al solicitar recuperación de contraseña' }
+  }
+}

@@ -1,34 +1,32 @@
-// components/shared/Navbar.tsx
-import { User, LogOut } from 'lucide-react'
-import { logoutAction } from '@/app/actions/auth'
 import { createClient } from '@/lib/supabase/server'
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { UserProfileMenu, type UserProfileData } from '@/components/shared/UserProfileMenu'
 
 export async function Navbar() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  
+
   // Obtenemos los datos del perfil y área desde la base de datos
-  const { data: perfil } = await supabase
-    .from('perfiles')
-    .select('nombres, apellidos, rol, areas(nombre)')
+  const { data: perfil } = await (supabase.from('perfiles') as any)
+    .select('id, nombres, apellidos, dni, rol, activo, created_at, areas(id, nombre, siglas)')
     .eq('id', user?.id || '')
     .single()
 
-  // Convertimos el resultado a 'any' para evitar que TypeScript marque errores en las propiedades
   const perfilData = perfil as any
 
-  const nombreCompleto = perfilData ? `${perfilData.nombres} ${perfilData.apellidos}` : 'Usuario Municipal'
-  const nombreArea = perfilData?.areas?.nombre || 'Área no asignada'
-  const rol = perfilData?.rol || 'Funcionario'
+  const userData: UserProfileData = {
+    id: user?.id || '',
+    email: user?.email || null,
+    nombres: perfilData?.nombres || 'Usuario',
+    apellidos: perfilData?.apellidos || 'Municipal',
+    dni: perfilData?.dni || null,
+    rol: perfilData?.rol || 'FUNCIONARIO',
+    activo: perfilData?.activo,
+    created_at: perfilData?.created_at,
+    areas: perfilData?.areas || null,
+  }
+
+  const nombreArea = userData.areas?.nombre || 'Área no asignada'
+  const rol = userData.rol
 
   return (
     <header className="h-16 border-b bg-white flex items-center justify-between px-6 sticky top-0 z-10">
@@ -37,29 +35,10 @@ export async function Navbar() {
         <span className="text-xs text-slate-500 uppercase tracking-wider">{rol}</span>
       </div>
 
-      <DropdownMenu>
-        {/* Quitamos asChild y pasamos las clases de diseño directamente al Trigger */}
-        <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-md text-sm font-medium border border-slate-200 bg-white hover:bg-slate-100 h-10 px-4 py-2 gap-2 focus:outline-none focus:ring-2 focus:ring-slate-900 transition-colors">
-          <User className="h-4 w-4" />
-          <span className="hidden sm:inline-block">{nombreCompleto}</span>
-        </DropdownMenuTrigger>
-        
-        <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          
-          <form action={logoutAction}>
-            {/* Quitamos asChild y metemos el botón nativo dentro del DropdownMenuItem */}
-            <DropdownMenuItem className="p-0">
-              <button type="submit" className="w-full flex items-center cursor-pointer text-destructive px-2 py-1.5 focus:outline-none hover:bg-slate-100 rounded-sm">
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Cerrar Sesión</span>
-              </button>
-            </DropdownMenuItem>
-          </form>
-          
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <div className="flex items-center gap-3">
+        {/* Componente del menú de usuario con panel desplegable y modal de ficha técnica */}
+        <UserProfileMenu user={userData} />
+      </div>
     </header>
   )
 }

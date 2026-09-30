@@ -7,3 +7,9 @@ export const loginSchema = z.object({
 })
 
 export type LoginInput = z.infer<typeof loginSchema>
+
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("Debe ingresar un correo electrónico válido"),
+})
+
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>

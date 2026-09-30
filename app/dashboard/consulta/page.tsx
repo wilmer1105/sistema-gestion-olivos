@@ -1,11 +1,16 @@
 // app/dashboard/consulta/page.tsx
 import { ConsultaTracker } from '@/components/modules/consulta/ConsultaTracker'
+import { BackButton } from '@/components/shared/BackButton'
 
 export const dynamic = 'force-dynamic'
 
 export default function DashboardConsultaPage() {
   return (
     <div className="space-y-6">
+      <div>
+        <BackButton fallbackUrl="/dashboard" label="Volver al panel" />
+      </div>
+
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">Consulta de Expedientes</h1>

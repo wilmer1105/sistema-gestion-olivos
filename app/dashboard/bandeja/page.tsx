@@ -2,6 +2,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { BandejaTable } from '@/components/modules/bandeja/BandejaTable'
 import { redirect } from 'next/navigation'
+import { BackButton } from '@/components/shared/BackButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -41,6 +42,10 @@ export default async function BandejaPage() {
 
     return (
         <div className="space-y-6">
+            <div>
+                <BackButton fallbackUrl="/dashboard" label="Volver al panel" />
+            </div>
+
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight text-slate-900">Bandeja de Entrada</h1>

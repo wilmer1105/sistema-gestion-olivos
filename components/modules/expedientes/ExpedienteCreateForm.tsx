@@ -14,6 +14,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, ShieldAlert, User, FileText, FileCheck, Trash2, Plus, UploadCloud } from 'lucide-react'
 
+const TIPO_DOC_ITEMS: Record<string, string> = {
+  DNI: 'DNI',
+  RUC: 'RUC',
+  CE: 'Carné Ext. (CE)',
+}
+
+const TIPO_TRAMITE_ITEMS: Record<string, string> = {
+  FUT: 'FUT (Formulario Único)',
+  Carta: 'Carta',
+  Oficio: 'Oficio',
+  Solicitud: 'Solicitud',
+}
+
 export function ExpedienteCreateForm() {
   const router = useRouter()
   const [serverError, setServerError] = useState<string | null>(null)
@@ -122,7 +135,13 @@ export function ExpedienteCreateForm() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="tipo_documento_identidad">Tipo Doc. *</Label>
-                  <Select value={tipoDoc} onValueChange={(val: any) => setTipoDoc(val)} disabled={isPending}>
+                  <Select 
+                    items={TIPO_DOC_ITEMS}
+                    itemToStringLabel={(val: any) => (val ? TIPO_DOC_ITEMS[String(val)] || String(val) : '')}
+                    value={tipoDoc} 
+                    onValueChange={(val: any) => setTipoDoc(val)} 
+                    disabled={isPending}
+                  >
                     <SelectTrigger id="tipo_documento_identidad">
                       <SelectValue placeholder="Tipo" />
                     </SelectTrigger>
@@ -212,7 +231,13 @@ export function ExpedienteCreateForm() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="sm:col-span-2 space-y-1.5">
                   <Label htmlFor="tipo_tramite">Tipo de Trámite *</Label>
-                  <Select value={tipoTramite} onValueChange={(val: any) => setTipoTramite(val)} disabled={isPending}>
+                  <Select 
+                    items={TIPO_TRAMITE_ITEMS}
+                    itemToStringLabel={(val: any) => (val ? TIPO_TRAMITE_ITEMS[String(val)] || String(val) : '')}
+                    value={tipoTramite} 
+                    onValueChange={(val: any) => setTipoTramite(val)} 
+                    disabled={isPending}
+                  >
                     <SelectTrigger id="tipo_tramite">
                       <SelectValue placeholder="Seleccione" />
                     </SelectTrigger>
