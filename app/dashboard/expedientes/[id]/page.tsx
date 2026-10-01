@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
-import { notFound } from 'next/navigation'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { notFound, redirect } from 'next/navigation'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { DerivacionModal } from '@/components/modules/expedientes/DerivacionModal'
@@ -17,9 +18,27 @@ export default async function ExpedienteDetailPage({ params }: { params: Promise
   const supabase = await createClient()
   const { id: expedienteId } = await params
 
-  // 1. Obtener datos del expediente, su área actual y archivos adjuntos con JOIN de áreas
-  const { data: expediente, error: expError } = await (supabase.from('expedientes') as any)
-    .select('*, areas(nombre), adjuntos(*, areas(nombre))')
+  // 1. Verificar usuario autenticado
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    redirect('/login')
+  }
+
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
+
+  const dbClient = (serviceRoleKey && supabaseUrl)
+    ? createAdminClient(supabaseUrl, serviceRoleKey, {
+        auth: { autoRefreshToken: false, persistSession: false },
+      })
+    : supabase
+
+  // 2. Obtener datos del expediente, su área actual y archivos adjuntos con JOIN de áreas
+  const { data: expediente, error: expError } = await (dbClient.from('expedientes') as any)
+    .select('*, areas:area_actual_id(nombre), adjuntos(*, areas(nombre))')
     .eq('id', expedienteId)
     .single()
 
@@ -29,7 +48,7 @@ export default async function ExpedienteDetailPage({ params }: { params: Promise
 
   const adjuntos = Array.isArray(expediente.adjuntos) ? expediente.adjuntos : []
 
-  // TAREA 2: Agrupación visual de adjuntos por nombre de área
+  // Agrupación visual de adjuntos por nombre de área
   const adjuntosPorArea: Record<string, any[]> = {}
   for (const adj of adjuntos) {
     const areaName = adj.areas?.nombre || 'Mesa de Partes (Ingreso Inicial)'
@@ -39,13 +58,13 @@ export default async function ExpedienteDetailPage({ params }: { params: Promise
     adjuntosPorArea[areaName].push(adj)
   }
 
-  // 2. Obtener lista de áreas (para el select del modal de derivación)
-  const { data: areas } = await (supabase.from('areas') as any)
+  // 3. Obtener lista de áreas (para el select del modal de derivación)
+  const { data: areas } = await (dbClient.from('areas') as any)
     .select('id, nombre, siglas')
     .order('nombre')
 
-  // 3. Obtener el tracking (Hoja de ruta)
-  const { data: trazabilidad } = await (supabase.from('trazabilidad') as any)
+  // 4. Obtener el tracking (Hoja de ruta completa con nombres de áreas y emisores)
+  const { data: trazabilidad } = await (dbClient.from('trazabilidad') as any)
     .select(`
       *,
       area_origen:area_origen_id(nombre),
@@ -55,20 +74,14 @@ export default async function ExpedienteDetailPage({ params }: { params: Promise
     .eq('expediente_id', expedienteId)
     .order('fecha_envio', { ascending: false })
 
-  // 4. Obtener usuario y rol para RBAC
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
+  // 5. Obtener rol del usuario para RBAC
   let rolUsuario = ''
-  if (user) {
-    const { data: perfil } = await supabase
-      .from('perfiles')
-      .select('rol')
-      .eq('id', user.id)
-      .single()
-    rolUsuario = (perfil as any)?.rol || ''
-  }
+  const { data: perfil } = await dbClient
+    .from('perfiles')
+    .select('rol')
+    .eq('id', user.id)
+    .single()
+  rolUsuario = (perfil as any)?.rol || ''
 
   return (
     <div className="space-y-6">
@@ -251,27 +264,61 @@ export default async function ExpedienteDetailPage({ params }: { params: Promise
             Hoja de Ruta (Tracking)
           </h3>
           <div className="relative border-l border-slate-200 ml-3 space-y-6 pb-4">
-            {trazabilidad?.map((item: any) => (
-              <div key={item.id} className="relative pl-6">
-                <div className="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full bg-primary ring-4 ring-white" />
-                <div className="flex flex-col">
-                  <span className="text-sm font-semibold text-slate-900">
-                    {item.accion}
-                  </span>
-                  <span className="text-xs text-slate-500 mb-1">
-                    {format(new Date(item.fecha_envio), "dd MMM yyyy, HH:mm", { locale: es })}
-                  </span>
-                  <div className="bg-white border rounded-md p-3 mt-1 shadow-sm">
-                    <p className="text-xs font-medium text-slate-700">De: {item.area_origen?.nombre}</p>
-                    <p className="text-xs font-medium text-slate-700 mb-2">Hacia: {item.area_destino?.nombre}</p>
-                    <p className="text-sm text-slate-600 italic">"{item.proveido}"</p>
-                    <p className="text-[10px] text-slate-400 mt-2 text-right">
-                      Por: {item.emisor?.nombres} {item.emisor?.apellidos}
-                    </p>
+            {(!trazabilidad || trazabilidad.length === 0) ? (
+              <p className="text-sm text-slate-500 italic pl-6">
+                No hay movimientos registrados para este expediente aún.
+              </p>
+            ) : (
+              trazabilidad.map((item: any) => {
+                let formattedFecha = 'Fecha no registrada'
+                if (item.fecha_envio) {
+                  try {
+                    const d = new Date(item.fecha_envio)
+                    if (!isNaN(d.getTime())) {
+                      formattedFecha = format(d, "dd MMM yyyy, HH:mm", { locale: es })
+                    }
+                  } catch {
+                    formattedFecha = 'Fecha no disponible'
+                  }
+                }
+
+                const emisorNombre = item.emisor
+                  ? `${item.emisor.nombres || ''} ${item.emisor.apellidos || ''}`.trim()
+                  : ''
+
+                return (
+                  <div key={item.id} className="relative pl-6">
+                    <div className="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full bg-primary ring-4 ring-white" />
+                    <div className="flex flex-col">
+                      <span className="text-sm font-semibold text-slate-900">
+                        {item.accion}
+                      </span>
+                      <span className="text-xs text-slate-500 mb-1">
+                        {formattedFecha}
+                      </span>
+                      <div className="bg-white border rounded-md p-3 mt-1 shadow-sm">
+                        <p className="text-xs font-medium text-slate-700">
+                          De: {item.area_origen?.nombre || 'Mesa de Partes'}
+                        </p>
+                        <p className="text-xs font-medium text-slate-700 mb-2">
+                          Hacia: {item.area_destino?.nombre || 'Mesa de Partes'}
+                        </p>
+                        {item.proveido ? (
+                          <p className="text-sm text-slate-600 italic">"{item.proveido}"</p>
+                        ) : (
+                          <p className="text-xs text-slate-400 italic">Sin observaciones</p>
+                        )}
+                        {emisorNombre && (
+                          <p className="text-[10px] text-slate-400 mt-2 text-right">
+                            Por: {emisorNombre}
+                          </p>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            ))}
+                )
+              })
+            )}
           </div>
         </div>
 
