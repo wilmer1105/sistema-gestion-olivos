@@ -3,9 +3,11 @@ import { notFound } from 'next/navigation'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { DerivacionModal } from '@/components/modules/expedientes/DerivacionModal'
+import { FinalizarExpedienteModal } from '@/components/expedientes/FinalizarExpedienteModal'
+import { SubirDocumentosDialog } from '@/components/modules/expedientes/SubirDocumentosDialog'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { FileText, Paperclip } from 'lucide-react'
+import { FileText, Paperclip, Building2 } from 'lucide-react'
 import { PdfViewerModal } from '@/components/shared/PdfViewerModal'
 import { BackButton } from '@/components/shared/BackButton'
 
@@ -15,9 +17,9 @@ export default async function ExpedienteDetailPage({ params }: { params: Promise
   const supabase = await createClient()
   const { id: expedienteId } = await params
 
-  // 1. Obtener datos del expediente, su área actual y archivos adjuntos
+  // 1. Obtener datos del expediente, su área actual y archivos adjuntos con JOIN de áreas
   const { data: expediente, error: expError } = await (supabase.from('expedientes') as any)
-    .select('*, areas(nombre), adjuntos(id, nombre_archivo, ruta_almacenamiento, peso_bytes, tipo_mime)')
+    .select('*, areas(nombre), adjuntos(*, areas(nombre))')
     .eq('id', expedienteId)
     .single()
 
@@ -26,6 +28,16 @@ export default async function ExpedienteDetailPage({ params }: { params: Promise
   }
 
   const adjuntos = Array.isArray(expediente.adjuntos) ? expediente.adjuntos : []
+
+  // TAREA 2: Agrupación visual de adjuntos por nombre de área
+  const adjuntosPorArea: Record<string, any[]> = {}
+  for (const adj of adjuntos) {
+    const areaName = adj.areas?.nombre || 'Mesa de Partes (Ingreso Inicial)'
+    if (!adjuntosPorArea[areaName]) {
+      adjuntosPorArea[areaName] = []
+    }
+    adjuntosPorArea[areaName].push(adj)
+  }
 
   // 2. Obtener lista de áreas (para el select del modal de derivación)
   const { data: areas } = await (supabase.from('areas') as any)
@@ -42,6 +54,21 @@ export default async function ExpedienteDetailPage({ params }: { params: Promise
     `)
     .eq('expediente_id', expedienteId)
     .order('fecha_envio', { ascending: false })
+
+  // 4. Obtener usuario y rol para RBAC
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  let rolUsuario = ''
+  if (user) {
+    const { data: perfil } = await supabase
+      .from('perfiles')
+      .select('rol')
+      .eq('id', user.id)
+      .single()
+    rolUsuario = (perfil as any)?.rol || ''
+  }
 
   return (
     <div className="space-y-6">
@@ -63,10 +90,25 @@ export default async function ExpedienteDetailPage({ params }: { params: Promise
           <p className="text-slate-500">Ubicación actual: <span className="font-medium text-slate-700">{expediente.areas?.nombre}</span></p>
         </div>
         
-        {/* Solo mostrar el botón de Derivar si el expediente está en estado RECEPCIONADO */}
-        {expediente.estado === 'RECEPCIONADO' && (
-          <DerivacionModal expedienteId={expedienteId} areas={areas || []} />
-        )}
+        {/* Acciones: Derivación y Cierre de Expedientes (RBAC) */}
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Solo mostrar el botón de Derivar si el expediente está en estado RECEPCIONADO */}
+          {expediente.estado === 'RECEPCIONADO' && (
+            <DerivacionModal
+              expedienteId={expedienteId}
+              areaOrigenId={expediente.area_actual_id}
+              areas={areas || []}
+            />
+          )}
+
+          {/* Renderizado Condicional RBAC: ÚNICAMENTE si rol === 'JEFE_AREA' */}
+          {rolUsuario === 'JEFE_AREA' && expediente.estado !== 'ATENDIDO' && expediente.estado !== 'ARCHIVADO' && (
+            <FinalizarExpedienteModal
+              expedienteId={expedienteId}
+              cut={expediente.cut}
+            />
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -123,14 +165,23 @@ export default async function ExpedienteDetailPage({ params }: { params: Promise
 
           {/* Sección: Archivos Adjuntos */}
           <Card className="shadow-sm">
-            <CardHeader className="bg-slate-50 border-b flex flex-row items-center justify-between py-4">
+            <CardHeader className="bg-slate-50 border-b flex flex-row items-center justify-between py-3.5">
               <div className="flex items-center gap-2">
                 <Paperclip className="w-5 h-5 text-slate-600" />
                 <CardTitle className="text-lg">Archivos Adjuntos</CardTitle>
               </div>
-              <Badge variant="secondary" className="font-normal text-xs">
-                {adjuntos.length === 1 ? '1 Archivo adjunto' : `${adjuntos.length} Archivos adjuntos`}
-              </Badge>
+
+              <div className="flex items-center gap-3">
+                <Badge variant="secondary" className="font-normal text-xs">
+                  {adjuntos.length === 1 ? '1 Archivo adjunto' : `${adjuntos.length} Archivos adjuntos`}
+                </Badge>
+
+                {/* TAREA 1: Visible ÚNICAMENTE si rol es ESPECIALISTA o JEFE_AREA */}
+                {(rolUsuario === 'ESPECIALISTA' || rolUsuario === 'JEFE_AREA') &&
+                  expediente.estado !== 'ARCHIVADO' && (
+                    <SubirDocumentosDialog expedienteId={expedienteId} />
+                  )}
+              </div>
             </CardHeader>
             <CardContent className="pt-6">
               {adjuntos.length === 0 ? (
@@ -139,33 +190,52 @@ export default async function ExpedienteDetailPage({ params }: { params: Promise
                   <p className="text-sm">No se adjuntaron archivos para este expediente.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {adjuntos.map((adjunto: any) => (
-                    <div
-                      key={adjunto.id}
-                      className="flex items-center justify-between p-3.5 rounded-lg border border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition-colors gap-3"
-                    >
-                      <div className="flex items-center gap-3 overflow-hidden min-w-0">
-                        <div className="p-2 bg-primary/10 rounded-md shrink-0">
-                          <FileText className="w-5 h-5 text-primary" />
+                /* TAREA 2: Agrupación visual de adjuntos separándolos por el nombre de su área */
+                <div className="space-y-6">
+                  {Object.entries(adjuntosPorArea).map(([areaNombre, listaAdjuntos]) => (
+                    <div key={areaNombre} className="space-y-3">
+                      <div className="flex items-center justify-between border-b pb-1.5">
+                        <div className="flex items-center gap-2">
+                          <Building2 className="w-4 h-4 text-primary" />
+                          <h4 className="text-sm font-semibold text-slate-800">
+                            Sección: {areaNombre}
+                          </h4>
                         </div>
-                        <div className="truncate min-w-0">
-                          <p className="text-sm font-medium text-slate-900 truncate" title={adjunto.nombre_archivo}>
-                            {adjunto.nombre_archivo}
-                          </p>
-                          <p className="text-xs text-slate-500">
-                            {adjunto.peso_bytes
-                              ? `${(adjunto.peso_bytes / 1024 / 1024).toFixed(2)} MB`
-                              : adjunto.tipo_mime || 'Documento adjunto'}
-                          </p>
-                        </div>
+                        <Badge variant="outline" className="text-xs font-normal">
+                          {listaAdjuntos.length} {listaAdjuntos.length === 1 ? 'archivo' : 'archivos'}
+                        </Badge>
                       </div>
 
-                      <div className="shrink-0">
-                        <PdfViewerModal
-                          url={adjunto.ruta_almacenamiento}
-                          nombreArchivo={adjunto.nombre_archivo}
-                        />
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {listaAdjuntos.map((adjunto: any) => (
+                          <div
+                            key={adjunto.id}
+                            className="flex items-center justify-between p-3 rounded-lg border border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition-colors gap-3"
+                          >
+                            <div className="flex items-center gap-3 overflow-hidden min-w-0">
+                              <div className="p-2 bg-primary/10 rounded-md shrink-0">
+                                <FileText className="w-4 h-4 text-primary" />
+                              </div>
+                              <div className="truncate min-w-0">
+                                <p className="text-sm font-medium text-slate-900 truncate" title={adjunto.nombre_archivo}>
+                                  {adjunto.nombre_archivo}
+                                </p>
+                                <p className="text-xs text-slate-500">
+                                  {adjunto.peso_bytes
+                                    ? `${(adjunto.peso_bytes / 1024 / 1024).toFixed(2)} MB`
+                                    : adjunto.tipo_mime || 'Documento adjunto'}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="shrink-0">
+                              <PdfViewerModal
+                                url={adjunto.ruta_almacenamiento}
+                                nombreArchivo={adjunto.nombre_archivo}
+                              />
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   ))}

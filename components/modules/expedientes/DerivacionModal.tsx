@@ -1,17 +1,18 @@
 'use client'
 
 import { useState, useTransition, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { derivacionSchema, type DerivacionInput } from '@/lib/validators/derivacion.schema'
-import { derivarExpedienteAction } from '@/app/actions/derivaciones'
+import { derivarExpedienteAction } from '@/app/actions/expedientes'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Send, Loader2, AlertCircle } from 'lucide-react'
+import { Send, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
 interface Area {
@@ -22,12 +23,15 @@ interface Area {
 
 interface Props {
   expedienteId: string
+  areaOrigenId?: string | null
   areas: Area[]
 }
 
-export function DerivacionModal({ expedienteId, areas }: Props) {
+export function DerivacionModal({ expedienteId, areaOrigenId, areas }: Props) {
+  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [successMsg, setSuccessMsg] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
   const areaItems: Record<string, string> = useMemo(() => {
@@ -45,19 +49,36 @@ export function DerivacionModal({ expedienteId, areas }: Props) {
 
   function onSubmit(data: DerivacionInput) {
     setErrorMsg(null)
+    setSuccessMsg(null)
     startTransition(async () => {
-      const res = await derivarExpedienteAction(expedienteId, data)
-      if (res.error) {
-        setErrorMsg(res.error)
+      const res = await derivarExpedienteAction({
+        expediente_id: expedienteId,
+        area_destino_id: data.area_destino_id,
+        area_origen_id: areaOrigenId as string,
+        accion: data.proveido || '',
+      })
+
+      if (!res.success) {
+        setErrorMsg(res.error || 'Error al derivar el expediente.')
       } else {
+        setSuccessMsg('Expediente derivado correctamente.')
         reset()
+        setErrorMsg(null)
         setOpen(false)
+        router.push('/dashboard/bandeja')
+        router.refresh()
       }
     })
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        setOpen(isOpen)
+        if (!isOpen) setErrorMsg(null)
+      }}
+    >
       <DialogTrigger asChild>
         <Button className="gap-2">
           <Send className="w-4 h-4" />
@@ -72,8 +93,19 @@ export function DerivacionModal({ expedienteId, areas }: Props) {
 
         {errorMsg && (
           <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{errorMsg}</AlertDescription>
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            <AlertDescription className="break-words font-medium">
+              {errorMsg}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {successMsg && (
+          <Alert className="border-emerald-500 bg-emerald-50 text-emerald-800">
+            <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+            <AlertDescription className="break-words font-medium">
+              {successMsg}
+            </AlertDescription>
           </Alert>
         )}
 
@@ -112,7 +144,15 @@ export function DerivacionModal({ expedienteId, areas }: Props) {
           </div>
 
           <div className="flex justify-end pt-4 gap-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={isPending}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setOpen(false)
+                setErrorMsg(null)
+              }}
+              disabled={isPending}
+            >
               Cancelar
             </Button>
             <Button type="submit" disabled={isPending}>

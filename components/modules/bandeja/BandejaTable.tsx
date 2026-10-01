@@ -4,7 +4,7 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { CheckCircle2, ArrowRightCircle, Loader2, Clock, AlertCircle } from 'lucide-react'
+import { CheckCircle2, ArrowRightCircle, Loader2, Clock, AlertCircle, Eye } from 'lucide-react'
 import { recepcionarExpedienteAction } from '@/app/actions/bandeja'
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -78,6 +78,18 @@ export function BandejaTable({ data }: { data: any[] }) {
             case 'RECEPCIONADO':
                 return (
                     <Badge className="bg-emerald-600 text-white hover:bg-emerald-700 font-medium">
+                        {estado}
+                    </Badge>
+                )
+            case 'ATENDIDO':
+                return (
+                    <Badge className="bg-blue-600 text-white hover:bg-blue-700 font-medium">
+                        {estado}
+                    </Badge>
+                )
+            case 'ARCHIVADO':
+                return (
+                    <Badge className="bg-slate-700 text-white hover:bg-slate-800 font-medium">
                         {estado}
                     </Badge>
                 )
@@ -176,6 +188,16 @@ export function BandejaTable({ data }: { data: any[] }) {
                                                 <Button size="sm" variant="outline" className="shadow-sm border-slate-300 gap-1.5 hover:bg-slate-100">
                                                     <ArrowRightCircle className="w-4 h-4 text-emerald-600" />
                                                     Atender / Derivar
+                                                </Button>
+                                            </Link>
+                                        )}
+
+                                        {/* Si estado es ATENDIDO o ARCHIVADO: Botón 'Ver Detalle' para consulta histórica */}
+                                        {(expediente.estado === 'ATENDIDO' || expediente.estado === 'ARCHIVADO') && (
+                                            <Link href={`/dashboard/expedientes/${expediente.id}`}>
+                                                <Button size="sm" variant="outline" className="shadow-sm border-slate-300 gap-1.5 hover:bg-slate-100 text-slate-700">
+                                                    <Eye className="w-4 h-4 text-slate-500" />
+                                                    Ver Detalle
                                                 </Button>
                                             </Link>
                                         )}
