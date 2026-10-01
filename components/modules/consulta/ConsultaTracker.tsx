@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Search, FileText, MapPin, ArrowRight, Clock, AlertCircle } from 'lucide-react'
+import { Search, FileText, MapPin, ArrowRight, Clock, Calendar, AlertCircle } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 
@@ -51,6 +51,11 @@ export function ConsultaTracker({
       }
     })
   }
+
+  // Deducción de la ubicación actual a partir del último movimiento registrado
+  const movimientos = resultado?.trazabilidad || []
+  const ultimoMovimiento = movimientos.length > 0 ? movimientos[movimientos.length - 1] : null
+  const ubicacionActual = ultimoMovimiento?.area_destino || 'Mesa de Partes'
 
   return (
     <div className="space-y-6">
@@ -97,7 +102,9 @@ export function ConsultaTracker({
                   <p className="text-sm font-medium text-slate-500">Expediente</p>
                   <h2 className="text-2xl font-bold text-slate-900">{resultado.expediente.cut}</h2>
                 </div>
-                <Badge className="bg-slate-900 text-sm py-1">{resultado.expediente.estado}</Badge>
+                <Badge className="bg-slate-900 text-sm py-1 font-semibold">
+                  {resultado.expediente.estado}
+                </Badge>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 p-4 bg-slate-50 rounded-lg border">
@@ -108,57 +115,102 @@ export function ConsultaTracker({
                     <p className="text-slate-900 line-clamp-2">{resultado.expediente.asunto}</p>
                   </div>
                 </div>
+
                 <div className="flex items-start gap-3">
                   <MapPin className="w-5 h-5 text-slate-400 mt-0.5 shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-slate-500">Ubicación Actual</p>
-                    <p className="font-semibold text-primary">
-                      {(resultado.expediente.areas as any)?.nombre || 'Mesa de Partes / Área Asignada'}
-                    </p>
+                    <p className="font-semibold text-primary">{ubicacionActual}</p>
                   </div>
                 </div>
+
+                {resultado.expediente.fecha_ingreso && (
+                  <div className="flex items-start gap-3">
+                    <Calendar className="w-5 h-5 text-slate-400 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-slate-500">Fecha de Ingreso</p>
+                      <p className="text-slate-800 text-sm font-medium">
+                        {formatDateSafe(resultado.expediente.fecha_ingreso)}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {resultado.expediente.fecha_actualizacion && (
+                  <div className="flex items-start gap-3">
+                    <Clock className="w-5 h-5 text-slate-400 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-slate-500">Última Actualización</p>
+                      <p className="text-slate-800 text-sm font-medium">
+                        {formatDateSafe(resultado.expediente.fecha_actualizacion)}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
 
           {/* Hoja de Ruta */}
           <div>
-            <h3 className="font-semibold text-slate-800 ml-1 mb-4">Historial de Movimientos (Hoja de Ruta)</h3>
+            <h3 className="font-semibold text-slate-800 ml-1 mb-4">
+              Historial de Movimientos (Línea de Tiempo)
+            </h3>
             <div className="bg-white rounded-lg border shadow-sm p-6">
-              {(!resultado.trazabilidad || resultado.trazabilidad.length === 0) ? (
+              {movimientos.length === 0 ? (
                 <div className="flex flex-col items-center justify-center p-8 text-center text-slate-500">
                   <Clock className="w-8 h-8 text-slate-300 mb-2" />
-                  <p className="text-sm font-medium">No se registran movimientos ni derivaciones para este expediente aún.</p>
+                  <p className="text-sm font-medium">
+                    No se registran movimientos ni derivaciones para este expediente aún.
+                  </p>
                 </div>
               ) : (
                 <div className="relative border-l-2 border-slate-200 ml-4 space-y-8 pb-4">
-                  {resultado.trazabilidad.map((item: any, index: number) => (
-                    <div key={item.id} className="relative pl-6">
-                      <div className={`absolute -left-2.5 mt-1.5 h-5 w-5 rounded-full ring-4 ring-white flex items-center justify-center ${index === 0 ? 'bg-primary' : 'bg-slate-300'}`}>
-                        <div className="h-2 w-2 bg-white rounded-full" />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className={`text-sm font-bold ${index === 0 ? 'text-primary' : 'text-slate-700'}`}>
-                          {item.accion}
-                        </span>
-                        <span className="text-xs text-slate-500 mb-2">
-                          {formatDateSafe(item.fecha_envio)}
-                        </span>
-                        <div className="bg-slate-50 border rounded-md p-3">
-                          <div className="flex items-center gap-2 text-sm text-slate-600 mb-1">
-                            <span className="font-medium">{item.area_origen?.nombre || 'Mesa de Partes'}</span>
-                            <ArrowRight className="w-4 h-4 text-slate-400 shrink-0" />
-                            <span className="font-medium">{item.area_destino?.nombre || 'Mesa de Partes'}</span>
+                  {movimientos.map((item: any, index: number) => {
+                    const isUltimo = index === movimientos.length - 1
+
+                    return (
+                      <div key={`${item.expediente_id || 'item'}-${index}`} className="relative pl-6">
+                        <div
+                          className={`absolute -left-2.5 mt-1.5 h-5 w-5 rounded-full ring-4 ring-white flex items-center justify-center ${
+                            isUltimo ? 'bg-primary' : 'bg-slate-300'
+                          }`}
+                        >
+                          <div className="h-2 w-2 bg-white rounded-full" />
+                        </div>
+                        <div className="flex flex-col">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span
+                              className={`text-sm font-bold ${
+                                isUltimo ? 'text-primary' : 'text-slate-700'
+                              }`}
+                            >
+                              {item.accion}
+                            </span>
+                            {item.estado_nuevo && (
+                              <Badge variant="outline" className="text-xs font-normal">
+                                {item.estado_nuevo}
+                              </Badge>
+                            )}
                           </div>
-                          {item.proveido ? (
-                            <p className="text-sm text-slate-700 italic">"{item.proveido}"</p>
-                          ) : (
-                            <p className="text-xs text-slate-400 italic">Sin observaciones adicionales</p>
-                          )}
+                          <span className="text-xs text-slate-500 mb-2">
+                            {formatDateSafe(item.fecha)}
+                          </span>
+                          <div className="bg-slate-50 border rounded-md p-3">
+                            <div className="flex items-center gap-2 text-sm text-slate-700">
+                              <span className="font-medium text-slate-800">
+                                {item.area_origen || 'Mesa de Partes'}
+                              </span>
+                              <ArrowRight className="w-4 h-4 text-slate-400 shrink-0" />
+                              <span className="font-semibold text-primary">
+                                {item.area_destino || 'Mesa de Partes'}
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )}
             </div>

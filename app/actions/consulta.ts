@@ -1,7 +1,6 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
 
 export async function buscarExpedientePorCut(cut: string) {
   try {
@@ -10,22 +9,13 @@ export async function buscarExpedientePorCut(cut: string) {
       return { error: 'Debe ingresar un Código Único de Trámite (CUT) válido.' }
     }
 
-    // Usar cliente con SERVICE_ROLE_KEY si está disponible para consultas públicas de rastreo.
-    // Esto garantiza que el ciudadano o usuario vea la línea de tiempo real sin que RLS
-    // oculte los registros históricos de trazabilidad ni los nombres de las áreas.
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
+    // Cliente público estándar de Supabase (anon / servidor estándar)
+    const supabase = await createClient()
 
-    const dbClient = (serviceRoleKey && supabaseUrl)
-      ? createAdminClient(supabaseUrl, serviceRoleKey, {
-          auth: { autoRefreshToken: false, persistSession: false },
-        })
-      : await createClient()
-
-    // 1. Buscar el expediente (insensible a mayúsculas/minúsculas)
-    const { data: expediente, error } = await (dbClient.from('expedientes') as any)
-      .select('id, cut, asunto, estado, fecha_creacion, areas:area_actual_id(nombre)')
-      .ilike('cut', cleanCut)
+    // 1. Consultar la vista pública segura 'vista_consulta_ciudadana'
+    const { data: expediente, error } = await (supabase.from('vista_consulta_ciudadana') as any)
+      .select('*')
+      .eq('cut', cleanCut)
       .single()
 
     if (error || !expediente) {
@@ -34,14 +24,14 @@ export async function buscarExpedientePorCut(cut: string) {
       }
     }
 
-    // 2. Buscar la hoja de ruta (trazabilidad completa con nombres de áreas)
-    const { data: trazabilidad, error: trazError } = await (dbClient.from('trazabilidad') as any)
-      .select('id, accion, proveido, fecha_envio, estado_nuevo, area_origen:area_origen_id(nombre), area_destino:area_destino_id(nombre)')
+    // 2. Consultar la vista pública segura 'vista_trazabilidad_ciudadana'
+    const { data: trazabilidad, error: trazError } = await (supabase.from('vista_trazabilidad_ciudadana') as any)
+      .select('*')
       .eq('expediente_id', expediente.id)
-      .order('fecha_envio', { ascending: false })
+      .order('fecha', { ascending: true })
 
     if (trazError) {
-      console.error('Error al consultar trazabilidad en buscarExpedientePorCut:', trazError)
+      console.error('Error al consultar vista_trazabilidad_ciudadana:', trazError)
     }
 
     return {
