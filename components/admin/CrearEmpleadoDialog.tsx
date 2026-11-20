@@ -170,42 +170,44 @@ export function CrearEmpleadoDialog({ areas }: Props) {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium">
-          <UserPlus className="w-4 h-4" />
-          Nuevo Empleado
+        <Button className="h-11 px-5 gap-2 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-base font-semibold shadow-xs">
+          <UserPlus className="w-5 h-5" aria-hidden="true" />
+          <span>Nuevo Empleado</span>
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-140 max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-140 max-h-[90vh] overflow-y-auto rounded-xl">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold flex items-center gap-2 text-slate-800">
-            <UserPlus className="w-5 h-5 text-emerald-600" />
+          <DialogTitle className="text-xl font-bold flex items-center gap-2 text-slate-900">
+            <UserPlus className="w-5 h-5 text-blue-700" aria-hidden="true" />
             Registrar Nuevo Empleado
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-sm text-slate-600">
             Alta de cuenta institucional con acceso directo al sistema municipal. Todos los datos son requeridos para users y perfiles.
           </DialogDescription>
         </DialogHeader>
 
         {errorMsg && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
+          <Alert role="alert" aria-live="assertive" variant="destructive">
+            <AlertCircle className="h-4 w-4" aria-hidden="true" />
             <AlertDescription>{errorMsg}</AlertDescription>
           </Alert>
         )}
 
         {successMsg && (
-          <Alert className="border-emerald-500 bg-emerald-50 text-emerald-800">
-            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-            <AlertDescription className="text-emerald-700">{successMsg}</AlertDescription>
+          <Alert role="status" aria-live="polite" className="border-emerald-600 bg-emerald-50 text-emerald-900">
+            <CheckCircle2 className="h-4 w-4 text-emerald-700" aria-hidden="true" />
+            <AlertDescription className="text-emerald-900 font-medium">{successMsg}</AlertDescription>
           </Alert>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
           {/* Fila 1: Nombres y Apellidos */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="nombres">Nombres *</Label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="nombres" className="text-sm font-semibold text-slate-800">
+                Nombres *
+              </Label>
               <Input
                 id="nombres"
                 name="nombres"
@@ -214,10 +216,13 @@ export function CrearEmpleadoDialog({ areas }: Props) {
                 onChange={(e) => setNombres(e.target.value)}
                 disabled={isPending}
                 required
+                className="h-11 text-base bg-white border-slate-300 text-slate-900 placeholder:text-slate-500"
               />
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="apellidos">Apellidos *</Label>
+            <div className="space-y-2">
+              <Label htmlFor="apellidos" className="text-sm font-semibold text-slate-800">
+                Apellidos *
+              </Label>
               <Input
                 id="apellidos"
                 name="apellidos"
@@ -226,14 +231,17 @@ export function CrearEmpleadoDialog({ areas }: Props) {
                 onChange={(e) => setApellidos(e.target.value)}
                 disabled={isPending}
                 required
+                className="h-11 text-base bg-white border-slate-300 text-slate-900 placeholder:text-slate-500"
               />
             </div>
           </div>
 
           {/* Fila 2: DNI y Rol */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="dni">DNI (8 dígitos) *</Label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="dni" className="text-sm font-semibold text-slate-800">
+                DNI (8 dígitos) *
+              </Label>
               <Input
                 id="dni"
                 name="dni"
@@ -243,11 +251,14 @@ export function CrearEmpleadoDialog({ areas }: Props) {
                 onChange={(e) => setDni(e.target.value.replace(/\D/g, ''))}
                 disabled={isPending}
                 required
+                className="h-11 text-base font-mono bg-white border-slate-300 text-slate-900 placeholder:text-slate-500"
               />
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="rol">Rol Asignado *</Label>
+            <div className="space-y-2">
+              <Label htmlFor="rol" className="text-sm font-semibold text-slate-800">
+                Rol Asignado *
+              </Label>
               <Select
                 items={ROL_LABELS}
                 itemToStringLabel={(val: string | null) => (val ? ROL_LABELS[String(val)] || String(val) : '')}
@@ -255,7 +266,7 @@ export function CrearEmpleadoDialog({ areas }: Props) {
                 onValueChange={(val: string | null) => handleRoleChange(val || '')}
                 disabled={isPending}
               >
-                <SelectTrigger id="rol">
+                <SelectTrigger id="rol" className="h-11 text-base bg-white border-slate-300 text-slate-900">
                   <SelectValue placeholder="Seleccione un rol" />
                 </SelectTrigger>
                 <SelectContent>
@@ -270,8 +281,8 @@ export function CrearEmpleadoDialog({ areas }: Props) {
           </div>
 
           {/* Fila 3: Área de Adscripción */}
-          <div className="space-y-1.5">
-            <Label htmlFor="area_id">
+          <div className="space-y-2">
+            <Label htmlFor="area_id" className="text-sm font-semibold text-slate-800">
               Área de Adscripción {rol !== 'ADMIN_TI' ? '*' : ''}
             </Label>
             <Select
@@ -281,7 +292,12 @@ export function CrearEmpleadoDialog({ areas }: Props) {
               onValueChange={(val: string | null) => setAreaId(val || '')}
               disabled={rol === 'MESA_PARTES' || rol === 'ADMIN_TI' || isPending}
             >
-              <SelectTrigger id="area_id" className={rol === 'ADMIN_TI' ? 'bg-slate-50 text-slate-400' : ''}>
+              <SelectTrigger
+                id="area_id"
+                className={`h-11 text-base border-slate-300 ${
+                  rol === 'ADMIN_TI' ? 'bg-slate-100 text-slate-600' : 'bg-white text-slate-900'
+                }`}
+              >
                 <SelectValue placeholder={rol === 'ADMIN_TI' ? 'No aplica (Administrador Global)' : 'Seleccione el área municipal'} />
               </SelectTrigger>
               <SelectContent>
@@ -293,21 +309,23 @@ export function CrearEmpleadoDialog({ areas }: Props) {
               </SelectContent>
             </Select>
             {rol === 'MESA_PARTES' && (
-              <p className="text-[11px] text-emerald-600 font-medium">
+              <p className="text-xs text-emerald-800 font-semibold">
                 Área bloqueada y asignada automáticamente a Mesa de Partes para este rol.
               </p>
             )}
             {rol === 'ADMIN_TI' && (
-              <p className="text-[11px] text-purple-600 font-medium">
+              <p className="text-xs text-purple-800 font-semibold">
                 No aplica: Los Administradores TI no pertenecen a un área específica y tienen alcance global.
               </p>
             )}
           </div>
 
           {/* Fila 4: Correo Electrónico y Contraseña */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="email">Correo Institucional *</Label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-sm font-semibold text-slate-800">
+                Correo Institucional *
+              </Label>
               <Input
                 id="email"
                 name="email"
@@ -317,11 +335,14 @@ export function CrearEmpleadoDialog({ areas }: Props) {
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isPending}
                 required
+                className="h-11 text-base bg-white border-slate-300 text-slate-900 placeholder:text-slate-500"
               />
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="password">Contraseña Temporal *</Label>
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-sm font-semibold text-slate-800">
+                Contraseña Temporal *
+              </Label>
               <Input
                 id="password"
                 name="password"
@@ -331,32 +352,34 @@ export function CrearEmpleadoDialog({ areas }: Props) {
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isPending}
                 required
+                className="h-11 text-base bg-white border-slate-300 text-slate-900 placeholder:text-slate-500"
               />
-              <p className="text-[10px] text-slate-400">
+              <p className="text-xs text-slate-600 font-medium">
                 Mínimo 6 caracteres.
               </p>
             </div>
           </div>
 
           {/* Botones de acción */}
-          <div className="flex justify-end gap-2 pt-4 border-t">
+          <div className="flex justify-end gap-2.5 pt-4 border-t border-slate-200">
             <Button
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
               disabled={isPending}
+              className="h-11 px-5 rounded-xl border-slate-300 font-semibold text-slate-800"
             >
               Cancelar
             </Button>
             <Button
               type="submit"
               disabled={isPending}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="h-11 px-5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-semibold"
             >
               {isPending ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Guardando...
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" aria-hidden="true" />
+                  <span>Guardando...</span>
                 </>
               ) : (
                 'Guardar Empleado'
@@ -368,3 +391,4 @@ export function CrearEmpleadoDialog({ areas }: Props) {
     </Dialog>
   )
 }
+

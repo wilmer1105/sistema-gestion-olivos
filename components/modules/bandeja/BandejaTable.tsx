@@ -10,6 +10,9 @@ import {
   Clock,
   AlertCircle,
   Eye,
+  FileText,
+  Send,
+  Archive,
 } from 'lucide-react'
 import { recepcionarExpedienteAction } from '@/app/actions/bandeja'
 import type { IExpedienteLectura } from '@/lib/domain/contracts/expediente.contracts'
@@ -88,56 +91,67 @@ export function BandejaTable({
     })
   }
 
-  // Renderizado con colores semánticos que cumplen ratio de contraste WCAG 2.1 AA (>= 4.5:1)
+  // Renderizado píldora (texto + ícono + borde) con ratio de contraste WCAG 2.1 AA/AAA
   const getStatusBadge = (estado: string) => {
     switch (estado) {
       case 'REGISTRADO':
         return (
           <Badge
             variant="secondary"
-            className="bg-slate-100 text-slate-800 border-slate-300 font-medium"
+            className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 text-slate-900 border border-slate-400 px-3 py-1 text-xs font-bold"
           >
-            {estado}
+            <FileText className="w-3.5 h-3.5 text-slate-700" aria-hidden="true" />
+            <span>{estado}</span>
           </Badge>
         )
       case 'DERIVADO':
         return (
-          <Badge className="bg-amber-700 text-white hover:bg-amber-800 font-medium">
-            {estado}
+          <Badge className="inline-flex items-center gap-1.5 rounded-full bg-amber-700 text-white hover:bg-amber-800 border border-amber-900 px-3 py-1 text-xs font-bold">
+            <Clock className="w-3.5 h-3.5" aria-hidden="true" />
+            <span>{estado}</span>
           </Badge>
         )
       case 'RECEPCIONADO':
         return (
-          <Badge className="bg-emerald-700 text-white hover:bg-emerald-800 font-medium">
-            {estado}
+          <Badge className="inline-flex items-center gap-1.5 rounded-full bg-emerald-800 text-white hover:bg-emerald-900 border border-emerald-950 px-3 py-1 text-xs font-bold">
+            <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />
+            <span>{estado}</span>
           </Badge>
         )
       case 'EN_TRAMITE':
         return (
-          <Badge className="bg-indigo-700 text-white hover:bg-indigo-800 font-medium">
-            EN TRÁMITE
+          <Badge className="inline-flex items-center gap-1.5 rounded-full bg-indigo-800 text-white hover:bg-indigo-900 border border-indigo-950 px-3 py-1 text-xs font-bold">
+            <Send className="w-3.5 h-3.5" aria-hidden="true" />
+            <span>EN TRÁMITE</span>
           </Badge>
         )
       case 'OBSERVADO':
         return (
-          <Badge className="bg-rose-700 text-white hover:bg-rose-800 font-medium">
-            {estado}
+          <Badge className="inline-flex items-center gap-1.5 rounded-full bg-rose-800 text-white hover:bg-rose-900 border border-rose-950 px-3 py-1 text-xs font-bold">
+            <AlertCircle className="w-3.5 h-3.5" aria-hidden="true" />
+            <span>{estado}</span>
           </Badge>
         )
       case 'ATENDIDO':
         return (
-          <Badge className="bg-blue-700 text-white hover:bg-blue-800 font-medium">
-            {estado}
+          <Badge className="inline-flex items-center gap-1.5 rounded-full bg-blue-800 text-white hover:bg-blue-900 border border-blue-950 px-3 py-1 text-xs font-bold">
+            <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />
+            <span>{estado}</span>
           </Badge>
         )
       case 'ARCHIVADO':
         return (
-          <Badge className="bg-slate-700 text-white hover:bg-slate-800 font-medium">
-            {estado}
+          <Badge className="inline-flex items-center gap-1.5 rounded-full bg-slate-800 text-white hover:bg-slate-900 border border-slate-950 px-3 py-1 text-xs font-bold">
+            <Archive className="w-3.5 h-3.5" aria-hidden="true" />
+            <span>{estado}</span>
           </Badge>
         )
       default:
-        return <Badge variant="outline">{estado}</Badge>
+        return (
+          <Badge variant="outline" className="rounded-full px-3 py-1 text-xs font-bold">
+            {estado}
+          </Badge>
+        )
     }
   }
 
@@ -146,10 +160,12 @@ export function BandejaTable({
       <div
         role="status"
         aria-live="polite"
-        className="flex flex-col items-center justify-center p-12 bg-white border border-dashed rounded-lg text-slate-600"
+        className="flex flex-col items-center justify-center p-12 bg-white border border-dashed border-slate-300 rounded-xl text-slate-700"
       >
-        <Clock className="w-10 h-10 mb-4 text-slate-400" aria-hidden="true" />
-        <p>No se encontraron expedientes en esta vista de la bandeja.</p>
+        <Clock className="w-10 h-10 mb-3 text-slate-600" aria-hidden="true" />
+        <p className="text-base font-semibold text-slate-800">
+          No se encontraron expedientes en esta vista de la bandeja.
+        </p>
       </div>
     )
   }
@@ -163,44 +179,44 @@ export function BandejaTable({
           variant={feedback.type === 'error' ? 'destructive' : 'default'}
           className={
             feedback.type === 'success'
-              ? 'border-emerald-600 bg-emerald-50 text-emerald-900 shadow-sm'
-              : 'shadow-sm'
+              ? 'border-emerald-600 bg-emerald-50 text-emerald-900 rounded-xl shadow-xs'
+              : 'rounded-xl shadow-xs'
           }
         >
           {feedback.type === 'success' ? (
-            <CheckCircle2 className="h-4 w-4 text-emerald-700" aria-hidden="true" />
+            <CheckCircle2 className="h-5 w-5 text-emerald-700" aria-hidden="true" />
           ) : (
-            <AlertCircle className="h-4 w-4" aria-hidden="true" />
+            <AlertCircle className="h-5 w-5" aria-hidden="true" />
           )}
-          <AlertDescription className="font-medium text-sm">
+          <AlertDescription className="font-semibold text-sm">
             {feedback.message}
           </AlertDescription>
         </Alert>
       )}
 
-      <div className="bg-white border rounded-lg shadow-sm">
+      <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
         <Table aria-label="Tabla de expedientes de la unidad orgánica">
           <caption className="sr-only">
             Lista de expedientes asignados a la bandeja de entrada con su estado y acciones disponibles
           </caption>
           <TableHeader>
-            <TableRow className="bg-slate-50 hover:bg-slate-50">
-              <TableHead scope="col" className="font-semibold text-slate-800">
+            <TableRow className="bg-slate-100/90 hover:bg-slate-100/90 border-b border-slate-200">
+              <TableHead scope="col" className="py-3.5 px-4 text-sm font-bold text-slate-900">
                 CUT
               </TableHead>
-              <TableHead scope="col" className="font-semibold text-slate-800">
+              <TableHead scope="col" className="py-3.5 px-4 text-sm font-bold text-slate-900">
                 Asunto
               </TableHead>
-              <TableHead scope="col" className="font-semibold text-slate-800">
+              <TableHead scope="col" className="py-3.5 px-4 text-sm font-bold text-slate-900">
                 Remitente
               </TableHead>
-              <TableHead scope="col" className="font-semibold text-slate-800">
+              <TableHead scope="col" className="py-3.5 px-4 text-sm font-bold text-slate-900">
                 Estado
               </TableHead>
-              <TableHead scope="col" className="font-semibold text-slate-800">
+              <TableHead scope="col" className="py-3.5 px-4 text-sm font-bold text-slate-900">
                 Última Actualización
               </TableHead>
-              <TableHead scope="col" className="text-right font-semibold text-slate-800">
+              <TableHead scope="col" className="py-3.5 px-4 text-right text-sm font-bold text-slate-900">
                 Acción
               </TableHead>
             </TableRow>
@@ -224,39 +240,41 @@ export function BandejaTable({
               return (
                 <TableRow
                   key={expediente.id}
-                  className="hover:bg-slate-50/50 transition-colors"
+                  className="hover:bg-blue-50/40 transition-colors border-b border-slate-200/80"
                 >
-                  <TableCell className="font-medium">
+                  <TableCell className="py-3.5 px-4 font-semibold">
                     <Link
                       href={`/dashboard/expedientes/${expediente.id}`}
-                      className="font-medium text-primary hover:underline"
+                      className="font-mono text-base font-bold text-blue-800 hover:text-blue-900 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 rounded-sm"
                     >
                       {expediente.cut}
                     </Link>
                   </TableCell>
                   <TableCell
-                    className="max-w-[200px] truncate"
+                    className="py-3.5 px-4 max-w-[260px] truncate text-base text-slate-900 font-medium"
                     title={expediente.asunto}
                   >
                     {expediente.asunto}
                   </TableCell>
-                  <TableCell className="truncate max-w-[160px]">
-                    <div className="truncate">{expediente.remitente_nombres}</div>
+                  <TableCell className="py-3.5 px-4 truncate max-w-[200px]">
+                    <div className="truncate text-base font-semibold text-slate-900">
+                      {expediente.remitente_nombres}
+                    </div>
                     {expediente.remitente_dni_ruc && (
-                      <div className="text-xs text-slate-500 font-mono">
-                        {expediente.remitente_dni_ruc}
+                      <div className="text-sm text-slate-600 font-mono">
+                        Doc: {expediente.remitente_dni_ruc}
                       </div>
                     )}
                   </TableCell>
-                  <TableCell>{getStatusBadge(expediente.estado)}</TableCell>
-                  <TableCell className="text-slate-600 text-sm">
+                  <TableCell className="py-3.5 px-4">{getStatusBadge(expediente.estado)}</TableCell>
+                  <TableCell className="py-3.5 px-4 text-slate-700 text-sm font-medium">
                     {format(
                       new Date(expediente.fecha_actualizacion),
                       'dd MMM yyyy, HH:mm',
                       { locale: es }
                     )}
                   </TableCell>
-                  <TableCell className="text-right space-x-2 whitespace-nowrap">
+                  <TableCell className="py-3.5 px-4 text-right space-x-2 whitespace-nowrap">
                     {!esPestanaEnviados &&
                       expediente.estado === 'DERIVADO' &&
                       puedeRecepcionarRow && (
@@ -268,7 +286,7 @@ export function BandejaTable({
                           disabled={isLoadingThis}
                           aria-busy={isLoadingThis}
                           aria-label={`Recibir expediente ${cutLabel}`}
-                          className="shadow-sm"
+                          className="h-10 px-4 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold shadow-2xs"
                         >
                           {isLoadingThis ? (
                             <Loader2
@@ -289,8 +307,12 @@ export function BandejaTable({
                       href={`/dashboard/expedientes/${expediente.id}`}
                       aria-label={`Ver detalle del expediente ${cutLabel}`}
                     >
-                      <Button size="sm" variant="outline" className="gap-1.5">
-                        <Eye className="w-4 h-4 text-slate-500" aria-hidden="true" />
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-10 px-4 gap-1.5 rounded-xl border-slate-300 text-sm font-semibold text-slate-800 hover:bg-slate-100"
+                      >
+                        <Eye className="w-4 h-4 text-blue-700" aria-hidden="true" />
                         <span>
                           {expediente.estado === 'REGISTRADO'
                             ? 'Ver / Derivar'
@@ -308,3 +330,4 @@ export function BandejaTable({
     </div>
   )
 }
+

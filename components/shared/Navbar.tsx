@@ -1,4 +1,5 @@
 // components/shared/Navbar.tsx
+import { Building, ShieldCheck } from 'lucide-react'
 import { UserProfileMenu, type UserProfileData } from '@/components/shared/UserProfileMenu'
 import { obtenerEtiquetaRol } from '@/lib/domain/rbac'
 import {
@@ -42,20 +43,32 @@ export async function Navbar({ perfil }: NavbarProps) {
     <header
       role="banner"
       aria-label="Barra superior institucional"
-      className="h-16 border-b bg-white flex items-center justify-between px-6 sticky top-0 z-10"
+      className="h-18 border-b border-slate-200 bg-white flex items-center justify-between px-6 md:px-8 sticky top-0 z-10 shadow-2xs"
     >
-      <div className="flex flex-col" aria-label="Unidad orgánica y cargo del usuario">
-        <span className="text-sm font-semibold text-slate-800">
-          {siglasArea ? `${nombreArea} (${siglasArea})` : nombreArea}
-        </span>
-        <span className="text-xs text-slate-600 uppercase tracking-wider">
-          {rolFormateado}
-        </span>
+      <div className="flex items-center gap-3.5 min-w-0" aria-label="Unidad orgánica y cargo del usuario">
+        <div className="hidden sm:flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 border border-slate-200 text-[#0F2A4A] shrink-0">
+          <Building className="h-5 w-5" aria-hidden="true" />
+        </div>
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-base font-bold text-slate-900 truncate">
+              {siglasArea ? `${nombreArea} (${siglasArea})` : nombreArea}
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 border border-blue-200 px-2.5 py-0.5 text-xs font-bold text-blue-800">
+              <ShieldCheck className="w-3.5 h-3.5 text-blue-700" aria-hidden="true" />
+              <span>{rolFormateado}</span>
+            </span>
+          </div>
+          <span className="text-sm text-slate-600 hidden sm:block">
+            Sistema de Gestión Documental · Municipalidad Distrital de Los Olivos
+          </span>
+        </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 shrink-0">
         <UserProfileMenu user={userData} />
       </div>
     </header>
   )
 }
+

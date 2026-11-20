@@ -107,17 +107,19 @@ export function AsignarEspecialistaModal({
           variant="outline"
           disabled={disabled}
           aria-label="Asignar especialista de la unidad orgánica"
-          className="gap-2 border-slate-300"
+          className="h-11 px-4 gap-2 rounded-xl border-slate-300 text-sm font-semibold text-slate-800 hover:bg-slate-100"
         >
           <UserCheck className="w-4 h-4 text-indigo-700" aria-hidden="true" />
           <span>Asignar Especialista</span>
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[480px]">
+      <DialogContent className="sm:max-w-[480px] rounded-xl">
         <DialogHeader>
-          <DialogTitle>Asignación Interna de Especialista</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-xl font-bold text-slate-900">
+            Asignación Interna de Especialista
+          </DialogTitle>
+          <DialogDescription className="text-sm text-slate-600">
             Seleccione al especialista o asesor de su misma unidad orgánica
             encargado de evaluar el expediente y elaborar el informe respectivo.
           </DialogDescription>
@@ -146,7 +148,9 @@ export function AsignarEspecialistaModal({
 
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
           <div className="space-y-2">
-            <Label htmlFor="especialista_id">Especialista del Área *</Label>
+            <Label htmlFor="especialista_id" className="text-sm font-semibold text-slate-800">
+              Especialista del Área *
+            </Label>
             <Select
               items={especialistaItems}
               itemToStringLabel={(val: string | null) =>
@@ -162,6 +166,7 @@ export function AsignarEspecialistaModal({
                 id="especialista_id"
                 aria-required="true"
                 aria-invalid={Boolean(errorMsg && !especialistaId)}
+                className="h-11 text-base bg-white border-slate-300 text-slate-900"
               >
                 <SelectValue
                   placeholder={
@@ -182,7 +187,7 @@ export function AsignarEspecialistaModal({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="proveido_asignacion">
+            <Label htmlFor="proveido_asignacion" className="text-sm font-semibold text-slate-800">
               Instrucción Interna / Proveído
             </Label>
             <Textarea
@@ -192,15 +197,17 @@ export function AsignarEspecialistaModal({
               value={proveido}
               onChange={(e) => setProveido(e.target.value)}
               disabled={isPending}
+              className="text-base bg-white border-slate-300 text-slate-900 placeholder:text-slate-500"
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-3">
+          <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-200">
             <Button
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
               disabled={isPending}
+              className="h-11 px-5 rounded-xl border-slate-300 font-semibold text-slate-800"
             >
               Cancelar
             </Button>
@@ -208,6 +215,7 @@ export function AsignarEspecialistaModal({
               type="submit"
               disabled={isPending || especialistas.length === 0}
               aria-busy={isPending}
+              className="h-11 px-5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-semibold"
             >
               {isPending && (
                 <Loader2
@@ -223,3 +231,4 @@ export function AsignarEspecialistaModal({
     </Dialog>
   )
 }
+

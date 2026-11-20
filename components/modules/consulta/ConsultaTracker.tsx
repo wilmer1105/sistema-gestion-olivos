@@ -54,12 +54,12 @@ export function HojaDeRutaTimeline({
 }) {
   if (movimientos.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 text-center text-slate-600">
+      <div className="flex flex-col items-center justify-center p-10 text-center text-slate-700">
         <Clock
-          className="w-8 h-8 text-slate-400 mb-2"
+          className="w-10 h-10 text-slate-600 mb-3"
           aria-hidden="true"
         />
-        <p className="text-sm font-medium">
+        <p className="text-base font-semibold text-slate-800">
           No se registran movimientos ni derivaciones para este expediente aún.
         </p>
       </div>
@@ -69,7 +69,7 @@ export function HojaDeRutaTimeline({
   return (
     <ol
       aria-label="Línea de tiempo cronológica de movimientos"
-      className="relative border-l-2 border-slate-200 ml-4 space-y-8 pb-4 list-none"
+      className="relative border-l-2 border-blue-200 ml-4 space-y-6 pb-2 list-none"
     >
       {movimientos.map((item: IConsultaCiudadanaMovimiento, index: number) => {
         const isUltimo = index === movimientos.length - 1
@@ -81,58 +81,63 @@ export function HojaDeRutaTimeline({
         return (
           <li
             key={`${item.id || item.expediente_id || 'item'}-${index}`}
-            className="relative pl-6"
+            className="relative pl-8"
           >
             <div
               aria-hidden="true"
-              className={`absolute -left-2.5 mt-1.5 h-5 w-5 rounded-full ring-4 ring-white flex items-center justify-center ${
-                isUltimo ? 'bg-primary' : 'bg-slate-400'
+              className={`absolute -left-3 mt-1.5 h-6 w-6 rounded-full ring-4 ring-white flex items-center justify-center shadow-xs ${
+                isUltimo ? 'bg-blue-700' : 'bg-[#0F2A4A]'
               }`}
             >
-              <div className="h-2 w-2 bg-white rounded-full" />
+              <div className="h-2.5 w-2.5 bg-white rounded-full" />
             </div>
-            <div className="flex flex-col">
-              <div className="flex flex-wrap items-center gap-2">
-                <span
-                  className={`text-sm font-bold ${
-                    isUltimo ? 'text-primary' : 'text-slate-800'
-                  }`}
-                >
-                  {item.accion}
-                </span>
-                {item.estado_nuevo && (
-                  <Badge
-                    variant="outline"
-                    className="text-xs font-normal"
+
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2.5 shadow-2xs">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <span
+                    className={`text-base font-bold ${
+                      isUltimo ? 'text-blue-800' : 'text-slate-900'
+                    }`}
                   >
-                    {item.estado_nuevo}
-                  </Badge>
-                )}
-              </div>
-              <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600 mb-2 mt-0.5">
-                <span>Envío: {fechaEnvioTexto}</span>
-                {fechaRecepcionTexto && (
-                  <span className="inline-flex items-center gap-1 text-emerald-700 font-medium">
-                    <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />
-                    Recepción: {fechaRecepcionTexto}
+                    {item.accion}
                   </span>
-                )}
+                  {item.estado_nuevo && (
+                    <Badge
+                      variant="outline"
+                      className="rounded-full bg-white text-slate-900 border-slate-300 text-xs font-semibold px-3 py-0.5"
+                    >
+                      {item.estado_nuevo}
+                    </Badge>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-4 text-sm text-slate-700">
+                  <span>Envío: {fechaEnvioTexto}</span>
+                  {fechaRecepcionTexto && (
+                    <span className="inline-flex items-center gap-1.5 text-emerald-800 font-semibold">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-700" aria-hidden="true" />
+                      Recepción: {fechaRecepcionTexto}
+                    </span>
+                  )}
+                </div>
               </div>
-              <div className="bg-slate-50 border rounded-md p-3 space-y-1.5">
-                <div className="flex items-center gap-2 text-sm text-slate-700">
-                  <span className="font-medium text-slate-800">
+
+              <div className="bg-white border border-slate-200 rounded-lg p-3.5 space-y-2">
+                <div className="flex flex-wrap items-center gap-2 text-base text-slate-800">
+                  <span className="font-semibold text-slate-900">
                     {item.area_origen || 'Mesa de Partes'}
                   </span>
                   <ArrowRight
-                    className="w-4 h-4 text-slate-500 shrink-0"
+                    className="w-4 h-4 text-blue-700 shrink-0"
                     aria-hidden="true"
                   />
-                  <span className="font-semibold text-primary">
+                  <span className="font-bold text-blue-800">
                     {item.area_destino || 'Mesa de Partes'}
                   </span>
                 </div>
                 {item.proveido && (
-                  <p className="text-xs text-slate-700 italic border-t border-slate-200/80 pt-1.5">
+                  <p className="text-sm text-slate-700 italic border-t border-slate-200 pt-2">
                     Proveído: &ldquo;{item.proveido}&rdquo;
                   </p>
                 )}
@@ -184,11 +189,13 @@ export function ConsultaTracker({
 
   return (
     <div className="space-y-6">
-      {/* Buscador */}
-      <Card className="shadow-sm border">
-        <CardHeader>
-          <CardTitle>{cardTitle}</CardTitle>
-          <CardDescription id="cut-search-desc">
+      {/* Buscador protagonista */}
+      <Card className="bg-white rounded-xl shadow-sm border border-slate-200 border-t-4 border-t-blue-700">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-xl font-bold text-slate-900">
+            {cardTitle}
+          </CardTitle>
+          <CardDescription id="cut-search-desc" className="text-base text-slate-700">
             {cardDescription}
           </CardDescription>
         </CardHeader>
@@ -214,7 +221,7 @@ export function ConsultaTracker({
                 aria-describedby={
                   errorMsg ? 'cut-search-error' : 'cut-search-desc'
                 }
-                className="w-full text-base py-5 uppercase"
+                className="w-full h-12 text-base font-mono font-semibold uppercase bg-white border-slate-300 text-slate-900 placeholder:text-slate-500 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
                 disabled={isPending}
               />
             </div>
@@ -223,7 +230,7 @@ export function ConsultaTracker({
               size="lg"
               disabled={isPending}
               aria-busy={isPending}
-              className="px-8 font-medium"
+              className="h-12 px-8 text-base font-semibold bg-blue-700 hover:bg-blue-800 text-white shadow-sm focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
             >
               {isPending ? (
                 'Buscando...'
@@ -240,9 +247,9 @@ export function ConsultaTracker({
               id="cut-search-error"
               role="alert"
               aria-live="assertive"
-              className="flex items-center gap-2 text-red-700 mt-4 text-sm font-medium"
+              className="flex items-center gap-2.5 text-red-900 bg-red-50 border border-red-300 rounded-lg px-4 py-3 mt-4 text-sm font-semibold"
             >
-              <AlertCircle className="w-4 h-4 shrink-0" aria-hidden="true" />
+              <AlertCircle className="w-5 h-5 text-red-700 shrink-0" aria-hidden="true" />
               <span>{errorMsg}</span>
             </div>
           )}
@@ -256,33 +263,34 @@ export function ConsultaTracker({
             aria-label={`Resultado de consulta del expediente ${resultado.expediente.cut}`}
             className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500"
           >
-            <Card className="border-l-4 border-l-primary shadow-sm">
+            <Card className="bg-white rounded-xl border border-slate-200 border-l-4 border-l-blue-700 shadow-sm">
               <CardContent className="pt-6">
-                <div className="flex justify-between items-start mb-4">
+                <div className="flex flex-wrap justify-between items-start gap-4 mb-4">
                   <div>
-                    <p className="text-sm font-medium text-slate-600">
-                      Expediente
+                    <p className="text-sm font-semibold uppercase tracking-wider text-slate-600">
+                      Código Único de Trámite
                     </p>
-                    <h2 className="text-2xl font-bold text-slate-900">
+                    <h2 className="text-2xl font-extrabold font-mono text-slate-900 mt-0.5">
                       {resultado.expediente.cut}
                     </h2>
                   </div>
-                  <Badge className="bg-slate-900 text-white text-sm py-1 font-semibold">
-                    {resultado.expediente.estado}
+                  <Badge className="inline-flex items-center gap-1.5 rounded-full bg-[#0F2A4A] text-white border border-slate-800 text-sm px-3.5 py-1 font-bold">
+                    <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
+                    <span>{resultado.expediente.estado}</span>
                   </Badge>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 p-4 bg-slate-50 rounded-lg border">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 p-5 bg-slate-50 rounded-xl border border-slate-200">
                   <div className="flex items-start gap-3">
                     <FileText
-                      className="w-5 h-5 text-slate-500 mt-0.5 shrink-0"
+                      className="w-5 h-5 text-blue-700 mt-0.5 shrink-0"
                       aria-hidden="true"
                     />
                     <div>
-                      <p className="text-sm font-medium text-slate-600">
+                      <p className="text-sm font-semibold text-slate-600">
                         Asunto
                       </p>
-                      <p className="text-slate-900 line-clamp-2">
+                      <p className="text-base font-medium text-slate-900">
                         {resultado.expediente.asunto}
                       </p>
                     </div>
@@ -290,14 +298,14 @@ export function ConsultaTracker({
 
                   <div className="flex items-start gap-3">
                     <MapPin
-                      className="w-5 h-5 text-slate-500 mt-0.5 shrink-0"
+                      className="w-5 h-5 text-blue-700 mt-0.5 shrink-0"
                       aria-hidden="true"
                     />
                     <div>
-                      <p className="text-sm font-medium text-slate-600">
+                      <p className="text-sm font-semibold text-slate-600">
                         Ubicación Actual
                       </p>
-                      <p className="font-semibold text-primary">
+                      <p className="text-base font-bold text-blue-800">
                         {ubicacionActual}
                         {resultado.expediente.area_actual_siglas
                           ? ` (${resultado.expediente.area_actual_siglas})`
@@ -309,14 +317,14 @@ export function ConsultaTracker({
                   {resultado.expediente.fecha_ingreso && (
                     <div className="flex items-start gap-3">
                       <Calendar
-                        className="w-5 h-5 text-slate-500 mt-0.5 shrink-0"
+                        className="w-5 h-5 text-blue-700 mt-0.5 shrink-0"
                         aria-hidden="true"
                       />
                       <div>
-                        <p className="text-sm font-medium text-slate-600">
+                        <p className="text-sm font-semibold text-slate-600">
                           Fecha de Ingreso
                         </p>
-                        <p className="text-slate-800 text-sm font-medium">
+                        <p className="text-slate-900 text-base font-medium">
                           {formatDateSafe(resultado.expediente.fecha_ingreso)}
                         </p>
                       </div>
@@ -326,14 +334,14 @@ export function ConsultaTracker({
                   {resultado.expediente.fecha_actualizacion && (
                     <div className="flex items-start gap-3">
                       <Clock
-                        className="w-5 h-5 text-slate-500 mt-0.5 shrink-0"
+                        className="w-5 h-5 text-blue-700 mt-0.5 shrink-0"
                         aria-hidden="true"
                       />
                       <div>
-                        <p className="text-sm font-medium text-slate-600">
+                        <p className="text-sm font-semibold text-slate-600">
                           Última Actualización
                         </p>
-                        <p className="text-slate-800 text-sm font-medium">
+                        <p className="text-slate-900 text-base font-medium">
                           {formatDateSafe(
                             resultado.expediente.fecha_actualizacion
                           )}
@@ -347,10 +355,10 @@ export function ConsultaTracker({
 
             {/* Hoja de Ruta */}
             <section aria-label="Historial de movimientos del expediente">
-              <h3 className="font-semibold text-slate-800 ml-1 mb-4">
+              <h3 className="text-lg font-bold text-slate-900 ml-1 mb-4">
                 Historial de Movimientos (Línea de Tiempo)
               </h3>
-              <div className="bg-white rounded-lg border shadow-sm p-6">
+              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
                 <HojaDeRutaTimeline movimientos={movimientos} />
               </div>
             </section>

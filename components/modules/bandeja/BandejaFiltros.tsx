@@ -115,7 +115,7 @@ export function BandejaFiltros({
   )
 
   return (
-    <div className="bg-white p-4 rounded-lg border shadow-sm space-y-3">
+    <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs space-y-3">
       <form
         onSubmit={handleSearchSubmit}
         role="search"
@@ -127,7 +127,7 @@ export function BandejaFiltros({
             Buscar por CUT, DNI/RUC o Asunto
           </Label>
           <Search
-            className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+            className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-600"
             aria-hidden="true"
           />
           <Input
@@ -135,7 +135,7 @@ export function BandejaFiltros({
             placeholder="Buscar por CUT, DNI/RUC o Asunto..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9 pr-8"
+            className="h-11 pl-10 pr-9 text-base bg-white border-slate-300 text-slate-900 placeholder:text-slate-500 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
             disabled={isPending}
           />
           {searchTerm && (
@@ -146,14 +146,14 @@ export function BandejaFiltros({
                 setSearchTerm('')
                 applyFilters('', undefined)
               }}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-900 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-600 hover:text-slate-900 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
             >
               <X className="w-4 h-4" aria-hidden="true" />
             </button>
           )}
         </div>
 
-        <div className="w-full sm:w-56">
+        <div className="w-full sm:w-64">
           <Label htmlFor="filtro_estado" className="sr-only">
             Filtrar por estado
           </Label>
@@ -166,12 +166,16 @@ export function BandejaFiltros({
             onValueChange={handleEstadoChange}
             disabled={isPending}
           >
-            <SelectTrigger id="filtro_estado" aria-label="Filtrar por estado">
+            <SelectTrigger
+              id="filtro_estado"
+              aria-label="Filtrar por estado"
+              className="h-11 text-base bg-white border-slate-300 text-slate-900 focus-visible:ring-2 focus-visible:ring-blue-600"
+            >
               <SelectValue placeholder="Filtrar por estado" />
             </SelectTrigger>
             <SelectContent>
               {Object.entries(estadoOptions).map(([key, label]) => (
-                <SelectItem key={key} value={key}>
+                <SelectItem key={key} value={key} className="text-base">
                   {label}
                 </SelectItem>
               ))}
@@ -183,7 +187,7 @@ export function BandejaFiltros({
           type="submit"
           disabled={isPending}
           aria-busy={isPending}
-          className="gap-1.5 shadow-sm"
+          className="h-11 px-6 gap-2 text-base font-semibold bg-blue-700 hover:bg-blue-800 text-white rounded-xl shadow-xs focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
         >
           {isPending ? (
             <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
@@ -196,10 +200,10 @@ export function BandejaFiltros({
         {hasActiveFilters && (
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             onClick={handleClear}
             disabled={isPending}
-            className="gap-1 text-slate-600 hover:text-slate-900"
+            className="h-11 px-4 gap-1.5 text-sm font-semibold border-slate-300 text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-xl"
           >
             <X className="w-4 h-4" aria-hidden="true" />
             <span>Limpiar</span>
@@ -209,3 +213,4 @@ export function BandejaFiltros({
     </div>
   )
 }
+

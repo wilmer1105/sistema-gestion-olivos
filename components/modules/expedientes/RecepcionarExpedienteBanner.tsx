@@ -39,19 +39,19 @@ export function RecepcionarExpedienteBanner({
     <div
       role="region"
       aria-label="Aviso de recepción pendiente del expediente"
-      className="rounded-lg border border-amber-300 bg-amber-50 p-4 shadow-xs space-y-3"
+      className="rounded-xl border border-amber-400 bg-amber-50 p-5 shadow-xs space-y-3"
     >
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-start gap-3">
-          <div className="p-2 rounded-full bg-amber-100 text-amber-800 shrink-0 mt-0.5">
+        <div className="flex items-start gap-3.5">
+          <div className="p-2.5 rounded-xl bg-amber-100 border border-amber-300 text-amber-900 shrink-0 mt-0.5">
             <Inbox className="w-5 h-5" aria-hidden="true" />
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-amber-950">
+            <h2 className="text-base font-bold text-amber-950">
               Expediente Pendiente de Recepción en su Unidad Orgánica
             </h2>
-            <p className="text-xs text-amber-900 mt-0.5">
-              El expediente {cut ? <strong>{cut}</strong> : ''} ha sido derivado
+            <p className="text-sm text-amber-950 mt-1 leading-relaxed">
+              El expediente {cut ? <strong className="font-mono">{cut}</strong> : ''} ha sido derivado
               a su área pero aún se encuentra en estado{' '}
               <strong>DERIVADO</strong>. Debe acusar recepción antes de poder
               asignar especialista, subir informes técnicos/legales, derivar o
@@ -67,7 +67,7 @@ export function RecepcionarExpedienteBanner({
             disabled={isPending}
             aria-busy={isPending}
             aria-label={`Recepcionar expediente ${cut || expedienteId}`}
-            className="bg-amber-700 hover:bg-amber-800 text-white shrink-0 gap-2"
+            className="h-11 px-5 rounded-xl bg-amber-800 hover:bg-amber-900 text-white text-sm font-bold shrink-0 gap-2 shadow-xs"
           >
             {isPending ? (
               <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
@@ -88,3 +88,4 @@ export function RecepcionarExpedienteBanner({
     </div>
   )
 }
+

@@ -202,22 +202,25 @@ export default async function BandejaPage({ searchParams }: Props) {
         <BackButton fallbackUrl="/dashboard" label="Volver al panel" />
       </div>
 
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+          <p className="text-xs font-bold uppercase tracking-widest text-blue-700">
+            Gestión de Trámite Documentario
+          </p>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 mt-1">
             Bandeja Documental de Unidad Orgánica
           </h1>
-          <p className="text-sm text-slate-600">
+          <p className="text-base text-slate-700 mt-1">
             Control de expedientes de{' '}
-            <span className="font-semibold text-slate-800">{areaNombre}</span>.
+            <span className="font-bold text-slate-900">{areaNombre}</span>.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           {puedeRadicar && (
             <Link href="/dashboard/expedientes/nuevo">
-              <Button className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium shadow-sm">
-                <FilePlus2 className="w-4 h-4" aria-hidden="true" />
+              <Button className="h-11 px-5 gap-2 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-base font-semibold shadow-sm focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">
+                <FilePlus2 className="w-5 h-5" aria-hidden="true" />
                 <span>Nuevo Expediente</span>
               </Button>
             </Link>
@@ -241,7 +244,7 @@ export default async function BandejaPage({ searchParams }: Props) {
       {queryError ? (
         <div
           role="alert"
-          className="p-4 bg-red-50 text-red-700 rounded-md border border-red-200"
+          className="p-4 bg-red-50 text-red-900 rounded-xl border border-red-300 text-base font-medium"
         >
           <strong>Error al cargar expedientes:</strong> {queryError.message}
         </div>
@@ -264,3 +267,4 @@ export default async function BandejaPage({ searchParams }: Props) {
     </div>
   )
 }
+

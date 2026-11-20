@@ -103,10 +103,10 @@ export function EmpleadosTable({ empleados, areas = [] }: Props) {
 
   if (!empleados || empleados.length === 0) {
     return (
-      <div className="rounded-lg border border-slate-200 bg-white p-8 text-center text-slate-500">
-        <User className="mx-auto h-8 w-8 text-slate-300 mb-2" />
-        <p className="text-sm font-medium text-slate-700">No hay empleados registrados</p>
-        <p className="text-xs text-slate-400 mt-1">
+      <div className="rounded-xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-700">
+        <User className="mx-auto h-10 w-10 text-slate-600 mb-3" aria-hidden="true" />
+        <p className="text-base font-bold text-slate-900">No hay empleados registrados</p>
+        <p className="text-sm text-slate-700 mt-1">
           Haga clic en &quot;Nuevo Empleado&quot; para registrar el primer usuario.
         </p>
       </div>
@@ -114,34 +114,46 @@ export function EmpleadosTable({ empleados, areas = [] }: Props) {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {/* Alerta de notificación visual inmediata */}
       {alerta && (
         <Alert
+          role={alerta.tipo === 'error' ? 'alert' : 'status'}
+          aria-live={alerta.tipo === 'error' ? 'assertive' : 'polite'}
           className={
             alerta.tipo === 'success'
-              ? 'border-emerald-500 bg-emerald-50 text-emerald-800'
-              : 'border-destructive bg-destructive/10 text-destructive'
+              ? 'rounded-xl border-emerald-600 bg-emerald-50 text-emerald-900'
+              : 'rounded-xl border-red-300 bg-red-50 text-red-900'
           }
         >
           {alerta.tipo === 'success' ? (
-            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+            <CheckCircle2 className="h-5 w-5 text-emerald-700" aria-hidden="true" />
           ) : (
-            <AlertCircle className="h-4 w-4 text-destructive" />
+            <AlertCircle className="h-5 w-5 text-red-700" aria-hidden="true" />
           )}
-          <AlertDescription className="text-sm font-medium">{alerta.mensaje}</AlertDescription>
+          <AlertDescription className="text-sm font-semibold">{alerta.mensaje}</AlertDescription>
         </Alert>
       )}
 
-      <div className="rounded-lg border border-slate-200 bg-white overflow-hidden shadow-xs">
-        <Table className="w-full">
-          <TableHeader className="bg-slate-50">
-            <TableRow>
-              <TableHead className="font-semibold text-slate-700">Funcionario</TableHead>
-              <TableHead className="font-semibold text-slate-700">Rol</TableHead>
-              <TableHead className="font-semibold text-slate-700">Área de Adscripción</TableHead>
-              <TableHead className="font-semibold text-slate-700 text-center">Estado</TableHead>
-              <TableHead className="font-semibold text-slate-700 text-right pr-4">Acciones</TableHead>
+      <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-xs">
+        <Table className="w-full" aria-label="Tabla de funcionarios y usuarios registrados">
+          <TableHeader className="bg-slate-100/90 border-b border-slate-200">
+            <TableRow className="hover:bg-slate-100/90">
+              <TableHead scope="col" className="py-3.5 px-4 text-sm font-bold text-slate-900">
+                Funcionario
+              </TableHead>
+              <TableHead scope="col" className="py-3.5 px-4 text-sm font-bold text-slate-900">
+                Rol Institucional
+              </TableHead>
+              <TableHead scope="col" className="py-3.5 px-4 text-sm font-bold text-slate-900">
+                Área de Adscripción
+              </TableHead>
+              <TableHead scope="col" className="py-3.5 px-4 text-sm font-bold text-slate-900 text-center">
+                Estado
+              </TableHead>
+              <TableHead scope="col" className="py-3.5 px-4 text-sm font-bold text-slate-900 text-right pr-5">
+                Acciones
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -149,36 +161,36 @@ export function EmpleadosTable({ empleados, areas = [] }: Props) {
               return (
                 <TableRow
                   key={emp.id}
-                  className={`hover:bg-slate-50/80 transition-colors ${
-                    !emp.activo ? 'bg-slate-50/40 text-slate-500' : ''
+                  className={`hover:bg-blue-50/40 transition-colors border-b border-slate-200/80 ${
+                    !emp.activo ? 'bg-slate-50/60' : ''
                   }`}
                 >
                   {/* Funcionario (Celda Compuesta: Nombre, Email y DNI) */}
-                  <TableCell className="whitespace-normal py-3 align-top">
-                    <div className="flex items-start gap-3">
+                  <TableCell className="whitespace-normal py-3.5 px-4 align-top">
+                    <div className="flex items-start gap-3.5">
                       <div
-                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold mt-0.5 ${
+                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold mt-0.5 ${
                           emp.activo
-                            ? 'bg-slate-100 text-slate-700 ring-1 ring-slate-200'
-                            : 'bg-slate-200 text-slate-400'
+                            ? 'bg-[#0F2A4A] text-white'
+                            : 'bg-slate-300 text-slate-800'
                         }`}
                         aria-hidden="true"
                       >
                         {emp.nombres?.charAt(0) || 'U'}
                       </div>
-                      <div className="min-w-0 space-y-0.5">
+                      <div className="min-w-0 space-y-1">
                         <p
-                          className={`font-semibold text-sm leading-snug ${
-                            emp.activo ? 'text-slate-900' : 'text-slate-500 line-through'
+                          className={`font-bold text-base leading-snug ${
+                            emp.activo ? 'text-slate-900' : 'text-slate-700 line-through'
                           }`}
                         >
                           {emp.nombre_completo}
                         </p>
-                        <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                          <Mail className="h-3 w-3 shrink-0 text-slate-400" />
+                        <div className="flex items-center gap-1.5 text-sm text-slate-700">
+                          <Mail className="h-3.5 w-3.5 shrink-0 text-blue-700" aria-hidden="true" />
                           <span className="break-all">{emp.email}</span>
                         </div>
-                        <p className="text-[11px] text-slate-400 font-mono">
+                        <p className="text-xs text-slate-700 font-mono font-semibold">
                           DNI: {emp.dni || '—'}
                         </p>
                       </div>
@@ -186,50 +198,52 @@ export function EmpleadosTable({ empleados, areas = [] }: Props) {
                   </TableCell>
 
                   {/* Rol */}
-                  <TableCell className="whitespace-normal py-3 align-top">
+                  <TableCell className="whitespace-normal py-3.5 px-4 align-top">
                     {emp.rol === 'ADMIN_TI' ? (
-                      <Badge className="bg-purple-100 text-purple-700 border-purple-200 font-semibold gap-1 whitespace-nowrap">
-                        <Shield className="h-3 w-3" />
-                        Administrador TI
+                      <Badge className="inline-flex items-center rounded-full bg-purple-100 text-purple-950 border border-purple-300 px-3 py-1 text-xs font-bold gap-1.5 whitespace-nowrap">
+                        <Shield className="h-3.5 w-3.5 text-purple-800" aria-hidden="true" />
+                        <span>Administrador TI</span>
                       </Badge>
                     ) : emp.rol === 'JEFE_AREA' ? (
-                      <Badge className="bg-indigo-100 text-indigo-700 border-indigo-200 font-medium whitespace-nowrap">
-                        Jefe de Área
+                      <Badge className="inline-flex items-center rounded-full bg-indigo-100 text-indigo-950 border border-indigo-300 px-3 py-1 text-xs font-bold whitespace-nowrap">
+                        <span>Jefe de Área</span>
                       </Badge>
                     ) : emp.rol === 'ESPECIALISTA' ? (
-                      <Badge className="bg-blue-100 text-blue-700 border-blue-200 font-medium whitespace-nowrap">
-                        Especialista
+                      <Badge className="inline-flex items-center rounded-full bg-blue-100 text-blue-950 border border-blue-300 px-3 py-1 text-xs font-bold whitespace-nowrap">
+                        <span>Especialista</span>
                       </Badge>
                     ) : emp.rol === 'ASISTENTE_AREA' ? (
-                      <Badge className="bg-amber-100 text-amber-800 border-amber-200 font-medium whitespace-nowrap">
-                        Asistente de Área
+                      <Badge className="inline-flex items-center rounded-full bg-amber-100 text-amber-950 border border-amber-300 px-3 py-1 text-xs font-bold whitespace-nowrap">
+                        <span>Asistente de Área</span>
                       </Badge>
                     ) : emp.rol === 'MESA_PARTES' ? (
-                      <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 font-medium whitespace-nowrap">
-                        Mesa de Partes
+                      <Badge className="inline-flex items-center rounded-full bg-emerald-100 text-emerald-950 border border-emerald-300 px-3 py-1 text-xs font-bold whitespace-nowrap">
+                        <span>Mesa de Partes</span>
                       </Badge>
                     ) : (
-                      <Badge variant="secondary" className="font-medium whitespace-nowrap">
+                      <Badge variant="secondary" className="rounded-full px-3 py-1 text-xs font-bold whitespace-nowrap">
                         {emp.rol}
                       </Badge>
                     )}
                   </TableCell>
 
                   {/* Área de Adscripción */}
-                  <TableCell className="whitespace-normal py-3 align-top">
+                  <TableCell className="whitespace-normal py-3.5 px-4 align-top">
                     {emp.rol === 'ADMIN_TI' ? (
-                      <span className="text-xs text-slate-400 italic">No aplica (Global)</span>
+                      <span className="text-sm text-slate-700 italic font-medium">
+                        No aplica (Alcance Global)
+                      </span>
                     ) : (
                       <div className="space-y-1">
-                        <div className="flex items-start gap-1.5 text-sm text-slate-700">
-                          <Building className="h-3.5 w-3.5 text-slate-400 shrink-0 mt-0.5" />
+                        <div className="flex items-start gap-2 text-base text-slate-900 font-medium">
+                          <Building className="h-4 w-4 text-blue-700 shrink-0 mt-1" aria-hidden="true" />
                           <span className="leading-snug">{emp.area_nombre || 'Sin área asignada'}</span>
                         </div>
                         {emp.area_siglas && (
-                          <div className="pl-5">
+                          <div className="pl-6">
                             <Badge
                               variant="outline"
-                              className="text-[10px] font-semibold text-slate-600 bg-slate-50 border-slate-200 px-1.5 py-0"
+                              className="text-xs font-bold text-slate-800 bg-slate-100 border-slate-300 px-2 py-0.5"
                             >
                               {emp.area_siglas}
                             </Badge>
@@ -239,45 +253,52 @@ export function EmpleadosTable({ empleados, areas = [] }: Props) {
                     )}
                   </TableCell>
 
-                  {/* Estado */}
-                  <TableCell className="whitespace-normal py-3 align-top text-center">
+                  {/* Estado (texto + ícono + borde independiente del color) */}
+                  <TableCell className="whitespace-normal py-3.5 px-4 align-top text-center">
                     {emp.activo ? (
-                      <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 font-medium">
-                        Activo
+                      <Badge className="inline-flex items-center gap-1.5 rounded-full bg-emerald-800 text-white border border-emerald-950 px-3 py-1 text-xs font-bold">
+                        <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+                        <span>Activo</span>
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="bg-slate-100 text-slate-600 border-slate-300 font-medium">
-                        Dado de baja
+                      <Badge
+                        variant="outline"
+                        className="inline-flex items-center gap-1.5 rounded-full bg-slate-200 text-slate-900 border border-slate-400 px-3 py-1 text-xs font-bold"
+                      >
+                        <UserX className="h-3.5 w-3.5 text-slate-700" aria-hidden="true" />
+                        <span>Dado de baja</span>
                       </Badge>
                     )}
                   </TableCell>
 
                   {/* Acciones */}
-                  <TableCell className="whitespace-normal py-3 align-top text-right pr-4">
+                  <TableCell className="whitespace-normal py-3.5 px-4 align-top text-right pr-5">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="icon"
-                          className="h-8 w-8 text-slate-500 hover:text-slate-900 focus-visible:ring-1"
+                          className="h-10 w-10 rounded-xl border-slate-300 text-slate-700 hover:text-slate-900 hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-blue-600"
                           disabled={loadingId === emp.id}
                           aria-label={`Acciones para ${emp.nombre_completo}`}
                         >
                           {loadingId === emp.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
+                            <Loader2 className="h-4 w-4 animate-spin text-slate-700" aria-hidden="true" />
                           ) : (
-                            <MoreHorizontal className="h-4 w-4" />
+                            <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
                           )}
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-44">
+                      <DropdownMenuContent align="end" className="w-48 rounded-xl">
                         <DropdownMenuGroup>
-                          <DropdownMenuLabel className="text-xs text-slate-400">Acciones</DropdownMenuLabel>
+                          <DropdownMenuLabel className="text-xs font-bold text-slate-700">
+                            Acciones de cuenta
+                          </DropdownMenuLabel>
                           <DropdownMenuItem
                             onClick={() => setEmpleadoAEditar(emp)}
-                            className="cursor-pointer gap-2"
+                            className="cursor-pointer gap-2 text-sm font-medium text-slate-800"
                           >
-                            <Pencil className="h-4 w-4 text-slate-500" />
+                            <Pencil className="h-4 w-4 text-blue-700" aria-hidden="true" />
                             <span>Editar</span>
                           </DropdownMenuItem>
 
@@ -286,17 +307,17 @@ export function EmpleadosTable({ empleados, areas = [] }: Props) {
                           {emp.activo ? (
                             <DropdownMenuItem
                               onClick={() => handleToggleEstado(emp)}
-                              className="cursor-pointer gap-2 text-red-600 focus:text-red-700 focus:bg-red-50"
+                              className="cursor-pointer gap-2 text-sm font-semibold text-red-700 focus:text-red-800 focus:bg-red-50"
                             >
-                              <UserX className="h-4 w-4 text-red-500" />
+                              <UserX className="h-4 w-4 text-red-700" aria-hidden="true" />
                               <span>Dar de baja</span>
                             </DropdownMenuItem>
                           ) : (
                             <DropdownMenuItem
                               onClick={() => handleToggleEstado(emp)}
-                              className="cursor-pointer gap-2 text-emerald-600 focus:text-emerald-700 focus:bg-emerald-50"
+                              className="cursor-pointer gap-2 text-sm font-semibold text-emerald-800 focus:text-emerald-900 focus:bg-emerald-50"
                             >
-                              <UserCheck className="h-4 w-4 text-emerald-500" />
+                              <UserCheck className="h-4 w-4 text-emerald-700" aria-hidden="true" />
                               <span>Activar</span>
                             </DropdownMenuItem>
                           )}
@@ -325,3 +346,4 @@ export function EmpleadosTable({ empleados, areas = [] }: Props) {
     </div>
   )
 }
+

@@ -11,9 +11,9 @@ export default async function DashboardLayout({
   const perfil = await obtenerPerfilAutenticado()
 
   return (
-    <div className="flex min-h-screen w-full bg-slate-50">
+    <div className="flex min-h-screen w-full bg-[#F4F6F9] text-slate-900">
       <Sidebar perfil={perfil} />
-      <div className="flex flex-col flex-1 overflow-hidden">
+      <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <Navbar perfil={perfil} />
         <main
           id="main-content"
@@ -26,3 +26,4 @@ export default async function DashboardLayout({
     </div>
   )
 }
+

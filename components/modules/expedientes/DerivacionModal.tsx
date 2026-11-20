@@ -120,16 +120,18 @@ export function DerivacionModal({
         <Button
           disabled={disabled}
           aria-label="Derivar expediente a otra unidad orgánica"
-          className="gap-2"
+          className="h-11 px-5 gap-2 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold shadow-2xs"
         >
           <Send className="w-4 h-4" aria-hidden="true" />
           <span>Derivar Expediente</span>
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] rounded-xl">
         <DialogHeader>
-          <DialogTitle>Derivar Documento</DialogTitle>
+          <DialogTitle className="text-xl font-bold text-slate-900">
+            Derivar Documento
+          </DialogTitle>
         </DialogHeader>
 
         {errorMsg && (
@@ -160,12 +162,14 @@ export function DerivacionModal({
         <form
           onSubmit={handleSubmit(onSubmit)}
           aria-label="Formulario de derivación de expediente"
-          className="space-y-4 pt-4"
+          className="space-y-4 pt-3"
         >
           <div className="space-y-2">
             <Label
               htmlFor="area_destino_id"
-              className={errors.area_destino_id ? 'text-destructive' : ''}
+              className={`text-sm font-semibold ${
+                errors.area_destino_id ? 'text-red-700' : 'text-slate-800'
+              }`}
             >
               Área de Destino *
             </Label>
@@ -186,6 +190,7 @@ export function DerivacionModal({
                 aria-describedby={
                   errors.area_destino_id ? 'area-destino-error' : undefined
                 }
+                className="h-11 text-base bg-white border-slate-300 text-slate-900"
               >
                 <SelectValue placeholder="Seleccione la unidad orgánica" />
               </SelectTrigger>
@@ -201,7 +206,7 @@ export function DerivacionModal({
               <p
                 id="area-destino-error"
                 role="alert"
-                className="text-sm text-destructive"
+                className="text-sm font-medium text-red-700"
               >
                 {errors.area_destino_id.message}
               </p>
@@ -211,7 +216,9 @@ export function DerivacionModal({
           <div className="space-y-2">
             <Label
               htmlFor="proveido"
-              className={errors.proveido ? 'text-destructive' : ''}
+              className={`text-sm font-semibold ${
+                errors.proveido ? 'text-red-700' : 'text-slate-800'
+              }`}
             >
               Proveído / Instrucciones *
             </Label>
@@ -223,20 +230,21 @@ export function DerivacionModal({
               aria-required="true"
               aria-invalid={Boolean(errors.proveido)}
               aria-describedby={errors.proveido ? 'proveido-error' : undefined}
+              className="text-base bg-white border-slate-300 text-slate-900 placeholder:text-slate-500"
               {...register('proveido')}
             />
             {errors.proveido && (
               <p
                 id="proveido-error"
                 role="alert"
-                className="text-sm text-destructive"
+                className="text-sm font-medium text-red-700"
               >
                 {errors.proveido.message}
               </p>
             )}
           </div>
 
-          <div className="flex justify-end pt-4 gap-2">
+          <div className="flex justify-end pt-4 border-t border-slate-200 gap-2.5">
             <Button
               type="button"
               variant="outline"
@@ -245,10 +253,16 @@ export function DerivacionModal({
                 setErrorMsg(null)
               }}
               disabled={isPending}
+              className="h-11 px-5 rounded-xl border-slate-300 font-semibold text-slate-800"
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={isPending} aria-busy={isPending}>
+            <Button
+              type="submit"
+              disabled={isPending}
+              aria-busy={isPending}
+              className="h-11 px-5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-semibold"
+            >
               {isPending ? (
                 <Loader2
                   className="w-4 h-4 mr-2 animate-spin"
@@ -263,3 +277,4 @@ export function DerivacionModal({
     </Dialog>
   )
 }
+

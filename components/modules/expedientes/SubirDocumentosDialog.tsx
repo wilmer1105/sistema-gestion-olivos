@@ -167,19 +167,19 @@ export function SubirDocumentosDialog({
           variant="outline"
           disabled={disabled}
           aria-label="Subir informe o documento intermedio en PDF"
-          className="gap-1.5 shadow-sm border-dashed"
+          className="h-10 px-4 gap-2 rounded-xl shadow-2xs border-slate-300 text-sm font-semibold text-slate-800 hover:bg-slate-100"
         >
-          <Plus className="w-4 h-4 text-primary" aria-hidden="true" />
+          <Plus className="w-4 h-4 text-blue-700" aria-hidden="true" />
           <span>Subir Informe / Documento</span>
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[540px]">
+      <DialogContent className="sm:max-w-[540px] rounded-xl">
         <DialogHeader>
-          <DialogTitle className="text-lg">
+          <DialogTitle className="text-xl font-bold text-slate-900">
             Anexar Documento Sustentatorio Intermedio
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-sm text-slate-600">
             Suba informes técnicos, informes legales, actas de fiscalización o
             resoluciones en formato PDF emitidos por su unidad orgánica.
           </DialogDescription>
@@ -211,8 +211,8 @@ export function SubirDocumentosDialog({
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
-          <div className="space-y-1.5">
-            <Label htmlFor="tipo_documento_intermedio">
+          <div className="space-y-2">
+            <Label htmlFor="tipo_documento_intermedio" className="text-sm font-semibold text-slate-800">
               Tipo de Documento Sustentatorio *
             </Label>
             <Select
@@ -228,7 +228,10 @@ export function SubirDocumentosDialog({
               }
               disabled={isPending}
             >
-              <SelectTrigger id="tipo_documento_intermedio">
+              <SelectTrigger
+                id="tipo_documento_intermedio"
+                className="h-11 text-base bg-white border-slate-300 text-slate-900"
+              >
                 <SelectValue placeholder="Seleccione el tipo de documento" />
               </SelectTrigger>
               <SelectContent>

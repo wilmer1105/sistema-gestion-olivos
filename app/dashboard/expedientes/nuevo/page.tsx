@@ -22,12 +22,15 @@ export default async function NuevoExpedientePage() {
         <BackButton fallbackUrl="/dashboard" label="Volver al panel" />
       </div>
 
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs">
+        <p className="text-xs font-bold uppercase tracking-widest text-blue-700">
+          Oficina de Atención al Ciudadano y Gestión Documental (OACGD-MDP)
+        </p>
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 mt-1">
           Mesa de Partes - Registro de Expediente
         </h1>
-        <p className="text-sm text-slate-500">
-          Ingrese los datos del administrado para generar el Código Único de Trámite (CUT).
+        <p className="text-base text-slate-700 mt-1">
+          Ingrese los datos del administrado y adjunte el documento digitalizado para generar el Código Único de Trámite (CUT).
         </p>
       </div>
 
@@ -35,3 +38,4 @@ export default async function NuevoExpedientePage() {
     </div>
   )
 }
+

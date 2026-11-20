@@ -40,16 +40,16 @@ export function BandejaPaginacion({
   return (
     <nav
       aria-label="Paginación de expedientes"
-      className="flex flex-col sm:flex-row items-center justify-between gap-4 py-3 px-1 text-sm text-slate-600"
+      className="flex flex-col sm:flex-row items-center justify-between gap-4 py-3.5 px-5 bg-white rounded-xl border border-slate-200 shadow-2xs text-sm text-slate-700"
     >
-      <div aria-live="polite">
-        Mostrando <span className="font-semibold text-slate-900">{from}</span> a{' '}
-        <span className="font-semibold text-slate-900">{to}</span> de{' '}
-        <span className="font-semibold text-slate-900">{totalCount}</span> expedientes
+      <div aria-live="polite" className="text-base">
+        Mostrando <span className="font-bold text-slate-900">{from}</span> a{' '}
+        <span className="font-bold text-slate-900">{to}</span> de{' '}
+        <span className="font-bold text-slate-900">{totalCount}</span> expedientes
       </div>
 
-      <div className="flex items-center gap-2">
-        <span className="text-xs text-slate-600 mr-2">
+      <div className="flex items-center gap-2.5">
+        <span className="text-sm font-semibold text-slate-700 mr-2">
           Página {currentPage} de {totalPages}
         </span>
 
@@ -59,7 +59,7 @@ export function BandejaPaginacion({
           onClick={() => goToPage(currentPage - 1)}
           disabled={currentPage <= 1 || isPending}
           aria-label="Ir a la página anterior"
-          className="gap-1 shadow-sm"
+          className="h-10 px-3.5 gap-1.5 rounded-xl border-slate-300 text-sm font-semibold text-slate-800 shadow-2xs"
         >
           <ChevronLeft className="w-4 h-4" aria-hidden="true" />
           <span>Anterior</span>
@@ -71,7 +71,7 @@ export function BandejaPaginacion({
           onClick={() => goToPage(currentPage + 1)}
           disabled={currentPage >= totalPages || isPending}
           aria-label="Ir a la página siguiente"
-          className="gap-1 shadow-sm"
+          className="h-10 px-3.5 gap-1.5 rounded-xl border-slate-300 text-sm font-semibold text-slate-800 shadow-2xs"
         >
           <span>Siguiente</span>
           <ChevronRight className="w-4 h-4" aria-hidden="true" />
@@ -80,3 +80,4 @@ export function BandejaPaginacion({
     </nav>
   )
 }
+

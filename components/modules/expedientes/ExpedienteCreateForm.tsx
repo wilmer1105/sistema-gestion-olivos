@@ -137,9 +137,12 @@ export function ExpedienteCreateForm() {
           role="alert"
           aria-live="assertive"
           variant="destructive"
+          className="rounded-xl border-red-300 bg-red-50 text-red-900"
         >
-          <ShieldAlert className="h-4 w-4" aria-hidden="true" />
-          <AlertDescription>{serverError}</AlertDescription>
+          <ShieldAlert className="h-5 w-5 text-red-700" aria-hidden="true" />
+          <AlertDescription className="text-sm font-semibold text-red-900">
+            {serverError}
+          </AlertDescription>
         </Alert>
       )}
 
@@ -151,22 +154,26 @@ export function ExpedienteCreateForm() {
       >
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Columna 1: Datos del Administrado */}
-          <Card className="shadow-sm border">
-            <CardHeader className="bg-slate-50 border-b pb-4">
-              <div className="flex items-center gap-2">
-                <User className="w-5 h-5 text-primary" aria-hidden="true" />
-                <CardTitle className="text-base font-semibold text-slate-800">
-                  1. Datos del Administrado
+          <Card className="bg-white rounded-xl shadow-sm border border-slate-200 border-t-4 border-t-[#0F2A4A]">
+            <CardHeader className="bg-slate-50/80 border-b border-slate-200 pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-lg bg-blue-700/10 text-blue-700">
+                  <User className="w-5 h-5" aria-hidden="true" />
+                </div>
+                <CardTitle className="text-lg font-bold text-slate-900">
+                  1. Datos del Solicitante / Administrado
                 </CardTitle>
               </div>
-              <CardDescription>
-                Identificación del titular, remitente o solicitante.
+              <CardDescription className="text-sm text-slate-700">
+                Identificación oficial del titular, remitente o representante legal.
               </CardDescription>
             </CardHeader>
-            <CardContent className="pt-6 space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor="tipo_documento_identidad">Tipo Doc. *</Label>
+            <CardContent className="pt-6 space-y-5">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="tipo_documento_identidad" className="text-sm font-semibold text-slate-800">
+                    Tipo Doc. *
+                  </Label>
                   <Select
                     items={TIPO_DOC_ITEMS}
                     itemToStringLabel={(val: string | null) =>
@@ -181,6 +188,7 @@ export function ExpedienteCreateForm() {
                     <SelectTrigger
                       id="tipo_documento_identidad"
                       aria-label="Tipo de documento de identidad"
+                      className="h-11 text-base bg-white border-slate-300 text-slate-900"
                     >
                       <SelectValue placeholder="Tipo" />
                     </SelectTrigger>
@@ -192,8 +200,10 @@ export function ExpedienteCreateForm() {
                   </Select>
                 </div>
 
-                <div className="sm:col-span-2 space-y-1.5">
-                  <Label htmlFor="remitente_dni_ruc">N° de Documento *</Label>
+                <div className="sm:col-span-2 space-y-2">
+                  <Label htmlFor="remitente_dni_ruc" className="text-sm font-semibold text-slate-800">
+                    N° de Documento *
+                  </Label>
                   <Input
                     id="remitente_dni_ruc"
                     name="remitente_dni_ruc"
@@ -204,12 +214,13 @@ export function ExpedienteCreateForm() {
                     required
                     aria-required="true"
                     disabled={isPending}
+                    className="h-11 text-base font-mono bg-white border-slate-300 text-slate-900 placeholder:text-slate-500"
                   />
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="remitente_nombres">
+              <div className="space-y-2">
+                <Label htmlFor="remitente_nombres" className="text-sm font-semibold text-slate-800">
                   Nombres y Apellidos / Razón Social *
                 </Label>
                 <Input
@@ -219,61 +230,75 @@ export function ExpedienteCreateForm() {
                   required
                   aria-required="true"
                   disabled={isPending}
+                  className="h-11 text-base bg-white border-slate-300 text-slate-900 placeholder:text-slate-500"
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor="correo">Correo Electrónico</Label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="correo" className="text-sm font-semibold text-slate-800">
+                    Correo Electrónico
+                  </Label>
                   <Input
                     id="correo"
                     name="correo"
                     type="email"
                     placeholder="administrado@correo.com"
                     disabled={isPending}
+                    className="h-11 text-base bg-white border-slate-300 text-slate-900 placeholder:text-slate-500"
                   />
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label htmlFor="telefono">Teléfono / Celular</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="telefono" className="text-sm font-semibold text-slate-800">
+                    Teléfono / Celular
+                  </Label>
                   <Input
                     id="telefono"
                     name="telefono"
                     placeholder="987654321"
                     disabled={isPending}
+                    className="h-11 text-base bg-white border-slate-300 text-slate-900 placeholder:text-slate-500"
                   />
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="direccion">Dirección Domiciliaria / Fiscal</Label>
+              <div className="space-y-2">
+                <Label htmlFor="direccion" className="text-sm font-semibold text-slate-800">
+                  Dirección Domiciliaria / Fiscal
+                </Label>
                 <Input
                   id="direccion"
                   name="direccion"
                   placeholder="Av. Antúnez de Mayolo 1234, Los Olivos"
                   disabled={isPending}
+                  className="h-11 text-base bg-white border-slate-300 text-slate-900 placeholder:text-slate-500"
                 />
               </div>
             </CardContent>
           </Card>
 
           {/* Columna 2: Datos del Trámite */}
-          <Card className="shadow-sm border">
-            <CardHeader className="bg-slate-50 border-b pb-4">
-              <div className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-primary" aria-hidden="true" />
-                <CardTitle className="text-base font-semibold text-slate-800">
-                  2. Datos del Trámite
+          <Card className="bg-white rounded-xl shadow-sm border border-slate-200 border-t-4 border-t-blue-700">
+            <CardHeader className="bg-slate-50/80 border-b border-slate-200 pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-lg bg-blue-700/10 text-blue-700">
+                  <FileText className="w-5 h-5" aria-hidden="true" />
+                </div>
+                <CardTitle className="text-lg font-bold text-slate-900">
+                  2. Datos del Trámite y Adjunto PDF
                 </CardTitle>
               </div>
-              <CardDescription>
-                Tipo de expediente, contenido y documentos adjuntos.
+              <CardDescription className="text-sm text-slate-700">
+                Tipo de expediente, sumilla y documentos sustentatorios digitalizados.
               </CardDescription>
             </CardHeader>
-            <CardContent className="pt-6 space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="sm:col-span-2 space-y-1.5">
-                  <Label htmlFor="tipo_tramite">Tipo de Trámite *</Label>
+            <CardContent className="pt-6 space-y-5">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="sm:col-span-2 space-y-2">
+                  <Label htmlFor="tipo_tramite" className="text-sm font-semibold text-slate-800">
+                    Tipo de Trámite *
+                  </Label>
                   <Select
                     items={TIPO_TRAMITE_ITEMS}
                     itemToStringLabel={(val: string | null) =>
@@ -288,6 +313,7 @@ export function ExpedienteCreateForm() {
                     <SelectTrigger
                       id="tipo_tramite"
                       aria-label="Tipo de trámite"
+                      className="h-11 text-base bg-white border-slate-300 text-slate-900"
                     >
                       <SelectValue placeholder="Seleccione" />
                     </SelectTrigger>
@@ -302,8 +328,10 @@ export function ExpedienteCreateForm() {
                   </Select>
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label htmlFor="folios">N° Folios *</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="folios" className="text-sm font-semibold text-slate-800">
+                    N° Folios *
+                  </Label>
                   <Input
                     id="folios"
                     name="folios"
@@ -313,12 +341,15 @@ export function ExpedienteCreateForm() {
                     required
                     aria-required="true"
                     disabled={isPending}
+                    className="h-11 text-base font-mono bg-white border-slate-300 text-slate-900"
                   />
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="asunto">Asunto del Trámite *</Label>
+              <div className="space-y-2">
+                <Label htmlFor="asunto" className="text-sm font-semibold text-slate-800">
+                  Asunto del Trámite *
+                </Label>
                 <Textarea
                   id="asunto"
                   name="asunto"
@@ -327,11 +358,12 @@ export function ExpedienteCreateForm() {
                   required
                   aria-required="true"
                   disabled={isPending}
+                  className="text-base bg-white border-slate-300 text-slate-900 placeholder:text-slate-500"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="archivos_adjuntos">
+                <Label htmlFor="archivos_adjuntos" className="text-sm font-semibold text-slate-800">
                   Archivos Digitales Adjuntos (PDF / Imágenes)
                 </Label>
 
@@ -354,19 +386,19 @@ export function ExpedienteCreateForm() {
                     aria-describedby="archivos-formato-ayuda"
                     onClick={() => !isPending && fileInputRef.current?.click()}
                     onKeyDown={handleDropzoneKeyDown}
-                    className="border-2 border-dashed border-slate-300 hover:border-primary hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg p-5 text-center cursor-pointer transition-colors"
+                    className="border-2 border-dashed border-slate-300 hover:border-blue-700 hover:bg-blue-50/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 rounded-xl p-6 text-center cursor-pointer transition-colors"
                   >
-                    <div className="mx-auto flex flex-col items-center justify-center gap-1.5">
-                      <div className="p-2.5 bg-primary/10 rounded-full text-primary">
-                        <UploadCloud className="w-5 h-5" aria-hidden="true" />
+                    <div className="mx-auto flex flex-col items-center justify-center gap-2">
+                      <div className="p-3 bg-blue-50 border border-blue-200 rounded-full text-blue-700">
+                        <UploadCloud className="w-6 h-6" aria-hidden="true" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-slate-700">
+                        <p className="text-base font-bold text-slate-800">
                           Haga clic o presione Enter para seleccionar archivos
                         </p>
                         <p
                           id="archivos-formato-ayuda"
-                          className="text-xs text-slate-600 mt-0.5"
+                          className="text-sm text-slate-700 mt-0.5"
                         >
                           Formato permitido: PDF (Hasta 10 MB por archivo)
                         </p>
@@ -382,10 +414,10 @@ export function ExpedienteCreateForm() {
                       {archivos.map((archivo, index) => (
                         <li
                           key={`${archivo.name}-${archivo.size}-${index}`}
-                          className="flex items-center justify-between p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-sm shadow-xs"
+                          className="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-slate-50 text-sm shadow-2xs"
                         >
                           <div className="flex items-center gap-2.5 truncate mr-2">
-                            <div className="p-1.5 bg-primary/10 rounded text-primary shrink-0">
+                            <div className="p-2 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 shrink-0">
                               <FileText
                                 className="w-4 h-4"
                                 aria-hidden="true"
@@ -393,12 +425,12 @@ export function ExpedienteCreateForm() {
                             </div>
                             <div className="truncate">
                               <p
-                                className="text-sm font-medium text-slate-800 truncate"
+                                className="text-sm font-bold text-slate-900 truncate"
                                 title={archivo.name}
                               >
                                 {archivo.name}
                               </p>
-                              <p className="text-xs text-slate-600">
+                              <p className="text-xs font-medium text-slate-700">
                                 {(archivo.size / (1024 * 1024)).toFixed(2)} MB
                               </p>
                             </div>
@@ -408,7 +440,7 @@ export function ExpedienteCreateForm() {
                             onClick={() => handleRemoveFile(index)}
                             disabled={isPending}
                             aria-label={`Eliminar archivo adjunto ${archivo.name}`}
-                            className="text-slate-500 hover:text-red-600 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 p-1.5 rounded transition-colors shrink-0 cursor-pointer"
+                            className="h-9 w-9 inline-flex items-center justify-center text-slate-700 hover:text-red-700 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 rounded-lg transition-colors shrink-0 cursor-pointer"
                             title="Eliminar archivo"
                           >
                             <Trash2 className="w-4 h-4" aria-hidden="true" />
@@ -424,12 +456,12 @@ export function ExpedienteCreateForm() {
                       onClick={() => fileInputRef.current?.click()}
                       disabled={isPending}
                       aria-label="Cargar otro archivo adjunto"
-                      className="w-full border-dashed border-slate-300 hover:border-primary hover:bg-primary/5 text-slate-700 gap-1.5 h-9 cursor-pointer"
+                      className="w-full h-11 rounded-xl border-dashed border-slate-300 hover:border-blue-700 hover:bg-blue-50/40 text-slate-800 font-semibold gap-2 cursor-pointer"
                     >
-                      <Plus className="w-4 h-4 text-primary" aria-hidden="true" />
+                      <Plus className="w-4 h-4 text-blue-700" aria-hidden="true" />
                       <span>+ Cargar otro archivo</span>
                     </Button>
-                    <p className="text-[11px] text-slate-600 text-center">
+                    <p className="text-xs text-slate-700 text-center">
                       Formatos: .pdf, .jpg, .png (Máx. 10 MB por archivo). Puede
                       agregar los archivos que necesite.
                     </p>
@@ -446,19 +478,19 @@ export function ExpedienteCreateForm() {
             disabled={isPending}
             aria-busy={isPending}
             size="lg"
-            className="px-8 shadow-sm cursor-pointer"
+            className="h-12 px-8 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-base font-bold shadow-sm cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
           >
             {isPending ? (
               <>
                 <Loader2
-                  className="mr-2 h-4 w-4 animate-spin"
+                  className="mr-2 h-5 w-5 animate-spin"
                   aria-hidden="true"
                 />
                 <span>Subiendo y Registrando...</span>
               </>
             ) : (
               <>
-                <FileCheck className="mr-2 h-4 w-4" aria-hidden="true" />
+                <FileCheck className="mr-2 h-5 w-5" aria-hidden="true" />
                 <span>Ingresar Expediente</span>
               </>
             )}
@@ -468,3 +500,4 @@ export function ExpedienteCreateForm() {
     </div>
   )
 }
+

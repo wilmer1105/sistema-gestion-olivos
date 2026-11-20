@@ -228,33 +228,29 @@ export default async function ExpedienteDetailPage({
         />
       )}
 
-      {/* Cabecera y Acciones Según Rol */}
-      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-3 mb-1">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+      {/* Cabecera destacada con CUT, estado y botonera de acciones */}
+      <div className="bg-white rounded-xl border border-slate-200 border-l-4 border-l-[#0F2A4A] p-6 shadow-xs flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="space-y-1.5">
+          <p className="text-xs font-bold uppercase tracking-widest text-blue-700">
+            Ficha Integral de Expediente Administrativo
+          </p>
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-2xl sm:text-3xl font-extrabold font-mono tracking-tight text-slate-900">
               {expedienteRaw.cut}
             </h1>
-            <Badge
-              variant={
-                expedienteRaw.estado === 'RECEPCIONADO' ||
-                expedienteRaw.estado === 'EN_TRAMITE'
-                  ? 'default'
-                  : 'secondary'
-              }
-            >
-              {expedienteRaw.estado}
+            <Badge className="inline-flex items-center gap-1.5 rounded-full bg-[#0F2A4A] text-white border border-slate-800 px-3.5 py-1 text-xs font-bold">
+              <span>{expedienteRaw.estado}</span>
             </Badge>
           </div>
-          <p className="text-slate-600">
+          <p className="text-base text-slate-700">
             Ubicación actual:{' '}
-            <span className="font-medium text-slate-800">
+            <span className="font-bold text-slate-900">
               {areaActualObj?.nombre || 'Mesa de Partes'}
             </span>
           </p>
           {especialistaAsignadoObj && (
-            <p className="text-xs text-indigo-700 font-medium mt-1 flex items-center gap-1.5">
-              <UserCheck className="w-3.5 h-3.5" aria-hidden="true" />
+            <p className="text-sm text-indigo-800 font-semibold mt-1 flex items-center gap-1.5">
+              <UserCheck className="w-4 h-4 text-indigo-700" aria-hidden="true" />
               <span>
                 Especialista asignado: {especialistaAsignadoObj.nombres}{' '}
                 {especialistaAsignadoObj.apellidos}
@@ -300,85 +296,93 @@ export default async function ExpedienteDetailPage({
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2 space-y-6">
-          <Card className="shadow-sm">
-            <CardHeader className="bg-slate-50 border-b">
-              <CardTitle className="text-lg">Datos del Administrado</CardTitle>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <Card className="bg-white rounded-xl border border-slate-200 shadow-xs">
+            <CardHeader className="bg-slate-50/80 border-b border-slate-200">
+              <CardTitle className="text-lg font-bold text-slate-900">
+                <h2>Datos del Administrado</h2>
+              </CardTitle>
             </CardHeader>
-            <CardContent className="pt-6 grid grid-cols-2 gap-4">
+            <CardContent className="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
-                <p className="text-sm font-medium text-slate-600">
+                <p className="text-sm font-semibold text-slate-600">
                   Nombre / Razón Social
                 </p>
-                <p className="font-medium text-slate-900">
+                <p className="text-base font-bold text-slate-900 mt-0.5">
                   {expedienteRaw.remitente_nombres}
                 </p>
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-600">
+                <p className="text-sm font-semibold text-slate-600">
                   {expedienteRaw.tipo_doc_remitente || 'DNI / RUC'}
                 </p>
-                <p className="font-medium text-slate-900">
+                <p className="text-base font-bold font-mono text-slate-900 mt-0.5">
                   {expedienteRaw.remitente_dni_ruc}
                 </p>
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-600">
+                <p className="text-sm font-semibold text-slate-600">
                   Correo Electrónico
                 </p>
-                <p className="text-slate-900">{expedienteRaw.correo || '-'}</p>
+                <p className="text-base text-slate-900 mt-0.5">
+                  {expedienteRaw.correo || '—'}
+                </p>
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-600">Teléfono</p>
-                <p className="text-slate-900">
-                  {expedienteRaw.telefono || '-'}
+                <p className="text-sm font-semibold text-slate-600">Teléfono</p>
+                <p className="text-base text-slate-900 mt-0.5">
+                  {expedienteRaw.telefono || '—'}
                 </p>
               </div>
               {expedienteRaw.direccion && (
-                <div className="col-span-2">
-                  <p className="text-sm font-medium text-slate-600">
+                <div className="sm:col-span-2">
+                  <p className="text-sm font-semibold text-slate-600">
                     Dirección Domiciliaria / Fiscal
                   </p>
-                  <p className="text-slate-900">{expedienteRaw.direccion}</p>
+                  <p className="text-base text-slate-900 mt-0.5">
+                    {expedienteRaw.direccion}
+                  </p>
                 </div>
               )}
             </CardContent>
           </Card>
 
-          <Card className="shadow-sm">
-            <CardHeader className="bg-slate-50 border-b">
-              <CardTitle className="text-lg">
-                Contenido del Expediente
+          <Card className="bg-white rounded-xl border border-slate-200 shadow-xs">
+            <CardHeader className="bg-slate-50/80 border-b border-slate-200">
+              <CardTitle className="text-lg font-bold text-slate-900">
+                <h2>Contenido del Expediente</h2>
               </CardTitle>
             </CardHeader>
-            <CardContent className="pt-6 space-y-4">
+            <CardContent className="pt-6 space-y-5">
               <div>
-                <p className="text-sm font-medium text-slate-600">Asunto</p>
-                <p className="text-slate-900 mt-1 p-3 bg-slate-50 rounded-md border">
+                <p className="text-sm font-semibold text-slate-600">Asunto</p>
+                <p className="text-base text-slate-900 mt-1.5 p-4 bg-slate-50 rounded-xl border border-slate-200 leading-relaxed">
                   {expedienteRaw.asunto}
                 </p>
               </div>
-              <div className="flex flex-wrap gap-10">
+              <div className="flex flex-wrap gap-8">
                 <div>
-                  <p className="text-sm font-medium text-slate-600">
+                  <p className="text-sm font-semibold text-slate-600">
                     Tipo de Trámite
                   </p>
-                  <p className="text-slate-900 font-medium">
+                  <p className="text-base text-slate-900 font-bold mt-0.5">
                     {expedienteRaw.tipo_tramite}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-slate-600">
+                  <p className="text-sm font-semibold text-slate-600">
                     Folios Adjuntos
                   </p>
-                  <p className="text-slate-900">{expedienteRaw.folios}</p>
+                  <p className="text-base font-mono font-bold text-slate-900 mt-0.5">
+                    {expedienteRaw.folios}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-slate-600">
+                  <p className="text-sm font-semibold text-slate-600">
                     Fecha de Ingreso
                   </p>
-                  <p className="text-slate-900">
+                  <p className="text-base text-slate-900 font-medium mt-0.5">
                     {format(
                       new Date(expedienteRaw.fecha_creacion),
                       "dd 'de' MMMM, yyyy - HH:mm",
@@ -391,18 +395,23 @@ export default async function ExpedienteDetailPage({
           </Card>
 
           {/* Sección: Archivos Adjuntos Agrupados por Unidad Orgánica Emisora (RF-13, RF-14, HU-06) */}
-          <Card className="shadow-sm">
-            <CardHeader className="bg-slate-50 border-b flex flex-row items-center justify-between py-3.5">
-              <div className="flex items-center gap-2">
+          <Card className="bg-white rounded-xl border border-slate-200 shadow-xs">
+            <CardHeader className="bg-slate-50/80 border-b border-slate-200 flex flex-row items-center justify-between py-4">
+              <div className="flex items-center gap-2.5">
                 <Paperclip
-                  className="w-5 h-5 text-slate-600"
+                  className="w-5 h-5 text-blue-700"
                   aria-hidden="true"
                 />
-                <CardTitle className="text-lg">Archivos Adjuntos</CardTitle>
+                <CardTitle className="text-lg font-bold text-slate-900">
+                  <h2>Archivos Adjuntos</h2>
+                </CardTitle>
               </div>
 
               <div className="flex items-center gap-3">
-                <Badge variant="secondary" className="font-normal text-xs">
+                <Badge
+                  variant="secondary"
+                  className="rounded-full bg-slate-200 text-slate-900 font-bold text-xs px-3 py-1"
+                >
                   {adjuntos.length === 1
                     ? '1 Archivo adjunto'
                     : `${adjuntos.length} Archivos adjuntos`}
@@ -425,12 +434,12 @@ export default async function ExpedienteDetailPage({
             </CardHeader>
             <CardContent className="pt-6">
               {adjuntos.length === 0 ? (
-                <div className="text-center py-6 text-slate-600">
+                <div className="text-center py-8 text-slate-700">
                   <FileText
-                    className="w-10 h-10 mx-auto text-slate-400 mb-2"
+                    className="w-10 h-10 mx-auto text-slate-600 mb-2"
                     aria-hidden="true"
                   />
-                  <p className="text-sm">
+                  <p className="text-base font-medium">
                     No se adjuntaron archivos para este expediente.
                   </p>
                 </div>
@@ -439,19 +448,19 @@ export default async function ExpedienteDetailPage({
                   {Object.entries(adjuntosPorArea).map(
                     ([areaNombre, listaAdjuntos]) => (
                       <div key={areaNombre} className="space-y-3">
-                        <div className="flex items-center justify-between border-b pb-1.5">
+                        <div className="flex items-center justify-between border-b border-slate-200 pb-2">
                           <div className="flex items-center gap-2">
                             <Building2
-                              className="w-4 h-4 text-primary"
+                              className="w-4 h-4 text-blue-700"
                               aria-hidden="true"
                             />
-                            <h4 className="text-sm font-semibold text-slate-800">
+                            <h3 className="text-sm font-bold text-slate-900">
                               Documentos emitidos por: {areaNombre}
-                            </h4>
+                            </h3>
                           </div>
                           <Badge
                             variant="outline"
-                            className="text-xs font-normal"
+                            className="rounded-full text-xs font-semibold border-slate-300 text-slate-800"
                           >
                             {listaAdjuntos.length}{' '}
                             {listaAdjuntos.length === 1
@@ -460,34 +469,34 @@ export default async function ExpedienteDetailPage({
                           </Badge>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                           {listaAdjuntos.map((adjunto) => (
                             <div
                               key={adjunto.id}
-                              className="flex items-center justify-between p-3 rounded-lg border border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition-colors gap-3"
+                              className="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-slate-100/70 transition-colors gap-3"
                             >
                               <div className="flex items-center gap-3 overflow-hidden min-w-0">
-                                <div className="p-2 bg-primary/10 rounded-md shrink-0">
+                                <div className="p-2.5 bg-blue-50 border border-blue-200 rounded-lg shrink-0">
                                   <FileText
-                                    className="w-4 h-4 text-primary"
+                                    className="w-4 h-4 text-blue-700"
                                     aria-hidden="true"
                                   />
                                 </div>
                                 <div className="truncate min-w-0">
                                   <p
-                                    className="text-sm font-medium text-slate-900 truncate"
+                                    className="text-sm font-bold text-slate-900 truncate"
                                     title={adjunto.nombre_archivo}
                                   >
                                     {adjunto.nombre_archivo}
                                   </p>
-                                  <div className="flex items-center gap-2 mt-0.5">
+                                  <div className="flex items-center gap-2 mt-1">
                                     <Badge
                                       variant="outline"
-                                      className="text-[10px] px-1.5 py-0 font-semibold text-slate-700"
+                                      className="text-xs px-2 py-0 font-bold text-slate-800 border-slate-300 bg-white"
                                     >
                                       {adjunto.tipo_documento}
                                     </Badge>
-                                    <span className="text-xs text-slate-600">
+                                    <span className="text-xs font-medium text-slate-700">
                                       {adjunto.peso_bytes
                                         ? `${(
                                             adjunto.peso_bytes /
@@ -519,20 +528,23 @@ export default async function ExpedienteDetailPage({
         </div>
 
         {/* Columna Derecha: Línea de Tiempo (Hoja de Ruta) */}
-        <section aria-label="Hoja de Ruta del expediente">
-          <h3 className="font-semibold text-slate-800 mb-4 flex items-center">
+        <section
+          aria-label="Hoja de Ruta del expediente"
+          className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs h-fit"
+        >
+          <h2 className="text-lg font-bold text-slate-900 mb-5 pb-3 border-b border-slate-200 flex items-center">
             Hoja de Ruta (Tracking)
-          </h3>
+          </h2>
           {!trazabilidadRaw || trazabilidadRaw.length === 0 ? (
-            <p className="text-sm text-slate-600 italic pl-6">
+            <p className="text-base text-slate-700 italic">
               No hay movimientos registrados para este expediente aún.
             </p>
           ) : (
             <ol
               aria-label="Movimientos registrados en la hoja de ruta"
-              className="relative border-l border-slate-200 ml-3 space-y-6 pb-4 list-none"
+              className="relative border-l-2 border-blue-200 ml-3 space-y-6 pb-2 list-none"
             >
-              {trazabilidadRaw.map((item) => {
+              {trazabilidadRaw.map((item, idx) => {
                 let formattedFecha = 'Fecha no registrada'
                 if (item.fecha_envio) {
                   try {
@@ -564,36 +576,40 @@ export default async function ExpedienteDetailPage({
                   : ''
 
                 return (
-                  <li key={item.id} className="relative pl-6">
+                  <li key={item.id} className="relative pl-7">
                     <div
                       aria-hidden="true"
-                      className="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full bg-primary ring-4 ring-white"
-                    />
+                      className={`absolute -left-2.5 mt-1.5 h-5 w-5 rounded-full ring-4 ring-white flex items-center justify-center ${
+                        idx === 0 ? 'bg-blue-700' : 'bg-[#0F2A4A]'
+                      }`}
+                    >
+                      <div className="h-2 w-2 bg-white rounded-full" />
+                    </div>
                     <div className="flex flex-col">
-                      <span className="text-sm font-semibold text-slate-900">
+                      <span className="text-base font-bold text-slate-900">
                         {item.accion}
                       </span>
-                      <span className="text-xs text-slate-600 mb-1">
+                      <span className="text-xs font-semibold text-slate-600 mb-1.5">
                         {formattedFecha}
                       </span>
-                      <div className="bg-white border rounded-md p-3 mt-1 shadow-sm">
-                        <p className="text-xs font-medium text-slate-700">
+                      <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 mt-1 space-y-1.5">
+                        <p className="text-sm font-semibold text-slate-800">
                           De: {areaOrigenObj?.nombre || 'Mesa de Partes'}
                         </p>
-                        <p className="text-xs font-medium text-slate-700 mb-2">
+                        <p className="text-sm font-bold text-blue-800">
                           Hacia: {areaDestinoObj?.nombre || 'Mesa de Partes'}
                         </p>
                         {item.proveido ? (
-                          <p className="text-sm text-slate-700 italic">
+                          <p className="text-sm text-slate-800 italic border-t border-slate-200 pt-1.5">
                             &ldquo;{item.proveido}&rdquo;
                           </p>
                         ) : (
-                          <p className="text-xs text-slate-500 italic">
+                          <p className="text-sm text-slate-600 italic">
                             Sin observaciones
                           </p>
                         )}
                         {emisorNombre && (
-                          <p className="text-[11px] text-slate-500 mt-2 text-right">
+                          <p className="text-xs font-semibold text-slate-600 pt-1 text-right">
                             Por: {emisorNombre}
                           </p>
                         )}
@@ -609,3 +625,4 @@ export default async function ExpedienteDetailPage({
     </div>
   )
 }
+

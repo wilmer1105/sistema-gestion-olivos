@@ -72,79 +72,92 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
+      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs">
+        <p className="text-xs font-bold uppercase tracking-widest text-blue-700">
+          Panel de Control Jurisdiccional
+        </p>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
           Resumen Operativo
         </h1>
-        <p className="text-slate-600">{nombreContexto}</p>
+        <p className="text-base text-slate-700 mt-1">{nombreContexto}</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {/* Total en Área */}
-        <Card className="shadow-sm">
+        <Card className="bg-white rounded-xl border border-slate-200 border-t-4 border-t-blue-700 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-600">
+            <CardTitle className="text-base font-bold text-slate-800">
               Total en Área
             </CardTitle>
-            <Files className="h-4 w-4 text-blue-600" aria-hidden="true" />
+            <div className="p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-700">
+              <Files className="h-5 w-5" aria-hidden="true" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{totalCount ?? 0}</div>
-            <p className="text-xs text-slate-600 mt-1">
+            <div className="text-4xl font-extrabold text-slate-900 font-mono">
+              {totalCount ?? 0}
+            </div>
+            <p className="text-sm text-slate-700 mt-1.5 font-medium">
               Asignados a la unidad orgánica
             </p>
           </CardContent>
         </Card>
 
         {/* Pendientes de Recepción (DERIVADO) */}
-        <Card className="shadow-sm">
+        <Card className="bg-white rounded-xl border border-slate-200 border-t-4 border-t-amber-600 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-600">
+            <CardTitle className="text-base font-bold text-slate-800">
               Pendientes de Recepción
             </CardTitle>
-            <Clock className="h-4 w-4 text-amber-600" aria-hidden="true" />
+            <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-800">
+              <Clock className="h-5 w-5" aria-hidden="true" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-amber-600">
+            <div className="text-4xl font-extrabold text-amber-800 font-mono">
               {pendientesRecepcionCount ?? 0}
             </div>
-            <p className="text-xs text-slate-600 mt-1">
+            <p className="text-sm text-slate-700 mt-1.5 font-medium">
               En estado DERIVADO hacia su área
             </p>
           </CardContent>
         </Card>
 
         {/* En Evaluación / Trámite */}
-        <Card className="shadow-sm">
+        <Card className="bg-white rounded-xl border border-slate-200 border-t-4 border-t-indigo-700 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-600">
+            <CardTitle className="text-base font-bold text-slate-800">
               En Evaluación
             </CardTitle>
-            <Send className="h-4 w-4 text-indigo-600" aria-hidden="true" />
+            <div className="p-2.5 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700">
+              <Send className="h-5 w-5" aria-hidden="true" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-indigo-600">
+            <div className="text-4xl font-extrabold text-indigo-800 font-mono">
               {enEvaluacionCount ?? 0}
             </div>
-            <p className="text-xs text-slate-600 mt-1">
+            <p className="text-sm text-slate-700 mt-1.5 font-medium">
               Recepcionados o en trámite activo
             </p>
           </CardContent>
         </Card>
 
         {/* Finalizados / Archivados */}
-        <Card className="shadow-sm">
+        <Card className="bg-white rounded-xl border border-slate-200 border-t-4 border-t-emerald-700 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-600">
+            <CardTitle className="text-base font-bold text-slate-800">
               Finalizados
             </CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+            <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700">
+              <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-emerald-600">
+            <div className="text-4xl font-extrabold text-emerald-800 font-mono">
               {finalizadosCount ?? 0}
             </div>
-            <p className="text-xs text-slate-600 mt-1">
+            <p className="text-sm text-slate-700 mt-1.5 font-medium">
               Atendidos o archivados por el área
             </p>
           </CardContent>
@@ -153,3 +166,4 @@ export default async function DashboardPage() {
     </div>
   )
 }
+

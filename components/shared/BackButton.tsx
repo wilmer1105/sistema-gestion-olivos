@@ -37,10 +37,14 @@ export function BackButton({
       variant={variant}
       size={size}
       onClick={handleBack}
-      className={cn('inline-flex items-center gap-1.5 text-slate-700 hover:text-slate-900 border-slate-200 shadow-2xs transition-colors', className)}
+      className={cn(
+        'inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-white text-sm font-semibold text-slate-800 hover:text-slate-900 hover:bg-slate-100 border-slate-300 shadow-2xs transition-colors focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2',
+        className
+      )}
     >
-      <ArrowLeft className="h-4 w-4 text-slate-500" />
+      <ArrowLeft className="h-4 w-4 text-slate-700" aria-hidden="true" />
       <span>{label}</span>
     </Button>
   )
 }
+

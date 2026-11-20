@@ -105,19 +105,19 @@ export function FinalizarExpedienteModal({
           variant="destructive"
           disabled={disabled}
           aria-label="Finalizar o archivar expediente"
-          className="gap-2 shadow-sm font-medium"
+          className="h-11 px-5 gap-2 rounded-xl bg-red-700 hover:bg-red-800 text-white text-sm font-semibold shadow-2xs"
         >
           <Archive className="w-4 h-4" aria-hidden="true" />
           <span>Finalizar / Archivar</span>
         </Button>
       </DialogTrigger>
 
-      <DialogContent className={newLocal}>
+      <DialogContent className="sm:max-w-[500px] rounded-xl">
         <DialogHeader>
-          <DialogTitle className="text-lg">
+          <DialogTitle className="text-xl font-bold text-slate-900">
             Finalizar o Archivar Expediente
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-sm text-slate-600">
             {cut ? `Expediente: ${cut}. ` : ''}
             Esta acción concluirá el ciclo de vida del expediente registrando la
             resolución en la hoja de ruta.
@@ -151,7 +151,9 @@ export function FinalizarExpedienteModal({
 
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
           <div className="space-y-2">
-            <Label htmlFor="estado_cierre">Acción de Cierre *</Label>
+            <Label htmlFor="estado_cierre" className="text-sm font-semibold text-slate-800">
+              Acción de Cierre *
+            </Label>
             <Select
               items={estadoItems}
               itemToStringLabel={(val: string | null) =>
@@ -163,7 +165,11 @@ export function FinalizarExpedienteModal({
               }
               disabled={isPending}
             >
-              <SelectTrigger id="estado_cierre" aria-required="true">
+              <SelectTrigger
+                id="estado_cierre"
+                aria-required="true"
+                className="h-11 text-base bg-white border-slate-300 text-slate-900"
+              >
                 <SelectValue placeholder="Seleccione el estado de resolución" />
               </SelectTrigger>
               <SelectContent>
@@ -178,7 +184,9 @@ export function FinalizarExpedienteModal({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="observacion">Observación / Proveído de Cierre *</Label>
+            <Label htmlFor="observacion" className="text-sm font-semibold text-slate-800">
+              Observación / Proveído de Cierre *
+            </Label>
             <Textarea
               id="observacion"
               rows={4}
@@ -188,15 +196,17 @@ export function FinalizarExpedienteModal({
               disabled={isPending}
               required
               aria-required="true"
+              className="text-base bg-white border-slate-300 text-slate-900 placeholder:text-slate-500"
             />
           </div>
 
-          <div className="flex justify-end pt-4 gap-2">
+          <div className="flex justify-end pt-4 border-t border-slate-200 gap-2.5">
             <Button
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
               disabled={isPending}
+              className="h-11 px-5 rounded-xl border-slate-300 font-semibold text-slate-800"
             >
               Cancelar
             </Button>
@@ -205,6 +215,7 @@ export function FinalizarExpedienteModal({
               variant="destructive"
               disabled={isPending}
               aria-busy={isPending}
+              className="h-11 px-5 rounded-xl bg-red-700 hover:bg-red-800 text-white font-semibold"
             >
               {isPending ? (
                 <Loader2
@@ -220,3 +231,4 @@ export function FinalizarExpedienteModal({
     </Dialog>
   )
 }
+
