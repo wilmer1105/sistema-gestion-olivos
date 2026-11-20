@@ -17,8 +17,8 @@
     <testCase name="Server Action: loginAction (app/actions/auth.ts) - Simulación Anti-Falsos Positivos - rechaza datos de entrada inválidos antes de invocar la infraestructura de Supabase" duration="5" />
     <testCase name="Server Action: loginAction (app/actions/auth.ts) - Simulación Anti-Falsos Positivos - devuelve mensaje amigable ante fallo de credenciales de Supabase Auth sin exponer trazas internas" duration="2" />
     <testCase name="Server Action: loginAction (app/actions/auth.ts) - Simulación Anti-Falsos Positivos - bloquea sesión y llama a signOut() cuando la cuenta está desactivada (activo === false)" duration="1" />
-    <testCase name="Server Action: loginAction (app/actions/auth.ts) - Simulación Anti-Falsos Positivos - bloquea sesión y llama a signOut() cuando el usuario no existe en la tabla perfiles" duration="1" />
-    <testCase name="Server Action: loginAction (app/actions/auth.ts) - Simulación Anti-Falsos Positivos - retorna éxito y URL de redirección exacta /dashboard/admin para rol ADMIN_TI" duration="1" />
+    <testCase name="Server Action: loginAction (app/actions/auth.ts) - Simulación Anti-Falsos Positivos - bloquea sesión y llama a signOut() cuando el usuario no existe en la tabla perfiles" duration="0" />
+    <testCase name="Server Action: loginAction (app/actions/auth.ts) - Simulación Anti-Falsos Positivos - retorna éxito y URL de redirección exacta /dashboard/admin para rol ADMIN_TI" duration="0" />
     <testCase name="Server Action: loginAction (app/actions/auth.ts) - Simulación Anti-Falsos Positivos - retorna éxito y URL de redirección /dashboard/bandeja para roles operativos (MESA_PARTES, JEFE_AREA)" duration="0" />
   </file>
   <file path="tests/unit/rbac.test.ts">
@@ -43,7 +43,7 @@
   <file path="tests/unit/solid.test.ts">
     <testCase name="Arquitectura SOLID - Pruebas Unitarias (Vitest) - 1. SRP: Clases con Responsabilidad Única aisladas - ExpedienteValidator valida exclusivamente reglas de datos de radicación, derivación y cierre" duration="3" />
     <testCase name="Arquitectura SOLID - Pruebas Unitarias (Vitest) - 1. SRP: Clases con Responsabilidad Única aisladas - EmpleadoAdminValidator valida datos de empleados y resuelve áreas según el rol" duration="0" />
-    <testCase name="Arquitectura SOLID - Pruebas Unitarias (Vitest) - 1. SRP: Clases con Responsabilidad Única aisladas - StorageService sanitiza nombres, sube binarios al StorageProvider y registra metadatos en AdjuntoRepository" duration="2" />
+    <testCase name="Arquitectura SOLID - Pruebas Unitarias (Vitest) - 1. SRP: Clases con Responsabilidad Única aisladas - StorageService sanitiza nombres, sube binarios al StorageProvider y registra metadatos en AdjuntoRepository" duration="1" />
     <testCase name="Arquitectura SOLID - Pruebas Unitarias (Vitest) - 1. SRP: Clases con Responsabilidad Única aisladas - TrazabilidadLogger registra hitos de hoja de ruta de manera aislada" duration="1" />
     <testCase name="Arquitectura SOLID - Pruebas Unitarias (Vitest) - 2. OCP y LSP: Polimorfismo en Políticas RBAC y Manejadores de Acciones - LSP: Todas las implementaciones de PoliticaPermisoRol cumplen el contrato base sin lanzar excepciones" duration="1" />
     <testCase name="Arquitectura SOLID - Pruebas Unitarias (Vitest) - 2. OCP y LSP: Polimorfismo en Políticas RBAC y Manejadores de Acciones - OCP: Permite extender y registrar una nueva política de rol sin modificar el código base" duration="0" />
@@ -57,7 +57,7 @@
     <testCase name="Validadores Isomórficos Zod y Aserciones Anti-Falsos Positivos (lib/validators/) - 2. empleadoSchema y Regla Reactiva de Rol vs. Área (RF-03, RF-04) - acepta ADMIN_TI únicamente cuando area_id es null" duration="2" />
     <testCase name="Validadores Isomórficos Zod y Aserciones Anti-Falsos Positivos (lib/validators/) - 2. empleadoSchema y Regla Reactiva de Rol vs. Área (RF-03, RF-04) - rechaza ADMIN_TI si se le intenta asignar un area_id con mensaje exacto" duration="0" />
     <testCase name="Validadores Isomórficos Zod y Aserciones Anti-Falsos Positivos (lib/validators/) - 2. empleadoSchema y Regla Reactiva de Rol vs. Área (RF-03, RF-04) - rechaza roles operativos (ASISTENTE_AREA, ESPECIALISTA, JEFE_AREA) si area_id es null con mensaje exacto" duration="0" />
-    <testCase name="Validadores Isomórficos Zod y Aserciones Anti-Falsos Positivos (lib/validators/) - 2. empleadoSchema y Regla Reactiva de Rol vs. Área (RF-03, RF-04) - rechaza DNI con letras o longitud diferente de 8 dígitos con mensaje exacto" duration="0" />
+    <testCase name="Validadores Isomórficos Zod y Aserciones Anti-Falsos Positivos (lib/validators/) - 2. empleadoSchema y Regla Reactiva de Rol vs. Área (RF-03, RF-04) - rechaza DNI con letras o longitud diferente de 8 dígitos con mensaje exacto" duration="1" />
     <testCase name="Validadores Isomórficos Zod y Aserciones Anti-Falsos Positivos (lib/validators/) - 3. expedienteSchema y validarArchivoPdf (RF-06, RF-07, RNF-05) - valida correctamente DNI de 8 dígitos y RUC de 11 dígitos" duration="2" />
     <testCase name="Validadores Isomórficos Zod y Aserciones Anti-Falsos Positivos (lib/validators/) - 3. expedienteSchema y validarArchivoPdf (RF-06, RF-07, RNF-05) - rechaza DNI con letras o longitud inválida con mensaje exacto" duration="0" />
     <testCase name="Validadores Isomórficos Zod y Aserciones Anti-Falsos Positivos (lib/validators/) - 3. expedienteSchema y validarArchivoPdf (RF-06, RF-07, RNF-05) - rechaza RUC con longitud distinta de 11 dígitos o caracteres alfabéticos" duration="0" />
@@ -69,5 +69,7 @@
     <testCase name="Validadores Isomórficos Zod y Aserciones Anti-Falsos Positivos (lib/validators/) - 4. derivacionSchema, asignacionInternaSchema y cierreExpedienteSchema - rechaza proveído menor a 5 caracteres en asignación interna a especialista" duration="1" />
     <testCase name="Validadores Isomórficos Zod y Aserciones Anti-Falsos Positivos (lib/validators/) - 4. derivacionSchema, asignacionInternaSchema y cierreExpedienteSchema - valida documento intermedio con tipo válido y descripción opcional" duration="1" />
     <testCase name="Validadores Isomórficos Zod y Aserciones Anti-Falsos Positivos (lib/validators/) - 4. derivacionSchema, asignacionInternaSchema y cierreExpedienteSchema - valida cierre de expediente solo con estados ATENDIDO o ARCHIVADO y proveído &gt;= 5 caracteres" duration="1" />
+    <testCase name="Validadores Isomórficos Zod y Aserciones Anti-Falsos Positivos (lib/validators/) - 5. Refactorización PC12: correo obligatorio en empleadoSchema y ExpedienteValidator - rechaza empleadoSchema cuando no se envía ni correo ni email" duration="0" />
+    <testCase name="Validadores Isomórficos Zod y Aserciones Anti-Falsos Positivos (lib/validators/) - 5. Refactorización PC12: correo obligatorio en empleadoSchema y ExpedienteValidator - ExpedienteValidator bloquea auto-derivación a la misma área, archivos &gt; 10MB por defecto y valida cierres" duration="26" />
   </file>
 </testExecutions>

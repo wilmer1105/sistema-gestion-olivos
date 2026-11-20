@@ -4,6 +4,7 @@ import type {
   EstadoCierreExpediente,
   IArchivoAdjuntoInput,
 } from '@/lib/domain/contracts/expediente.contracts'
+import { MAX_PDF_SIZE_BYTES } from '@/lib/validators/expediente.schema'
 
 export interface ValidacionResultado {
   readonly valido: boolean
@@ -71,21 +72,32 @@ export class ExpedienteValidator {
   }
 
   validarDerivacion(datos: DatosDerivacionValidar): ValidacionResultado {
-    if (!datos.area_origen_id || String(datos.area_origen_id).trim() === '') {
+    const origen = datos.area_origen_id ? String(datos.area_origen_id).trim() : ''
+    const destino = datos.area_destino_id ? String(datos.area_destino_id).trim() : ''
+    const expedienteId = datos.expediente_id ? String(datos.expediente_id).trim() : ''
+
+    if (!origen) {
       return {
         valido: false,
         error: 'El área de origen (area_origen_id) no puede ser undefined o null.',
       }
     }
 
-    if (!datos.area_destino_id || String(datos.area_destino_id).trim() === '') {
+    if (!destino) {
       return {
         valido: false,
         error: 'El área de destino (area_destino_id) no puede ser undefined o null.',
       }
     }
 
-    if (!datos.expediente_id || String(datos.expediente_id).trim() === '') {
+    if (origen === destino) {
+      return {
+        valido: false,
+        error: 'El área de destino debe ser distinta al área de origen.',
+      }
+    }
+
+    if (!expedienteId) {
       return {
         valido: false,
         error: 'El identificador del expediente (expediente_id) no puede ser undefined o null.',
@@ -116,7 +128,7 @@ export class ExpedienteValidator {
   validarArchivosAdjuntos(
     archivos: IArchivoAdjuntoInput[],
     requiereAlMenosUno = false,
-    maxBytesPorArchivo = 25 * 1024 * 1024
+    maxBytesPorArchivo = MAX_PDF_SIZE_BYTES
   ): ValidacionResultado {
     if (requiereAlMenosUno && archivos.length === 0) {
       return {

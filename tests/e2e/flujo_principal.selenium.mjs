@@ -173,7 +173,40 @@ async function runE2ESuite() {
     )
     console.log(`[PASS] Paso 3: Consulta ciudadana en /consulta respondió correctamente para ${TEST_CUT}.`)
 
-    console.log('\n=== RESUMEN SELENIUM E2E (PC8) ===')
+    // =========================================================================
+    // FLUJO 4: Auditoría WCAG básica en vivo en navegador (PC13 / ODS 10)
+    // =========================================================================
+    const wcagReport = await driver.executeScript(() => {
+      const lang = document.documentElement.getAttribute('lang') || ''
+      const title = document.title || ''
+      const inputs = Array.from(document.querySelectorAll('input:not([type="hidden"])'))
+      const unlabeledInputs = inputs.filter((el) => {
+        const id = el.getAttribute('id')
+        const hasLabel = id ? Boolean(document.querySelector(`label[for="${id}"]`)) : false
+        const hasAria = Boolean(el.getAttribute('aria-label') || el.getAttribute('aria-labelledby'))
+        return !hasLabel && !hasAria
+      }).length
+      const imgsSinAlt = Array.from(document.querySelectorAll('img')).filter(
+        (img) => !img.hasAttribute('alt')
+      ).length
+      const hasH1 = Boolean(document.querySelector('h1'))
+      return { lang, title, unlabeledInputs, imgsSinAlt, hasH1 }
+    })
+
+    assert.ok(wcagReport.lang.length > 0, 'El documento debe declarar atributo lang')
+    assert.ok(wcagReport.title.length > 0, 'La página debe tener un <title> descriptivo')
+    assert.equal(wcagReport.unlabeledInputs, 0, 'Todos los inputs visibles deben tener etiqueta accesible')
+    assert.equal(wcagReport.imgsSinAlt, 0, 'Todas las imágenes deben declarar atributo alt')
+    assert.equal(wcagReport.hasH1, true, 'La página debe incluir encabezado principal <h1>')
+
+    resumen.push(
+      `PASS | Paso 4: Auditoría WCAG en vivo (lang="${wcagReport.lang}", inputs sin etiqueta=0, imgs sin alt=0, h1=OK)`
+    )
+    console.log(
+      `[PASS] Paso 4: Auditoría WCAG en vivo aprobada (lang="${wcagReport.lang}", inputs sin etiqueta=0, imgs sin alt=0).`
+    )
+
+    console.log('\n=== RESUMEN SELENIUM E2E (PC8 / PC13) ===')
     for (const linea of resumen) {
       console.log(` - ${linea}`)
     }

@@ -893,3 +893,22 @@ Then(
   }
 )
 
+When(
+  'un ciudadano sin sesión consulta públicamente un código CUT inexistente {string}',
+  (cutInexistente: string) => {
+    if (state.datosCrudosConPII.cut !== cutInexistente) {
+      state.vistaPublicaExpediente = null
+      state.vistaPublicaTrazabilidad = []
+    }
+  }
+)
+
+Then(
+  'la vista pública no retorna expediente ni datos personales del administrado',
+  () => {
+    assert.equal(state.vistaPublicaExpediente, null)
+    assert.equal(state.vistaPublicaTrazabilidad.length, 0)
+  }
+)
+
+

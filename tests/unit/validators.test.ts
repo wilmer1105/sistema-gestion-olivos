@@ -430,4 +430,63 @@ describe('Validadores Isomórficos Zod y Aserciones Anti-Falsos Positivos (lib/v
       }
     })
   })
+
+  describe('5. Refactorización PC12: correo obligatorio en empleadoSchema y ExpedienteValidator', () => {
+    it('rechaza empleadoSchema cuando no se envía ni correo ni email', () => {
+      const sinCorreo = empleadoSchema.safeParse({
+        nombres: 'Lucía',
+        apellidos: 'Ramos',
+        dni: '44556677',
+        rol: 'ESPECIALISTA',
+        area_id: UUID_SGOPCU,
+      })
+      expect(sinCorreo.success).toBe(false)
+      if (!sinCorreo.success) {
+        expect(sinCorreo.error.issues[0]?.message).toBe(
+          'El correo electrónico institucional es obligatorio'
+        )
+      }
+    })
+
+    it('ExpedienteValidator bloquea auto-derivación a la misma área, archivos > 10MB por defecto y valida cierres', async () => {
+      const { ExpedienteValidator } = await import('@/lib/services/ExpedienteValidator')
+      const validator = new ExpedienteValidator()
+
+      // Auto-derivación bloqueada (regla PC12)
+      const mismaArea = validator.validarDerivacion({
+        expediente_id: UUID_EXPEDIENTE,
+        area_origen_id: UUID_SGOPCU,
+        area_destino_id: UUID_SGOPCU,
+      })
+      expect(mismaArea.valido).toBe(false)
+      expect(mismaArea.error).toMatch(/distinta al área de origen/i)
+
+      // Campos faltantes en derivación y cierre
+      expect(validator.validarDerivacion({ area_origen_id: '', area_destino_id: UUID_SGOPCU, expediente_id: UUID_EXPEDIENTE }).valido).toBe(false)
+      expect(validator.validarDerivacion({ area_origen_id: UUID_SGOPCU, area_destino_id: '', expediente_id: UUID_EXPEDIENTE }).valido).toBe(false)
+      expect(validator.validarDerivacion({ area_origen_id: UUID_SGOPCU, area_destino_id: 'area-otra', expediente_id: '' }).valido).toBe(false)
+      expect(validator.validarCierre({ expediente_id: '', estado_nuevo: 'ATENDIDO' }).valido).toBe(false)
+      expect(validator.validarCierre({ expediente_id: UUID_EXPEDIENTE, estado_nuevo: 'DERIVADO' }).valido).toBe(false)
+      expect(validator.esEstadoCierreValido('ATENDIDO')).toBe(true)
+      expect(validator.esEstadoCierreValido('DERIVADO')).toBe(false)
+
+      // Adjuntos: requiere al menos uno, vacío (0 bytes) y exceso del límite por defecto (10 MB)
+      expect(validator.validarArchivosAdjuntos([], true).valido).toBe(false)
+      expect(
+        validator.validarArchivosAdjuntos([
+          { nombre: 'vacio.pdf', tipoMime: 'application/pdf', tamanoBytes: 0, contenido: new ArrayBuffer(0) },
+        ]).valido
+      ).toBe(false)
+      expect(
+        validator.validarArchivosAdjuntos([
+          { nombre: 'grande.pdf', tipoMime: 'application/pdf', tamanoBytes: 10 * 1024 * 1024 + 1, contenido: new ArrayBuffer(1) },
+        ]).valido
+      ).toBe(false)
+      expect(
+        validator.validarArchivosAdjuntos([
+          { nombre: 'exacto10mb.pdf', tipoMime: 'application/pdf', tamanoBytes: 10 * 1024 * 1024, contenido: new ArrayBuffer(1) },
+        ]).valido
+      ).toBe(true)
+    })
+  })
 })
