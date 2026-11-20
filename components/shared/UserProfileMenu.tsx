@@ -6,7 +6,6 @@ import {
   User,
   Shield,
   Building,
-  Mail,
   CreditCard,
   Calendar,
   CheckCircle2,
@@ -14,7 +13,6 @@ import {
   LogOut,
   Info,
   Briefcase,
-  X,
 } from 'lucide-react'
 import { logoutAction } from '@/app/actions/auth'
 import { Badge } from '@/components/ui/badge'
@@ -59,10 +57,11 @@ export function UserProfileMenu({ user }: Props) {
   const siglasArea = user.areas?.siglas || ''
   const rol = user.rol || 'FUNCIONARIO'
   const cargoMap: Record<string, string> = {
-    ADMIN_TI: 'Administrador TI / OTI',
-    ADMIN: 'Administrador TI / OTI',
+    ADMIN_TI: 'Administrador TI / OGTIC',
+    ADMIN: 'Administrador TI / OGTIC',
     JEFE_AREA: 'Jefe de Área',
     ESPECIALISTA: 'Especialista',
+    ASISTENTE_AREA: 'Asistente de Área',
     MESA_PARTES: 'Operador de Mesa de Partes',
     FUNCIONARIO: 'Funcionario Municipal',
   }
@@ -154,6 +153,10 @@ export function UserProfileMenu({ user }: Props) {
               ) : rol === 'ESPECIALISTA' ? (
                 <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-[10px] py-0 px-2 font-semibold">
                   ESPECIALISTA
+                </Badge>
+              ) : rol === 'ASISTENTE_AREA' ? (
+                <Badge className="bg-amber-100 text-amber-800 border-amber-200 text-[10px] py-0 px-2 font-semibold">
+                  ASISTENTE DE ÁREA
                 </Badge>
               ) : rol === 'MESA_PARTES' ? (
                 <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 text-[10px] py-0 px-2 font-semibold">

@@ -36,7 +36,8 @@ interface Props {
 }
 
 const ROL_LABELS: Record<string, string> = {
-  MESA_PARTES: 'Mesa de Partes',
+  MESA_PARTES: 'Operador de Mesa de Partes',
+  ASISTENTE_AREA: 'Asistente de Área',
   ESPECIALISTA: 'Especialista',
   JEFE_AREA: 'Jefe de Área',
   ADMIN_TI: 'Administrador TI',
@@ -70,7 +71,11 @@ export function CrearEmpleadoDialog({ areas }: Props) {
   function handleRoleChange(value: string) {
     setRol(value)
     if (value === 'MESA_PARTES') {
-      const areaMesa = areas.find((a) => a.nombre.toLowerCase().includes('mesa de partes'))
+      const areaMesa = areas.find(
+        (a) =>
+          a.siglas === 'OACGD-MDP' ||
+          a.nombre.toLowerCase().includes('mesa de partes')
+      )
       if (areaMesa) {
         setAreaId(String(areaMesa.id))
       }
@@ -155,8 +160,9 @@ export function CrearEmpleadoDialog({ areas }: Props) {
             setSuccessMsg(null)
           }, 1200)
         }
-      } catch (err: any) {
-        setErrorMsg(err?.message || 'Error de comunicación con el servidor.')
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Error de comunicación con el servidor.'
+        setErrorMsg(msg)
       }
     })
   }
@@ -170,7 +176,7 @@ export function CrearEmpleadoDialog({ areas }: Props) {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[560px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-140 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold flex items-center gap-2 text-slate-800">
             <UserPlus className="w-5 h-5 text-emerald-600" />
@@ -244,16 +250,17 @@ export function CrearEmpleadoDialog({ areas }: Props) {
               <Label htmlFor="rol">Rol Asignado *</Label>
               <Select
                 items={ROL_LABELS}
-                itemToStringLabel={(val: any) => (val ? ROL_LABELS[String(val)] || String(val) : '')}
+                itemToStringLabel={(val: string | null) => (val ? ROL_LABELS[String(val)] || String(val) : '')}
                 value={rol}
-                onValueChange={(val: any) => handleRoleChange(val || '')}
+                onValueChange={(val: string | null) => handleRoleChange(val || '')}
                 disabled={isPending}
               >
                 <SelectTrigger id="rol">
                   <SelectValue placeholder="Seleccione un rol" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="MESA_PARTES">Mesa de Partes</SelectItem>
+                  <SelectItem value="MESA_PARTES">Operador de Mesa de Partes</SelectItem>
+                  <SelectItem value="ASISTENTE_AREA">Asistente de Área</SelectItem>
                   <SelectItem value="ESPECIALISTA">Especialista</SelectItem>
                   <SelectItem value="JEFE_AREA">Jefe de Área</SelectItem>
                   <SelectItem value="ADMIN_TI">Administrador TI</SelectItem>
@@ -269,9 +276,9 @@ export function CrearEmpleadoDialog({ areas }: Props) {
             </Label>
             <Select
               items={areaItems}
-              itemToStringLabel={(val: any) => (val ? areaItems[String(val)] || String(val) : '')}
+              itemToStringLabel={(val: string | null) => (val ? areaItems[String(val)] || String(val) : '')}
               value={rol === 'ADMIN_TI' ? '' : areaId}
-              onValueChange={(val: any) => setAreaId(val || '')}
+              onValueChange={(val: string | null) => setAreaId(val || '')}
               disabled={rol === 'MESA_PARTES' || rol === 'ADMIN_TI' || isPending}
             >
               <SelectTrigger id="area_id" className={rol === 'ADMIN_TI' ? 'bg-slate-50 text-slate-400' : ''}>

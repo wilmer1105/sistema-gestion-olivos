@@ -36,8 +36,10 @@ export default function LoginPage() {
     setErrorMsg(null)
     startTransition(async () => {
       const response = await loginAction(data)
-      if (response?.error) {
+      if (response && !response.success && response.error) {
         setErrorMsg(response.error)
+      } else if (response?.redirectUrl) {
+        window.location.href = response.redirectUrl
       }
     })
   }

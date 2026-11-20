@@ -1,48 +1,64 @@
-# Contexto del Proyecto: Sistema de Trámite Documentario Municipal (MDLO)
+## Skills Locales Activas
+Consulta e implementa estrictamente los lineamientos de las skills ubicadas en `.agents/skills/`:
+- `typescript-advanced-types`: Reglas de tipado estricto, genéricos y eliminación total de `any`.
+- `supabase-postgres-best-practices`: Políticas RLS seguras, transacciones y diseño de esquemas en Supabase.
+- `clerk-nextjs-patterns`: Patrones de autenticación y middleware para Next.js App Router (o referencia de sesión).
+# Contexto Maestro del Proyecto: Sistema de Gestión Documental Municipal (SISGESDOC - MDLO)
 
 ## 1. Stack Tecnológico y Reglas Base
-- **Framework:** Next.js (App Router), React, TypeScript.
-- **UI:** Tailwind CSS, Shadcn UI, Lucide React.
-- **Base de Datos & Auth:** Supabase.
-- **Regla de Ejecución (AGY):** Eres un agente autónomo. NO pidas permiso para ejecutar comandos, leer o editar archivos. Asume las mejores prácticas de Next.js. Si hay errores, captúralos (try/catch) y muéstralos en UI.
+- **Framework:** Next.js 16+ (App Router), React 19, TypeScript 5+ (`strict: true`, `noImplicitAny: true`).
+- **UI & Accesibilidad:** Tailwind CSS v4, Shadcn UI, Lucide React, Cumplimiento WCAG 2.1 AA.
+- **Base de Datos, Auth & Storage:** Supabase (PostgreSQL 15+, RLS activo, Auth SSR, Storage Bucket `documentos`).
+- **Testing:** Vitest (Pruebas Unitarias) + Cucumber.js (Pruebas BDD en Gherkin Español).
+- **Directiva de Ejecución Autónoma (AGY):** Ejecución 100% autónoma, incremental y sin uso de `any` (`@typescript-eslint/no-explicit-any`).
 
-## 2. Estructura de Base de Datos
-- **expedientes:** `id`, `cut`, `remitente_nombres`, `asunto`, `estado` (Enum: REGISTRADO, EN_TRAMITE, DERIVADO, RECEPCIONADO, OBSERVADO, ATENDIDO, ARCHIVADO), `area_actual_id`.
-- **adjuntos:** `id`, `expediente_id`, `nombre_archivo`, `ruta_almacenamiento`.
-- **trazabilidad:** `id`, `expediente_id`, `area_origen_id`, `area_destino_id`, `accion`, `estado_nuevo`, `fecha`.
-- **areas:** `id`, `nombre`.
-- **perfiles / usuarios:** Relacionado a `auth.users`, contiene `rol` (Enum: ADMIN_TI, MESA_PARTES, ESPECIALISTA, JEFE_AREA) y `area_id`.
+---
 
-## 3. Reglas Críticas de Código
-- **Supabase Server Actions:** Siempre encadenar `.select()` en INSERT/UPDATE. Verificar si hay fallo silencioso por RLS (`!data || data.length === 0`).
-- **Refresco de UI:** Siempre usar `revalidatePath` después de una mutación exitosa.
-- **Archivos (Storage):** Subir a bucket 'documentos', extraer URL pública (`getPublicUrl`), mapear a la columna `ruta_almacenamiento`.
+## 2. Unidades Orgánicas Oficiales (`public.areas`)
+- `OACGD-MDP`: Oficina de Atención al Ciudadano y Gestión Documental (Mesa de Partes)
+- `GDU`: Gerencia de Desarrollo Urbano
+- `SGOPCU`: Subgerencia de Obras Privadas y Control Urbano
+- `SGFA`: Subgerencia de Fiscalización Administrativa
+- `OGAJ`: Oficina General de Asesoría Jurídica
 
-## 4. Roadmap de Implementación (Pendientes)
+---
 
-**Fase 1: Módulo de Seguridad y Administración (OTI)**
-- [x] Crear pantalla `/dashboard/admin` (solo accesible por rol ADMIN / ADMIN_TI).
-- [x] Implementar gestión de empleados: Formulario para crear usuario con datos completos (`nombres`, `apellidos`, `dni`, `email`, `password`, `rol`, `area_id`).
-- [x] Edición de empleados: Modal para editar `nombres`, `apellidos`, `dni`, `rol` y `area_id`.
-- [x] Desactivación lógica: Acción para alternar estado (`activo` true/false: Activo / Dado de baja).
-- [x] Pantalla `/forgot-password` (Recuperación).
-- [x] Reglas reactivas de roles:
-  - `MESA_PARTES`: Área forzada y bloqueada en Mesa de Partes.
-  - `ADMIN_TI`: Área forzada a `null`, bloqueada ("No aplica / Global").
-  - `ESPECIALISTA` / `JEFE_AREA`: Selección libre de área institucional.
+## 3. Estructura de Base de Datos (5 Tablas y 2 Vistas)
+1. **`public.areas`**: `id`, `nombre`, `siglas`, `activo`, `created_at`.
+2. **`public.perfiles`**: `id` (FK `auth.users`), `nombres`, `apellidos`, `dni` (8 dígitos), `correo`, `rol` (`rol_usuario`), `area_id` (FK `areas`, `NULL` para `ADMIN_TI`), `activo` (`boolean`), `created_at`.
+3. **`public.expedientes`**: `id`, `cut` (generado por trigger `EXP-YYYY-NNNNNN-MDLO`), `tipo_doc_remitente` (`DNI` | `RUC` | `CE`), `remitente_dni_ruc`, `remitente_nombres`, `telefono`, `correo`, `direccion`, `tipo_tramite` (`tipo_documento_tramite`), `asunto`, `folios`, `estado` (`estado_expediente`), `area_actual_id`, `asignado_a` (FK `perfiles`), `registrado_por` (FK `perfiles`), `fecha_creacion`, `fecha_actualizacion`.
+4. **`public.trazabilidad`**: `id`, `expediente_id`, `area_origen_id`, `area_destino_id`, `emisor_id`, `receptor_id`, `accion`, `proveido`, `estado_previo`, `estado_nuevo`, `fecha_envio`, `fecha_recepcion`.
+5. **`public.adjuntos`**: `id`, `expediente_id`, `area_id`, `subido_por`, `tipo_documento` (`tipo_documento_tramite`), `nombre_archivo`, `ruta_almacenamiento`, `tipo_mime`, `peso_bytes`, `fecha_subida`.
+6. **Vistas Públicas Anonimizadas (RNF-03)**:
+   - `public.vista_consulta_ciudadana`: Expone `id`, `cut`, `tipo_tramite`, `asunto`, `estado`, `fecha_ingreso`, `fecha_actualizacion`, `area_actual`, `area_actual_siglas` (oculta DNI, teléfono, correo y dirección del ciudadano).
+   - `public.vista_trazabilidad_ciudadana`: Expone `id`, `expediente_id`, `accion`, `proveido`, `estado_nuevo`, `area_origen`, `area_destino`, `fecha`, `fecha_envio`, `fecha_recepcion`.
 
-**Fase 2: Vistas Dinámicas por Área (Flujo de Trabajo)**
-- [ ] **Filtro de Bandeja:** La bandeja de entrada DEBE filtrar automáticamente `expedientes` donde `area_actual_id` coincida con el `area_id` del usuario logueado.
-- [ ] **Bandeja de Salida:** Vista para ver los trámites que el área ya derivó.
-- [ ] **Subida Intermedia de Documentos:** En la pantalla 'Ver / Atender', las áreas internas deben poder subir nuevos archivos adjuntos (Ej. Informes, Resoluciones) al expediente *antes* de derivarlo o finalizarlo.
+---
 
-**Fase 3: Cierre y Consulta Pública**
-- [ ] **Botones de Cierre:** Permitir cambiar el estado a 'ATENDIDO' o 'ARCHIVADO' para finalizar el trámite.
-- [ ] **Consulta Pública (`/consulta`):** Actualizar la vista para que el ciudadano vea la línea de tiempo real extraída de la tabla `trazabilidad`.
+## 4. Actores, Roles (`public.rol_usuario`) y Matriz RBAC con Aislamiento por `area_id`
+1. **Ciudadano / Administrado (`anon`)**:
+   - Sin sesión (`area_id = null`). Consulta pública por CUT en `/consulta` vía `vista_consulta_ciudadana` y `vista_trazabilidad_ciudadana`.
+2. **Operador de Mesa de Partes (`MESA_PARTES`)**:
+   - `area_id` fijo en Mesa de Partes (`OACGD-MDP`).
+   - Exclusivo para radicar expedientes iniciales (generando CUT y subiendo PDF inicial), ver bandeja de Mesa de Partes, recepcionar devoluciones y realizar la primera derivación. No puede finalizar expedientes.
+3. **Asistente / Receptor Documental de Área (`ASISTENTE_AREA`)**:
+   - Rol transversal en gerencias/subgerencias (`GDU`, `SGOPCU`, `SGFA`, `OGAJ`).
+   - Puede ver bandeja de su `area_id`, acusar recepción (`DERIVADO` -> `RECEPCIONADO`), asignar internamente a un `ESPECIALISTA` de su misma área (`RECEPCIONADO` -> `EN_TRAMITE`), subir cargos/notificaciones PDF y derivar por encargo con proveído. No puede finalizar expedientes.
+4. **Especialista / Asesor Técnico-Legal (`ESPECIALISTA`)**:
+   - Rol transversal en gerencias/subgerencias.
+   - Puede ver bandeja de su `area_id`, previsualizar PDFs, adjuntar documentos sustentatorios intermedios (`INFORME_TECNICO`, `INFORME_LEGAL`, `ACTA_FISCALIZACION`) agrupados bajo su `area_id`, observar expedientes (`OBSERVADO`) y derivar/elevar con proveído. No puede finalizar expedientes.
+5. **Jefe de Área / Autoridad Resolutiva (`JEFE_AREA`)**:
+   - Presente en cada unidad orgánica.
+   - Puede realizar todas las operaciones de su área (ver bandeja, recepcionar, asignar especialista, adjuntar `RESOLUCION` o informes, derivar) + **Potestad Exclusiva** de finalizar/cerrar el expediente cambiando su estado a `ATENDIDO` o `ARCHIVADO` con proveído de cierre.
+6. **Administrador del Sistema OGTIC (`ADMIN_TI`)**:
+   - Rol global con `area_id = NULL` obligatorio (`chk_admin_sin_area`).
+   - Exclusivamente gestiona el catálogo de áreas y el CRUD de usuarios en `/dashboard/admin` (Crear, Editar, Asignar Rol/Área con regla reactiva y Baja Lógica `activo: boolean`). No tramita ni finaliza expedientes.
 
-## 5. Matriz de Permisos (RBAC)
-- **ADMIN_TI:** Solo acceso al `/dashboard/admin`. No opera expedientes.
-- **MESA_PARTES:** Puede crear expedientes y derivar. NUNCA debe ver los botones de 'Finalizar' o 'Archivar'.
-- **ESPECIALISTA:** Puede recibir, adjuntar documentos internos y derivar.
-- **JEFE_AREA:** Puede hacer lo del Especialista y es el ÚNICO autorizado para ver y usar los botones de cambiar estado a 'ATENDIDO' o 'ARCHIVADO'.
+---
 
+## 5. Directrices Estrictas de Ingeniería de Software
+1. **Prohibición de `any`:** Queda estrictamente prohibido usar `any` o `as any`. Usar siempre los tipos exportados de `types/database.types.ts` y validación en tiempo de ejecución con **Zod**.
+2. **React Server Components (RSC):** Componentes de servidor por defecto; `'use client'` solo en hojas interactivas.
+3. **Mutaciones Seguras en Supabase (RNF-06):** Toda operación `INSERT` o `UPDATE` debe encadenar `.select()` y verificar `!data || data.length === 0` para detectar bloqueos silenciosos por RLS. Invocar siempre `revalidatePath` tras mutaciones exitosas.
+4. **Aislamiento de Credenciales:** Jamás exponer `SUPABASE_SERVICE_ROLE_KEY` en el cliente ni en la consulta ciudadana pública (`/consulta`). Usarla únicamente en el servidor (`app/actions/admin.ts`) para administración de cuentas en `auth.admin`.
+5. **Accesibilidad Web (WCAG 2.1 AA):** Uso de HTML semántico (`<header role="banner">`, `<nav>`, `<main>`, `<ol>`), atributos `aria-label`, `aria-invalid`, `aria-describedby`, asociación `<Label htmlFor>` con `<Input id>` y contraste mínimo 4.5:1.

@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
+    "test:bdd": "cucumber-js",
+    "test": "vitest run && cucumber-js"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
@@ -30,13 +34,17 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@cucumber/cucumber": "^13.3.0",
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^26.6.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.7",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.5"
   }
 }

@@ -3,7 +3,7 @@
 import { useTransition } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface Props {
   currentPage: number

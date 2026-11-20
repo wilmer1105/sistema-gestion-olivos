@@ -1,132 +1,306 @@
+// app/dashboard/expedientes/[id]/page.tsx
 import { createClient } from '@/lib/supabase/server'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { notFound, redirect } from 'next/navigation'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { DerivacionModal } from '@/components/modules/expedientes/DerivacionModal'
 import { FinalizarExpedienteModal } from '@/components/expedientes/FinalizarExpedienteModal'
 import { SubirDocumentosDialog } from '@/components/modules/expedientes/SubirDocumentosDialog'
+import {
+  AsignarEspecialistaModal,
+  type EspecialistaAreaOption,
+} from '@/components/modules/expedientes/AsignarEspecialistaModal'
+import { RecepcionarExpedienteBanner } from '@/components/modules/expedientes/RecepcionarExpedienteBanner'
+import {
+  puedeAsignarEspecialista,
+  puedeDerivarExpediente,
+  puedeFinalizarExpediente,
+  puedeRecepcionarExpediente,
+  puedeSubirDocumentoIntermedio,
+  perteneceAlAreaActual,
+  obtenerTiposDocumentoPermitidosPorRol,
+} from '@/lib/domain/rbac'
+import { obtenerPerfilAutenticado } from '@/lib/auth/session'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { FileText, Paperclip, Building2 } from 'lucide-react'
+import { FileText, Paperclip, Building2, UserCheck, AlertCircle } from 'lucide-react'
 import { PdfViewerModal } from '@/components/shared/PdfViewerModal'
 import { BackButton } from '@/components/shared/BackButton'
+import type { TipoDocumentoTramite } from '@/types/database.types'
 
 export const dynamic = 'force-dynamic'
 
-export default async function ExpedienteDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const supabase = await createClient()
+interface AdjuntoVistaItem {
+  id: string
+  expediente_id: string | null
+  nombre_archivo: string
+  ruta_almacenamiento: string
+  tipo_documento: TipoDocumentoTramite
+  tipo_mime: string | null
+  peso_bytes: number | null
+  subido_por: string | null
+  fecha_subida: string
+  area_id: string | null
+  areaNombre: string
+}
+
+export default async function ExpedienteDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
   const { id: expedienteId } = await params
+  const perfil = await obtenerPerfilAutenticado()
 
-  // 1. Verificar usuario autenticado
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login')
+  if (perfil.rol === 'ADMIN_TI') {
+    redirect('/dashboard/admin')
   }
 
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
+  const supabase = await createClient()
+  const rolUsuario = perfil.rol
+  const areaUsuarioId = perfil.area_id
+  const usuarioActivo = perfil.activo
 
-  const dbClient = (serviceRoleKey && supabaseUrl)
-    ? createAdminClient(supabaseUrl, serviceRoleKey, {
-        auth: { autoRefreshToken: false, persistSession: false },
-      })
-    : supabase
-
-  // 2. Obtener datos del expediente, su área actual y archivos adjuntos con JOIN de áreas
-  const { data: expediente, error: expError } = await (dbClient.from('expedientes') as any)
-    .select('*, areas:area_actual_id(nombre), adjuntos(*, areas(nombre))')
+  const { data: expedienteRaw, error: expError } = await supabase
+    .from('expedientes')
+    .select(
+      '*, areas:area_actual_id(id, nombre, siglas), especialista:asignado_a(id, nombres, apellidos), adjuntos(*, areas(id, nombre, siglas))'
+    )
     .eq('id', expedienteId)
     .single()
 
-  if (expError || !expediente) {
+  if (expError || !expedienteRaw) {
     notFound()
   }
 
-  const adjuntos = Array.isArray(expediente.adjuntos) ? expediente.adjuntos : []
+  const areaActualObj = Array.isArray(expedienteRaw.areas)
+    ? expedienteRaw.areas[0]
+    : expedienteRaw.areas
+  const especialistaAsignadoObj = Array.isArray(expedienteRaw.especialista)
+    ? expedienteRaw.especialista[0]
+    : expedienteRaw.especialista
 
-  // Agrupación visual de adjuntos por nombre de área
-  const adjuntosPorArea: Record<string, any[]> = {}
-  for (const adj of adjuntos) {
-    const areaName = adj.areas?.nombre || 'Mesa de Partes (Ingreso Inicial)'
-    if (!adjuntosPorArea[areaName]) {
-      adjuntosPorArea[areaName] = []
+  const adjuntosRaw = Array.isArray(expedienteRaw.adjuntos)
+    ? expedienteRaw.adjuntos
+    : []
+
+  const adjuntos: AdjuntoVistaItem[] = adjuntosRaw.map((adj) => {
+    const areaAdjObj = Array.isArray(adj.areas) ? adj.areas[0] : adj.areas
+    return {
+      id: adj.id,
+      expediente_id: adj.expediente_id,
+      nombre_archivo: adj.nombre_archivo,
+      ruta_almacenamiento: adj.ruta_almacenamiento,
+      tipo_documento: adj.tipo_documento,
+      tipo_mime: adj.tipo_mime,
+      peso_bytes: adj.peso_bytes,
+      subido_por: adj.subido_por,
+      fecha_subida: adj.fecha_subida,
+      area_id: adj.area_id,
+      areaNombre:
+        areaAdjObj?.nombre ||
+        'Oficina de Atención al Ciudadano y Gestión Documental (Mesa de Partes)',
     }
-    adjuntosPorArea[areaName].push(adj)
+  })
+
+  const adjuntosPorArea: Record<string, AdjuntoVistaItem[]> = {}
+  for (const adj of adjuntos) {
+    if (!adjuntosPorArea[adj.areaNombre]) {
+      adjuntosPorArea[adj.areaNombre] = []
+    }
+    adjuntosPorArea[adj.areaNombre].push(adj)
   }
 
-  // 3. Obtener lista de áreas (para el select del modal de derivación)
-  const { data: areas } = await (dbClient.from('areas') as any)
+  const { data: areas } = await supabase
+    .from('areas')
     .select('id, nombre, siglas')
     .order('nombre')
 
-  // 4. Obtener el tracking (Hoja de ruta completa con nombres de áreas y emisores)
-  const { data: trazabilidad } = await (dbClient.from('trazabilidad') as any)
-    .select(`
+  let especialistasArea: EspecialistaAreaOption[] = []
+  if (
+    areaUsuarioId &&
+    (rolUsuario === 'ASISTENTE_AREA' || rolUsuario === 'JEFE_AREA')
+  ) {
+    const { data: espRows } = await supabase
+      .from('perfiles')
+      .select('id, nombres, apellidos, rol')
+      .eq('area_id', areaUsuarioId)
+      .eq('activo', true)
+      .in('rol', ['ESPECIALISTA', 'JEFE_AREA'])
+      .order('nombres')
+
+    especialistasArea = (espRows || []).map((e) => ({
+      id: e.id,
+      nombres: e.nombres,
+      apellidos: e.apellidos,
+      rol: e.rol,
+    }))
+  }
+
+  const { data: trazabilidadRaw } = await supabase
+    .from('trazabilidad')
+    .select(
+      `
       *,
       area_origen:area_origen_id(nombre),
       area_destino:area_destino_id(nombre),
       emisor:emisor_id(nombres, apellidos)
-    `)
+    `
+    )
     .eq('expediente_id', expedienteId)
     .order('fecha_envio', { ascending: false })
 
-  // 5. Obtener rol del usuario para RBAC
-  let rolUsuario = ''
-  const { data: perfil } = await dbClient
-    .from('perfiles')
-    .select('rol')
-    .eq('id', user.id)
-    .single()
-  rolUsuario = (perfil as any)?.rol || ''
+  const perfilContext = {
+    id: perfil.id,
+    rol: rolUsuario,
+    area_id: areaUsuarioId,
+    activo: usuarioActivo,
+  }
+
+  const expedienteContext = {
+    id: expedienteRaw.id,
+    area_actual_id: expedienteRaw.area_actual_id,
+    estado: expedienteRaw.estado,
+    asignado_a: expedienteRaw.asignado_a,
+  }
+
+  const esMismaArea = perteneceAlAreaActual(perfilContext, expedienteContext)
+  const estaEnEstadoDerivadoSinRecepcionar =
+    expedienteRaw.estado === 'DERIVADO'
+  const estaCerrado =
+    expedienteRaw.estado === 'ATENDIDO' ||
+    expedienteRaw.estado === 'ARCHIVADO'
+
+  const permisoRecepcionar = puedeRecepcionarExpediente(
+    perfilContext,
+    expedienteContext
+  )
+  const permisoAsignar = puedeAsignarEspecialista(
+    perfilContext,
+    expedienteContext
+  )
+  const permisoSubirDoc = puedeSubirDocumentoIntermedio(
+    perfilContext,
+    expedienteContext
+  )
+  const canDerivar = puedeDerivarExpediente(
+    perfilContext,
+    expedienteContext
+  )
+  const permisoFinalizar = puedeFinalizarExpediente(
+    perfilContext,
+    expedienteContext
+  )
 
   return (
     <div className="space-y-6">
-      
-      {/* Botón de retorno al panel anterior */}
       <div>
-        <BackButton fallbackUrl="/dashboard/bandeja" label="Volver a la bandeja" />
+        <BackButton
+          fallbackUrl="/dashboard/bandeja"
+          label="Volver a la bandeja"
+        />
       </div>
 
-      {/* Cabecera y Acciones */}
+      {/* Banner de Modo Solo Lectura para usuarios de otras áreas */}
+      {!esMismaArea && (
+        <div
+          role="status"
+          className="p-4 bg-amber-50 text-amber-900 rounded-md border border-amber-300 flex items-center gap-3 shadow-sm"
+        >
+          <AlertCircle className="w-5 h-5 text-amber-700 shrink-0" aria-hidden="true" />
+          <p className="text-sm">
+            <strong>Modo solo lectura:</strong> Este expediente se encuentra asignado al área{' '}
+            <span className="font-semibold">
+              {areaActualObj?.nombre || 'otra unidad orgánica'}
+              {areaActualObj?.siglas ? ` (${areaActualObj.siglas})` : ''}
+            </span>
+            . Su usuario no pertenece a dicha unidad y no puede ejecutar acciones operativas.
+          </p>
+        </div>
+      )}
+
+      {/* Control de Estado No Recepcionado (HU-05 Escenario 2) */}
+      {estaEnEstadoDerivadoSinRecepcionar && esMismaArea && (
+        <RecepcionarExpedienteBanner
+          expedienteId={expedienteId}
+          cut={expedienteRaw.cut}
+          puedeRecepcionar={permisoRecepcionar}
+        />
+      )}
+
+      {/* Cabecera y Acciones Según Rol */}
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">{expediente.cut}</h1>
-            <Badge variant={expediente.estado === 'RECEPCIONADO' ? 'default' : 'secondary'}>
-              {expediente.estado}
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+              {expedienteRaw.cut}
+            </h1>
+            <Badge
+              variant={
+                expedienteRaw.estado === 'RECEPCIONADO' ||
+                expedienteRaw.estado === 'EN_TRAMITE'
+                  ? 'default'
+                  : 'secondary'
+              }
+            >
+              {expedienteRaw.estado}
             </Badge>
           </div>
-          <p className="text-slate-500">Ubicación actual: <span className="font-medium text-slate-700">{expediente.areas?.nombre}</span></p>
+          <p className="text-slate-600">
+            Ubicación actual:{' '}
+            <span className="font-medium text-slate-800">
+              {areaActualObj?.nombre || 'Mesa de Partes'}
+            </span>
+          </p>
+          {especialistaAsignadoObj && (
+            <p className="text-xs text-indigo-700 font-medium mt-1 flex items-center gap-1.5">
+              <UserCheck className="w-3.5 h-3.5" aria-hidden="true" />
+              <span>
+                Especialista asignado: {especialistaAsignadoObj.nombres}{' '}
+                {especialistaAsignadoObj.apellidos}
+              </span>
+            </p>
+          )}
         </div>
-        
-        {/* Acciones: Derivación y Cierre de Expedientes (RBAC) */}
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Solo mostrar el botón de Derivar si el expediente está en estado RECEPCIONADO */}
-          {expediente.estado === 'RECEPCIONADO' && (
+
+        {!estaCerrado && esMismaArea && (
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Asignación Interna (RF-12): ASISTENTE_AREA o JEFE_AREA */}
+            {(rolUsuario === 'ASISTENTE_AREA' ||
+              rolUsuario === 'JEFE_AREA') && (
+              <AsignarEspecialistaModal
+                expedienteId={expedienteId}
+                especialistas={especialistasArea}
+                asignadoActualId={expedienteRaw.asignado_a}
+                disabled={
+                  estaEnEstadoDerivadoSinRecepcionar || !permisoAsignar
+                }
+              />
+            )}
+
+            {/* Derivación Segura (RF-15, HU-07) */}
             <DerivacionModal
               expedienteId={expedienteId}
-              areaOrigenId={expediente.area_actual_id}
+              areaOrigenId={expedienteRaw.area_actual_id}
               areas={areas || []}
+              disabled={estaEnEstadoDerivadoSinRecepcionar || !canDerivar}
             />
-          )}
 
-          {/* Renderizado Condicional RBAC: ÚNICAMENTE si rol === 'JEFE_AREA' */}
-          {rolUsuario === 'JEFE_AREA' && expediente.estado !== 'ATENDIDO' && expediente.estado !== 'ARCHIVADO' && (
-            <FinalizarExpedienteModal
-              expedienteId={expedienteId}
-              cut={expediente.cut}
-            />
-          )}
-        </div>
+            {/* Cierre Exclusivo por Jefatura (RF-16, HU-08): Solo se renderiza en el DOM si perfil.rol === 'JEFE_AREA' */}
+            {rolUsuario === 'JEFE_AREA' && (
+              <FinalizarExpedienteModal
+                expedienteId={expedienteId}
+                cut={expedienteRaw.cut}
+                disabled={
+                  estaEnEstadoDerivadoSinRecepcionar || !permisoFinalizar
+                }
+              />
+            )}
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-        {/* Columna Izquierda: Datos del Trámite */}
         <div className="md:col-span-2 space-y-6">
           <Card className="shadow-sm">
             <CardHeader className="bg-slate-50 border-b">
@@ -134,124 +308,210 @@ export default async function ExpedienteDetailPage({ params }: { params: Promise
             </CardHeader>
             <CardContent className="pt-6 grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm font-medium text-slate-500">Nombre / Razón Social</p>
-                <p className="font-medium text-slate-900">{expediente.remitente_nombres}</p>
+                <p className="text-sm font-medium text-slate-600">
+                  Nombre / Razón Social
+                </p>
+                <p className="font-medium text-slate-900">
+                  {expedienteRaw.remitente_nombres}
+                </p>
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-500">DNI / RUC</p>
-                <p className="font-medium text-slate-900">{expediente.remitente_dni_ruc}</p>
+                <p className="text-sm font-medium text-slate-600">
+                  {expedienteRaw.tipo_doc_remitente || 'DNI / RUC'}
+                </p>
+                <p className="font-medium text-slate-900">
+                  {expedienteRaw.remitente_dni_ruc}
+                </p>
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-500">Correo Electrónico</p>
-                <p className="text-slate-900">{expediente.correo || '-'}</p>
+                <p className="text-sm font-medium text-slate-600">
+                  Correo Electrónico
+                </p>
+                <p className="text-slate-900">{expedienteRaw.correo || '-'}</p>
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-500">Teléfono</p>
-                <p className="text-slate-900">{expediente.telefono || '-'}</p>
+                <p className="text-sm font-medium text-slate-600">Teléfono</p>
+                <p className="text-slate-900">
+                  {expedienteRaw.telefono || '-'}
+                </p>
               </div>
+              {expedienteRaw.direccion && (
+                <div className="col-span-2">
+                  <p className="text-sm font-medium text-slate-600">
+                    Dirección Domiciliaria / Fiscal
+                  </p>
+                  <p className="text-slate-900">{expedienteRaw.direccion}</p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
           <Card className="shadow-sm">
             <CardHeader className="bg-slate-50 border-b">
-              <CardTitle className="text-lg">Contenido del Expediente</CardTitle>
+              <CardTitle className="text-lg">
+                Contenido del Expediente
+              </CardTitle>
             </CardHeader>
             <CardContent className="pt-6 space-y-4">
               <div>
-                <p className="text-sm font-medium text-slate-500">Asunto</p>
-                <p className="text-slate-900 mt-1 p-3 bg-slate-50 rounded-md border">{expediente.asunto}</p>
+                <p className="text-sm font-medium text-slate-600">Asunto</p>
+                <p className="text-slate-900 mt-1 p-3 bg-slate-50 rounded-md border">
+                  {expedienteRaw.asunto}
+                </p>
               </div>
-              <div className="flex gap-12">
+              <div className="flex flex-wrap gap-10">
                 <div>
-                  <p className="text-sm font-medium text-slate-500">Folios Adjuntos</p>
-                  <p className="text-slate-900">{expediente.folios}</p>
+                  <p className="text-sm font-medium text-slate-600">
+                    Tipo de Trámite
+                  </p>
+                  <p className="text-slate-900 font-medium">
+                    {expedienteRaw.tipo_tramite}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-slate-500">Fecha de Ingreso</p>
+                  <p className="text-sm font-medium text-slate-600">
+                    Folios Adjuntos
+                  </p>
+                  <p className="text-slate-900">{expedienteRaw.folios}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-slate-600">
+                    Fecha de Ingreso
+                  </p>
                   <p className="text-slate-900">
-                    {format(new Date(expediente.fecha_creacion), "dd 'de' MMMM, yyyy - HH:mm", { locale: es })}
+                    {format(
+                      new Date(expedienteRaw.fecha_creacion),
+                      "dd 'de' MMMM, yyyy - HH:mm",
+                      { locale: es }
+                    )}
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Sección: Archivos Adjuntos */}
+          {/* Sección: Archivos Adjuntos Agrupados por Unidad Orgánica Emisora (RF-13, RF-14, HU-06) */}
           <Card className="shadow-sm">
             <CardHeader className="bg-slate-50 border-b flex flex-row items-center justify-between py-3.5">
               <div className="flex items-center gap-2">
-                <Paperclip className="w-5 h-5 text-slate-600" />
+                <Paperclip
+                  className="w-5 h-5 text-slate-600"
+                  aria-hidden="true"
+                />
                 <CardTitle className="text-lg">Archivos Adjuntos</CardTitle>
               </div>
 
               <div className="flex items-center gap-3">
                 <Badge variant="secondary" className="font-normal text-xs">
-                  {adjuntos.length === 1 ? '1 Archivo adjunto' : `${adjuntos.length} Archivos adjuntos`}
+                  {adjuntos.length === 1
+                    ? '1 Archivo adjunto'
+                    : `${adjuntos.length} Archivos adjuntos`}
                 </Badge>
 
-                {/* TAREA 1: Visible ÚNICAMENTE si rol es ESPECIALISTA o JEFE_AREA */}
-                {(rolUsuario === 'ESPECIALISTA' || rolUsuario === 'JEFE_AREA') &&
-                  expediente.estado !== 'ARCHIVADO' && (
-                    <SubirDocumentosDialog expedienteId={expedienteId} />
+                {(rolUsuario === 'ASISTENTE_AREA' ||
+                  rolUsuario === 'ESPECIALISTA' ||
+                  rolUsuario === 'JEFE_AREA') &&
+                  !estaCerrado &&
+                  esMismaArea && (
+                    <SubirDocumentosDialog
+                      expedienteId={expedienteId}
+                      disabled={
+                        estaEnEstadoDerivadoSinRecepcionar || !permisoSubirDoc
+                      }
+                      tiposPermitidos={obtenerTiposDocumentoPermitidosPorRol(rolUsuario)}
+                    />
                   )}
               </div>
             </CardHeader>
             <CardContent className="pt-6">
               {adjuntos.length === 0 ? (
-                <div className="text-center py-6 text-slate-500">
-                  <FileText className="w-10 h-10 mx-auto text-slate-300 mb-2" />
-                  <p className="text-sm">No se adjuntaron archivos para este expediente.</p>
+                <div className="text-center py-6 text-slate-600">
+                  <FileText
+                    className="w-10 h-10 mx-auto text-slate-400 mb-2"
+                    aria-hidden="true"
+                  />
+                  <p className="text-sm">
+                    No se adjuntaron archivos para este expediente.
+                  </p>
                 </div>
               ) : (
-                /* TAREA 2: Agrupación visual de adjuntos separándolos por el nombre de su área */
                 <div className="space-y-6">
-                  {Object.entries(adjuntosPorArea).map(([areaNombre, listaAdjuntos]) => (
-                    <div key={areaNombre} className="space-y-3">
-                      <div className="flex items-center justify-between border-b pb-1.5">
-                        <div className="flex items-center gap-2">
-                          <Building2 className="w-4 h-4 text-primary" />
-                          <h4 className="text-sm font-semibold text-slate-800">
-                            Sección: {areaNombre}
-                          </h4>
-                        </div>
-                        <Badge variant="outline" className="text-xs font-normal">
-                          {listaAdjuntos.length} {listaAdjuntos.length === 1 ? 'archivo' : 'archivos'}
-                        </Badge>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {listaAdjuntos.map((adjunto: any) => (
-                          <div
-                            key={adjunto.id}
-                            className="flex items-center justify-between p-3 rounded-lg border border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition-colors gap-3"
-                          >
-                            <div className="flex items-center gap-3 overflow-hidden min-w-0">
-                              <div className="p-2 bg-primary/10 rounded-md shrink-0">
-                                <FileText className="w-4 h-4 text-primary" />
-                              </div>
-                              <div className="truncate min-w-0">
-                                <p className="text-sm font-medium text-slate-900 truncate" title={adjunto.nombre_archivo}>
-                                  {adjunto.nombre_archivo}
-                                </p>
-                                <p className="text-xs text-slate-500">
-                                  {adjunto.peso_bytes
-                                    ? `${(adjunto.peso_bytes / 1024 / 1024).toFixed(2)} MB`
-                                    : adjunto.tipo_mime || 'Documento adjunto'}
-                                </p>
-                              </div>
-                            </div>
-
-                            <div className="shrink-0">
-                              <PdfViewerModal
-                                url={adjunto.ruta_almacenamiento}
-                                nombreArchivo={adjunto.nombre_archivo}
-                              />
-                            </div>
+                  {Object.entries(adjuntosPorArea).map(
+                    ([areaNombre, listaAdjuntos]) => (
+                      <div key={areaNombre} className="space-y-3">
+                        <div className="flex items-center justify-between border-b pb-1.5">
+                          <div className="flex items-center gap-2">
+                            <Building2
+                              className="w-4 h-4 text-primary"
+                              aria-hidden="true"
+                            />
+                            <h4 className="text-sm font-semibold text-slate-800">
+                              Documentos emitidos por: {areaNombre}
+                            </h4>
                           </div>
-                        ))}
+                          <Badge
+                            variant="outline"
+                            className="text-xs font-normal"
+                          >
+                            {listaAdjuntos.length}{' '}
+                            {listaAdjuntos.length === 1
+                              ? 'archivo'
+                              : 'archivos'}
+                          </Badge>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {listaAdjuntos.map((adjunto) => (
+                            <div
+                              key={adjunto.id}
+                              className="flex items-center justify-between p-3 rounded-lg border border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition-colors gap-3"
+                            >
+                              <div className="flex items-center gap-3 overflow-hidden min-w-0">
+                                <div className="p-2 bg-primary/10 rounded-md shrink-0">
+                                  <FileText
+                                    className="w-4 h-4 text-primary"
+                                    aria-hidden="true"
+                                  />
+                                </div>
+                                <div className="truncate min-w-0">
+                                  <p
+                                    className="text-sm font-medium text-slate-900 truncate"
+                                    title={adjunto.nombre_archivo}
+                                  >
+                                    {adjunto.nombre_archivo}
+                                  </p>
+                                  <div className="flex items-center gap-2 mt-0.5">
+                                    <Badge
+                                      variant="outline"
+                                      className="text-[10px] px-1.5 py-0 font-semibold text-slate-700"
+                                    >
+                                      {adjunto.tipo_documento}
+                                    </Badge>
+                                    <span className="text-xs text-slate-600">
+                                      {adjunto.peso_bytes
+                                        ? `${(
+                                            adjunto.peso_bytes /
+                                            1024 /
+                                            1024
+                                          ).toFixed(2)} MB`
+                                        : adjunto.tipo_mime || 'PDF'}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="shrink-0">
+                                <PdfViewerModal
+                                  url={adjunto.ruta_almacenamiento}
+                                  nombreArchivo={adjunto.nombre_archivo}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  )}
                 </div>
               )}
             </CardContent>
@@ -259,69 +519,92 @@ export default async function ExpedienteDetailPage({ params }: { params: Promise
         </div>
 
         {/* Columna Derecha: Línea de Tiempo (Hoja de Ruta) */}
-        <div>
+        <section aria-label="Hoja de Ruta del expediente">
           <h3 className="font-semibold text-slate-800 mb-4 flex items-center">
             Hoja de Ruta (Tracking)
           </h3>
-          <div className="relative border-l border-slate-200 ml-3 space-y-6 pb-4">
-            {(!trazabilidad || trazabilidad.length === 0) ? (
-              <p className="text-sm text-slate-500 italic pl-6">
-                No hay movimientos registrados para este expediente aún.
-              </p>
-            ) : (
-              trazabilidad.map((item: any) => {
+          {!trazabilidadRaw || trazabilidadRaw.length === 0 ? (
+            <p className="text-sm text-slate-600 italic pl-6">
+              No hay movimientos registrados para este expediente aún.
+            </p>
+          ) : (
+            <ol
+              aria-label="Movimientos registrados en la hoja de ruta"
+              className="relative border-l border-slate-200 ml-3 space-y-6 pb-4 list-none"
+            >
+              {trazabilidadRaw.map((item) => {
                 let formattedFecha = 'Fecha no registrada'
                 if (item.fecha_envio) {
                   try {
                     const d = new Date(item.fecha_envio)
                     if (!isNaN(d.getTime())) {
-                      formattedFecha = format(d, "dd MMM yyyy, HH:mm", { locale: es })
+                      formattedFecha = format(d, 'dd MMM yyyy, HH:mm', {
+                        locale: es,
+                      })
                     }
                   } catch {
                     formattedFecha = 'Fecha no disponible'
                   }
                 }
 
-                const emisorNombre = item.emisor
-                  ? `${item.emisor.nombres || ''} ${item.emisor.apellidos || ''}`.trim()
+                const areaOrigenObj = Array.isArray(item.area_origen)
+                  ? item.area_origen[0]
+                  : item.area_origen
+                const areaDestinoObj = Array.isArray(item.area_destino)
+                  ? item.area_destino[0]
+                  : item.area_destino
+                const emisorObj = Array.isArray(item.emisor)
+                  ? item.emisor[0]
+                  : item.emisor
+
+                const emisorNombre = emisorObj
+                  ? `${emisorObj.nombres || ''} ${
+                      emisorObj.apellidos || ''
+                    }`.trim()
                   : ''
 
                 return (
-                  <div key={item.id} className="relative pl-6">
-                    <div className="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full bg-primary ring-4 ring-white" />
+                  <li key={item.id} className="relative pl-6">
+                    <div
+                      aria-hidden="true"
+                      className="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full bg-primary ring-4 ring-white"
+                    />
                     <div className="flex flex-col">
                       <span className="text-sm font-semibold text-slate-900">
                         {item.accion}
                       </span>
-                      <span className="text-xs text-slate-500 mb-1">
+                      <span className="text-xs text-slate-600 mb-1">
                         {formattedFecha}
                       </span>
                       <div className="bg-white border rounded-md p-3 mt-1 shadow-sm">
                         <p className="text-xs font-medium text-slate-700">
-                          De: {item.area_origen?.nombre || 'Mesa de Partes'}
+                          De: {areaOrigenObj?.nombre || 'Mesa de Partes'}
                         </p>
                         <p className="text-xs font-medium text-slate-700 mb-2">
-                          Hacia: {item.area_destino?.nombre || 'Mesa de Partes'}
+                          Hacia: {areaDestinoObj?.nombre || 'Mesa de Partes'}
                         </p>
                         {item.proveido ? (
-                          <p className="text-sm text-slate-600 italic">"{item.proveido}"</p>
+                          <p className="text-sm text-slate-700 italic">
+                            &ldquo;{item.proveido}&rdquo;
+                          </p>
                         ) : (
-                          <p className="text-xs text-slate-400 italic">Sin observaciones</p>
+                          <p className="text-xs text-slate-500 italic">
+                            Sin observaciones
+                          </p>
                         )}
                         {emisorNombre && (
-                          <p className="text-[10px] text-slate-400 mt-2 text-right">
+                          <p className="text-[11px] text-slate-500 mt-2 text-right">
                             Por: {emisorNombre}
                           </p>
                         )}
                       </div>
                     </div>
-                  </div>
+                  </li>
                 )
-              })
-            )}
-          </div>
-        </div>
-
+              })}
+            </ol>
+          )}
+        </section>
       </div>
     </div>
   )

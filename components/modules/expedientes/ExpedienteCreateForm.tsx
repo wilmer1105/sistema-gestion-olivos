@@ -5,14 +5,35 @@ import { useState, useRef, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { createExpedienteAction } from '@/app/actions/expedientes'
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Loader2, ShieldAlert, User, FileText, FileCheck, Trash2, Plus, UploadCloud } from 'lucide-react'
+import {
+  Loader2,
+  ShieldAlert,
+  User,
+  FileText,
+  FileCheck,
+  Trash2,
+  Plus,
+  UploadCloud,
+} from 'lucide-react'
 
 const TIPO_DOC_ITEMS: Record<string, string> = {
   DNI: 'DNI',
@@ -22,9 +43,9 @@ const TIPO_DOC_ITEMS: Record<string, string> = {
 
 const TIPO_TRAMITE_ITEMS: Record<string, string> = {
   FUT: 'FUT (Formulario Único)',
-  Carta: 'Carta',
-  Oficio: 'Oficio',
-  Solicitud: 'Solicitud',
+  CARTA: 'Carta',
+  OFICIO: 'Oficio',
+  SOLICITUD: 'Solicitud',
 }
 
 export function ExpedienteCreateForm() {
@@ -32,14 +53,10 @@ export function ExpedienteCreateForm() {
   const [serverError, setServerError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
-  // Referencia al input file oculto para abrir el selector bajo demanda
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Estados controlados para los componentes Select de Shadcn/Base-UI
   const [tipoDoc, setTipoDoc] = useState('DNI')
   const [tipoTramite, setTipoTramite] = useState('FUT')
-
-  // Estado para acumular múltiples archivos
   const [archivos, setArchivos] = useState<File[]>([])
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -49,10 +66,9 @@ export function ExpedienteCreateForm() {
     const nuevosArchivos: File[] = []
     for (let i = 0; i < files.length; i++) {
       const file = files[i]
-      if (file.size > 5 * 1024 * 1024) {
-        alert('El archivo ' + file.name + ' supera los 5MB')
+      if (file.size > 10 * 1024 * 1024) {
+        setServerError('El archivo ' + file.name + ' supera los 10 MB permitidos.')
       } else {
-        // Evitar duplicados exactos (mismo nombre y tamaño)
         const yaExiste = archivos.some(
           (a) => a.name === file.name && a.size === file.size
         )
@@ -66,7 +82,6 @@ export function ExpedienteCreateForm() {
       setArchivos((prev) => [...prev, ...nuevosArchivos])
     }
 
-    // Limpiar el valor del input para que permita volver a seleccionar el mismo u otros archivos
     e.target.value = ''
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
@@ -77,6 +92,15 @@ export function ExpedienteCreateForm() {
     setArchivos((prev) => prev.filter((_, idx) => idx !== indexToRemove))
   }
 
+  function handleDropzoneKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      if (!isPending) {
+        fileInputRef.current?.click()
+      }
+    }
+  }
+
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setServerError(null)
@@ -84,14 +108,11 @@ export function ExpedienteCreateForm() {
     const form = e.currentTarget
     const formData = new FormData(form)
 
-    // Garantizar que los valores de los selects se incluyan en el FormData
+    formData.set('tipo_doc_remitente', tipoDoc)
     formData.set('tipo_documento_identidad', tipoDoc)
     formData.set('tipo_tramite', tipoTramite)
-
-    // Limpiar 'archivos' en caso de que el input tenga asignado el nombre
     formData.delete('archivos')
 
-    // Al enviar el formulario (onSubmit), añadir todos los archivos seleccionados en un bucle
     for (const file of archivos) {
       formData.append('archivos', file)
     }
@@ -99,7 +120,9 @@ export function ExpedienteCreateForm() {
     startTransition(async () => {
       const res = await createExpedienteAction(formData)
       if (!res.success || res.error) {
-        setServerError(res.error || 'Ocurrió un error inesperado al registrar el expediente.')
+        setServerError(
+          res.error || 'Ocurrió un error inesperado al registrar el expediente.'
+        )
       } else if (res.success) {
         router.push('/dashboard/bandeja')
       }
@@ -108,41 +131,57 @@ export function ExpedienteCreateForm() {
 
   return (
     <div className="space-y-6">
-      {/* Mensaje de Error */}
       {serverError && (
-        <Alert variant="destructive">
-          <ShieldAlert className="h-4 w-4" />
+        <Alert
+          id="expediente-form-error"
+          role="alert"
+          aria-live="assertive"
+          variant="destructive"
+        >
+          <ShieldAlert className="h-4 w-4" aria-hidden="true" />
           <AlertDescription>{serverError}</AlertDescription>
         </Alert>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Grid de 2 Columnas */}
+      <form
+        onSubmit={handleSubmit}
+        aria-label="Formulario de registro de nuevo expediente"
+        aria-describedby={serverError ? 'expediente-form-error' : undefined}
+        className="space-y-6"
+      >
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          
           {/* Columna 1: Datos del Administrado */}
           <Card className="shadow-sm border">
             <CardHeader className="bg-slate-50 border-b pb-4">
               <div className="flex items-center gap-2">
-                <User className="w-5 h-5 text-primary" />
-                <CardTitle className="text-base font-semibold text-slate-800">1. Datos del Administrado</CardTitle>
+                <User className="w-5 h-5 text-primary" aria-hidden="true" />
+                <CardTitle className="text-base font-semibold text-slate-800">
+                  1. Datos del Administrado
+                </CardTitle>
               </div>
-              <CardDescription>Identificación del titular, remitente o solicitante.</CardDescription>
+              <CardDescription>
+                Identificación del titular, remitente o solicitante.
+              </CardDescription>
             </CardHeader>
             <CardContent className="pt-6 space-y-4">
-              
-              {/* Tipo de Documento y Número de Documento */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="tipo_documento_identidad">Tipo Doc. *</Label>
-                  <Select 
+                  <Select
                     items={TIPO_DOC_ITEMS}
-                    itemToStringLabel={(val: any) => (val ? TIPO_DOC_ITEMS[String(val)] || String(val) : '')}
-                    value={tipoDoc} 
-                    onValueChange={(val: any) => setTipoDoc(val)} 
+                    itemToStringLabel={(val: string | null) =>
+                      val ? TIPO_DOC_ITEMS[String(val)] || String(val) : ''
+                    }
+                    value={tipoDoc}
+                    onValueChange={(val: string | null) =>
+                      setTipoDoc(val || 'DNI')
+                    }
                     disabled={isPending}
                   >
-                    <SelectTrigger id="tipo_documento_identidad">
+                    <SelectTrigger
+                      id="tipo_documento_identidad"
+                      aria-label="Tipo de documento de identidad"
+                    >
                       <SelectValue placeholder="Tipo" />
                     </SelectTrigger>
                     <SelectContent>
@@ -159,26 +198,30 @@ export function ExpedienteCreateForm() {
                     id="remitente_dni_ruc"
                     name="remitente_dni_ruc"
                     placeholder={tipoDoc === 'RUC' ? '20123456789' : '45892134'}
-                    maxLength={tipoDoc === 'RUC' ? 11 : tipoDoc === 'DNI' ? 8 : 12}
+                    maxLength={
+                      tipoDoc === 'RUC' ? 11 : tipoDoc === 'DNI' ? 8 : 12
+                    }
                     required
+                    aria-required="true"
                     disabled={isPending}
                   />
                 </div>
               </div>
 
-              {/* Nombres o Razón Social */}
               <div className="space-y-1.5">
-                <Label htmlFor="remitente_nombres">Nombres y Apellidos / Razón Social *</Label>
+                <Label htmlFor="remitente_nombres">
+                  Nombres y Apellidos / Razón Social *
+                </Label>
                 <Input
                   id="remitente_nombres"
                   name="remitente_nombres"
                   placeholder="Ej. Juan Pérez Quispe / Inversiones SAC"
                   required
+                  aria-required="true"
                   disabled={isPending}
                 />
               </div>
 
-              {/* Correo y Teléfono */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="correo">Correo Electrónico</Label>
@@ -202,7 +245,6 @@ export function ExpedienteCreateForm() {
                 </div>
               </div>
 
-              {/* Dirección */}
               <div className="space-y-1.5">
                 <Label htmlFor="direccion">Dirección Domiciliaria / Fiscal</Label>
                 <Input
@@ -212,7 +254,6 @@ export function ExpedienteCreateForm() {
                   disabled={isPending}
                 />
               </div>
-
             </CardContent>
           </Card>
 
@@ -220,32 +261,43 @@ export function ExpedienteCreateForm() {
           <Card className="shadow-sm border">
             <CardHeader className="bg-slate-50 border-b pb-4">
               <div className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-primary" />
-                <CardTitle className="text-base font-semibold text-slate-800">2. Datos del Trámite</CardTitle>
+                <FileText className="w-5 h-5 text-primary" aria-hidden="true" />
+                <CardTitle className="text-base font-semibold text-slate-800">
+                  2. Datos del Trámite
+                </CardTitle>
               </div>
-              <CardDescription>Tipo de expediente, contenido y documentos adjuntos.</CardDescription>
+              <CardDescription>
+                Tipo de expediente, contenido y documentos adjuntos.
+              </CardDescription>
             </CardHeader>
             <CardContent className="pt-6 space-y-4">
-              
-              {/* Tipo de Trámite y Número de Folios */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="sm:col-span-2 space-y-1.5">
                   <Label htmlFor="tipo_tramite">Tipo de Trámite *</Label>
-                  <Select 
+                  <Select
                     items={TIPO_TRAMITE_ITEMS}
-                    itemToStringLabel={(val: any) => (val ? TIPO_TRAMITE_ITEMS[String(val)] || String(val) : '')}
-                    value={tipoTramite} 
-                    onValueChange={(val: any) => setTipoTramite(val)} 
+                    itemToStringLabel={(val: string | null) =>
+                      val ? TIPO_TRAMITE_ITEMS[String(val)] || String(val) : ''
+                    }
+                    value={tipoTramite}
+                    onValueChange={(val: string | null) =>
+                      setTipoTramite(val || 'FUT')
+                    }
                     disabled={isPending}
                   >
-                    <SelectTrigger id="tipo_tramite">
+                    <SelectTrigger
+                      id="tipo_tramite"
+                      aria-label="Tipo de trámite"
+                    >
                       <SelectValue placeholder="Seleccione" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="FUT">FUT (Formulario Único)</SelectItem>
-                      <SelectItem value="Carta">Carta</SelectItem>
-                      <SelectItem value="Oficio">Oficio</SelectItem>
-                      <SelectItem value="Solicitud">Solicitud</SelectItem>
+                      <SelectItem value="FUT">
+                        FUT (Formulario Único)
+                      </SelectItem>
+                      <SelectItem value="CARTA">Carta</SelectItem>
+                      <SelectItem value="OFICIO">Oficio</SelectItem>
+                      <SelectItem value="SOLICITUD">Solicitud</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -259,12 +311,12 @@ export function ExpedienteCreateForm() {
                     min={1}
                     defaultValue={1}
                     required
+                    aria-required="true"
                     disabled={isPending}
                   />
                 </div>
               </div>
 
-              {/* Asunto */}
               <div className="space-y-1.5">
                 <Label htmlFor="asunto">Asunto del Trámite *</Label>
                 <Textarea
@@ -273,16 +325,18 @@ export function ExpedienteCreateForm() {
                   rows={3}
                   placeholder="Describa de manera concisa el motivo o solicitud del expediente..."
                   required
+                  aria-required="true"
                   disabled={isPending}
                 />
               </div>
 
-              {/* Archivos Adjuntos con Selección Múltiple y Carga Progresiva */}
               <div className="space-y-2">
-                <Label>Archivos Digitales Adjuntos (PDF / Imágenes)</Label>
-                
-                {/* Input de archivo oculto manejado programáticamente */}
+                <Label htmlFor="archivos_adjuntos">
+                  Archivos Digitales Adjuntos (PDF / Imágenes)
+                </Label>
+
                 <input
+                  id="archivos_adjuntos"
                   ref={fileInputRef}
                   type="file"
                   multiple
@@ -293,39 +347,58 @@ export function ExpedienteCreateForm() {
                 />
 
                 {archivos.length === 0 ? (
-                  /* Zona de carga inicial */
                   <div
+                    role="button"
+                    tabIndex={0}
+                    aria-label="Seleccionar archivos digitales adjuntos en formato PDF o imagen"
+                    aria-describedby="archivos-formato-ayuda"
                     onClick={() => !isPending && fileInputRef.current?.click()}
-                    className="border-2 border-dashed border-slate-300 hover:border-primary hover:bg-primary/5 rounded-lg p-5 text-center cursor-pointer transition-colors"
+                    onKeyDown={handleDropzoneKeyDown}
+                    className="border-2 border-dashed border-slate-300 hover:border-primary hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg p-5 text-center cursor-pointer transition-colors"
                   >
                     <div className="mx-auto flex flex-col items-center justify-center gap-1.5">
                       <div className="p-2.5 bg-primary/10 rounded-full text-primary">
-                        <UploadCloud className="w-5 h-5" />
+                        <UploadCloud className="w-5 h-5" aria-hidden="true" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-slate-700">Haga clic aquí para seleccionar archivos</p>
-                        <p className="text-xs text-slate-500 mt-0.5">Formatos permitidos: .pdf, .jpg, .png (Hasta 5MB por archivo)</p>
+                        <p className="text-sm font-medium text-slate-700">
+                          Haga clic o presione Enter para seleccionar archivos
+                        </p>
+                        <p
+                          id="archivos-formato-ayuda"
+                          className="text-xs text-slate-600 mt-0.5"
+                        >
+                          Formato permitido: PDF (Hasta 10 MB por archivo)
+                        </p>
                       </div>
                     </div>
                   </div>
                 ) : (
-                  /* Lista de archivos ya cargados y botón abajo para cargar otro */
-                  <div className="space-y-3">
-                    <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                  <div className="space-y-3" aria-live="polite">
+                    <ul
+                      aria-label="Archivos seleccionados para adjuntar"
+                      className="space-y-2 max-h-56 overflow-y-auto pr-1"
+                    >
                       {archivos.map((archivo, index) => (
-                        <div
+                        <li
                           key={`${archivo.name}-${archivo.size}-${index}`}
                           className="flex items-center justify-between p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-sm shadow-xs"
                         >
                           <div className="flex items-center gap-2.5 truncate mr-2">
                             <div className="p-1.5 bg-primary/10 rounded text-primary shrink-0">
-                              <FileText className="w-4 h-4" />
+                              <FileText
+                                className="w-4 h-4"
+                                aria-hidden="true"
+                              />
                             </div>
                             <div className="truncate">
-                              <p className="text-sm font-medium text-slate-800 truncate" title={archivo.name}>
+                              <p
+                                className="text-sm font-medium text-slate-800 truncate"
+                                title={archivo.name}
+                              >
                                 {archivo.name}
                               </p>
-                              <p className="text-xs text-slate-500">
+                              <p className="text-xs text-slate-600">
                                 {(archivo.size / (1024 * 1024)).toFixed(2)} MB
                               </p>
                             </div>
@@ -334,51 +407,59 @@ export function ExpedienteCreateForm() {
                             type="button"
                             onClick={() => handleRemoveFile(index)}
                             disabled={isPending}
-                            className="text-slate-400 hover:text-red-500 hover:bg-red-50 p-1.5 rounded transition-colors shrink-0 cursor-pointer"
+                            aria-label={`Eliminar archivo adjunto ${archivo.name}`}
+                            className="text-slate-500 hover:text-red-600 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 p-1.5 rounded transition-colors shrink-0 cursor-pointer"
                             title="Eliminar archivo"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-4 h-4" aria-hidden="true" />
                           </button>
-                        </div>
+                        </li>
                       ))}
-                    </div>
+                    </ul>
 
-                    {/* Botón justo debajo de los archivos cargados para adjuntar otro */}
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={isPending}
+                      aria-label="Cargar otro archivo adjunto"
                       className="w-full border-dashed border-slate-300 hover:border-primary hover:bg-primary/5 text-slate-700 gap-1.5 h-9 cursor-pointer"
                     >
-                      <Plus className="w-4 h-4 text-primary" />
+                      <Plus className="w-4 h-4 text-primary" aria-hidden="true" />
                       <span>+ Cargar otro archivo</span>
                     </Button>
-                    <p className="text-[11px] text-slate-500 text-center">
-                      Formatos: .pdf, .jpg, .png (Máx. 5MB cada uno). Puede agregar los archivos que necesite.
+                    <p className="text-[11px] text-slate-600 text-center">
+                      Formatos: .pdf, .jpg, .png (Máx. 5MB cada uno). Puede
+                      agregar los archivos que necesite.
                     </p>
                   </div>
                 )}
               </div>
-
             </CardContent>
           </Card>
-
         </div>
 
-        {/* Botón de Envío */}
         <div className="flex justify-end pt-2">
-          <Button type="submit" disabled={isPending} size="lg" className="px-8 shadow-sm cursor-pointer">
+          <Button
+            type="submit"
+            disabled={isPending}
+            aria-busy={isPending}
+            size="lg"
+            className="px-8 shadow-sm cursor-pointer"
+          >
             {isPending ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Subiendo y Registrando...
+                <Loader2
+                  className="mr-2 h-4 w-4 animate-spin"
+                  aria-hidden="true"
+                />
+                <span>Subiendo y Registrando...</span>
               </>
             ) : (
               <>
-                <FileCheck className="mr-2 h-4 w-4" />
-                Ingresar Expediente
+                <FileCheck className="mr-2 h-4 w-4" aria-hidden="true" />
+                <span>Ingresar Expediente</span>
               </>
             )}
           </Button>

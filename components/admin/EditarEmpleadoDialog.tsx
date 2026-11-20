@@ -1,7 +1,7 @@
 // components/admin/EditarEmpleadoDialog.tsx
 'use client'
 
-import { useState, useEffect, useTransition, useMemo } from 'react'
+import { useState, useTransition, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Dialog,
@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { UserCheck, Loader2, AlertCircle, CheckCircle2, Mail, Shield } from 'lucide-react'
+import { UserCheck, Loader2, AlertCircle, CheckCircle2, Mail } from 'lucide-react'
 import { EmpleadoItem, actualizarEmpleado } from '@/app/actions/admin'
 
 interface AreaOption {
@@ -38,13 +38,20 @@ interface Props {
 }
 
 const ROL_LABELS: Record<string, string> = {
-  MESA_PARTES: 'Mesa de Partes',
+  MESA_PARTES: 'Operador de Mesa de Partes',
+  ASISTENTE_AREA: 'Asistente de Área',
   ESPECIALISTA: 'Especialista',
   JEFE_AREA: 'Jefe de Área',
   ADMIN_TI: 'Administrador TI',
 }
 
-export function EditarEmpleadoDialog({ empleado, areas, open, onOpenChange }: Props) {
+interface FormProps {
+  empleado: EmpleadoItem
+  areas: AreaOption[]
+  onClose: () => void
+}
+
+function EditarEmpleadoForm({ empleado, areas, onClose }: FormProps) {
   const router = useRouter()
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
@@ -59,31 +66,25 @@ export function EditarEmpleadoDialog({ empleado, areas, open, onOpenChange }: Pr
     return map
   }, [areas])
 
-  // Form states initialized with current employee values
   const [nombres, setNombres] = useState(empleado.nombres || '')
   const [apellidos, setApellidos] = useState(empleado.apellidos || '')
-  const [dni, setDni] = useState(empleado.dni && empleado.dni !== '—' ? empleado.dni : '')
+  const [dni, setDni] = useState(
+    empleado.dni && empleado.dni !== '—' ? empleado.dni : ''
+  )
   const [rol, setRol] = useState<string>(empleado.rol || '')
-  const [areaId, setAreaId] = useState<string>(empleado.area_id || '')
-
-  // Reset form states whenever selected employee changes or modal opens
-  useEffect(() => {
-    if (open) {
-      setNombres(empleado.nombres || '')
-      setApellidos(empleado.apellidos || '')
-      setDni(empleado.dni && empleado.dni !== '—' ? empleado.dni : '')
-      setRol(empleado.rol || '')
-      setAreaId(empleado.rol === 'ADMIN_TI' ? '' : (empleado.area_id || ''))
-      setErrorMsg(null)
-      setSuccessMsg(null)
-    }
-  }, [open, empleado])
+  const [areaId, setAreaId] = useState<string>(
+    empleado.rol === 'ADMIN_TI' ? '' : empleado.area_id || ''
+  )
 
   // Lógica Reactiva de Rol
   function handleRoleChange(value: string) {
     setRol(value)
     if (value === 'MESA_PARTES') {
-      const areaMesa = areas.find((a) => a.nombre.toLowerCase().includes('mesa de partes'))
+      const areaMesa = areas.find(
+        (a) =>
+          a.siglas === 'OACGD-MDP' ||
+          a.nombre.toLowerCase().includes('mesa de partes')
+      )
       if (areaMesa) {
         setAreaId(String(areaMesa.id))
       }
@@ -134,174 +135,223 @@ export function EditarEmpleadoDialog({ empleado, areas, open, onOpenChange }: Pr
           setSuccessMsg('Empleado actualizado exitosamente.')
           router.refresh()
           setTimeout(() => {
-            onOpenChange(false)
+            onClose()
             setSuccessMsg(null)
           }, 1000)
         }
-      } catch (err: any) {
-        setErrorMsg(err?.message || 'Error de comunicación con el servidor.')
+      } catch (err: unknown) {
+        const msg =
+          err instanceof Error
+            ? err.message
+            : 'Error de comunicación con el servidor.'
+        setErrorMsg(msg)
       }
     })
   }
 
   return (
+    <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+      {errorMsg && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{errorMsg}</AlertDescription>
+        </Alert>
+      )}
+
+      {successMsg && (
+        <Alert className="border-emerald-500 bg-emerald-50 text-emerald-800">
+          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+          <AlertDescription className="text-emerald-700">
+            {successMsg}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Correo Electrónico (Solo Lectura) */}
+      <div className="space-y-1.5 bg-slate-50 p-3 rounded-md border border-slate-200">
+        <Label className="text-xs text-slate-500 flex items-center gap-1.5">
+          <Mail className="w-3.5 h-3.5 text-slate-400" />
+          Cuenta de Correo Institucional
+        </Label>
+        <p className="text-sm font-semibold text-slate-700">
+          {empleado.email}
+        </p>
+      </div>
+
+      {/* Fila 1: Nombres y Apellidos */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="edit-nombres">Nombres *</Label>
+          <Input
+            id="edit-nombres"
+            name="nombres"
+            value={nombres}
+            onChange={(e) => setNombres(e.target.value)}
+            disabled={isPending}
+            required
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="edit-apellidos">Apellidos *</Label>
+          <Input
+            id="edit-apellidos"
+            name="apellidos"
+            value={apellidos}
+            onChange={(e) => setApellidos(e.target.value)}
+            disabled={isPending}
+            required
+          />
+        </div>
+      </div>
+
+      {/* Fila 2: DNI y Rol */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="edit-dni">DNI (8 dígitos)</Label>
+          <Input
+            id="edit-dni"
+            name="dni"
+            maxLength={8}
+            value={dni}
+            onChange={(e) => setDni(e.target.value.replace(/\D/g, ''))}
+            disabled={isPending}
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="edit-rol">Rol Asignado *</Label>
+          <Select
+            items={ROL_LABELS}
+            itemToStringLabel={(val: string | null) =>
+              val ? ROL_LABELS[String(val)] || String(val) : ''
+            }
+            value={rol}
+            onValueChange={(val: string | null) =>
+              handleRoleChange(val || '')
+            }
+            disabled={isPending}
+          >
+            <SelectTrigger id="edit-rol">
+              <SelectValue placeholder="Seleccione un rol" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="MESA_PARTES">
+                Operador de Mesa de Partes
+              </SelectItem>
+              <SelectItem value="ASISTENTE_AREA">Asistente de Área</SelectItem>
+              <SelectItem value="ESPECIALISTA">Especialista</SelectItem>
+              <SelectItem value="JEFE_AREA">Jefe de Área</SelectItem>
+              <SelectItem value="ADMIN_TI">Administrador TI</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {/* Fila 3: Área de Adscripción */}
+      <div className="space-y-1.5">
+        <Label htmlFor="edit-area_id">
+          Área de Adscripción {rol !== 'ADMIN_TI' ? '*' : ''}
+        </Label>
+        <Select
+          items={areaItems}
+          itemToStringLabel={(val: string | null) =>
+            val ? areaItems[String(val)] || String(val) : ''
+          }
+          value={rol === 'ADMIN_TI' ? '' : areaId}
+          onValueChange={(val: string | null) => setAreaId(val || '')}
+          disabled={
+            rol === 'MESA_PARTES' || rol === 'ADMIN_TI' || isPending
+          }
+        >
+          <SelectTrigger
+            id="edit-area_id"
+            className={rol === 'ADMIN_TI' ? 'bg-slate-50 text-slate-400' : ''}
+          >
+            <SelectValue
+              placeholder={
+                rol === 'ADMIN_TI'
+                  ? 'No aplica (Administrador Global)'
+                  : 'Seleccione el área municipal'
+              }
+            />
+          </SelectTrigger>
+          <SelectContent>
+            {areas.map((area) => (
+              <SelectItem key={area.id} value={String(area.id)}>
+                {area.nombre}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {rol === 'MESA_PARTES' && (
+          <p className="text-[11px] text-emerald-600 font-medium">
+            Área asignada automáticamente a Mesa de Partes para este rol.
+          </p>
+        )}
+        {rol === 'ADMIN_TI' && (
+          <p className="text-[11px] text-purple-600 font-medium">
+            No aplica: Los Administradores TI no pertenecen a un área
+            específica y tienen alcance global.
+          </p>
+        )}
+      </div>
+
+      {/* Botones de acción */}
+      <div className="flex justify-end gap-2 pt-4 border-t">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onClose}
+          disabled={isPending}
+        >
+          Cancelar
+        </Button>
+        <Button
+          type="submit"
+          disabled={isPending}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white"
+        >
+          {isPending ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Guardando...
+            </>
+          ) : (
+            'Guardar Cambios'
+          )}
+        </Button>
+      </div>
+    </form>
+  )
+}
+
+export function EditarEmpleadoDialog({
+  empleado,
+  areas,
+  open,
+  onOpenChange,
+}: Props) {
+  return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[560px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-140 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold flex items-center gap-2 text-slate-800">
             <UserCheck className="w-5 h-5 text-indigo-600" />
             Editar Empleado
           </DialogTitle>
           <DialogDescription>
-            Modifique los datos institucionales, rol y área asignada al usuario.
+            Actualice la información institucional del empleado en el sistema.
           </DialogDescription>
         </DialogHeader>
 
-        {errorMsg && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{errorMsg}</AlertDescription>
-          </Alert>
+        {open && (
+          <EditarEmpleadoForm
+            key={empleado.id}
+            empleado={empleado}
+            areas={areas}
+            onClose={() => onOpenChange(false)}
+          />
         )}
-
-        {successMsg && (
-          <Alert className="border-emerald-500 bg-emerald-50 text-emerald-800">
-            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-            <AlertDescription className="text-emerald-700">{successMsg}</AlertDescription>
-          </Alert>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4 pt-2">
-          {/* Identificador institucional (Solo lectura) */}
-          <div className="rounded-lg bg-slate-50 border p-3 flex items-center justify-between text-xs text-slate-600">
-            <div className="flex items-center gap-2">
-              <Mail className="w-4 h-4 text-slate-400" />
-              <span>{empleado.email}</span>
-            </div>
-            <span className="font-mono text-[11px] text-slate-400">ID: {empleado.id.slice(0, 8)}...</span>
-          </div>
-
-          {/* Fila 1: Nombres y Apellidos */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="edit-nombres">Nombres *</Label>
-              <Input
-                id="edit-nombres"
-                value={nombres}
-                onChange={(e) => setNombres(e.target.value)}
-                disabled={isPending}
-                required
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="edit-apellidos">Apellidos *</Label>
-              <Input
-                id="edit-apellidos"
-                value={apellidos}
-                onChange={(e) => setApellidos(e.target.value)}
-                disabled={isPending}
-                required
-              />
-            </div>
-          </div>
-
-          {/* Fila 2: DNI y Rol */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="edit-dni">DNI (8 dígitos)</Label>
-              <Input
-                id="edit-dni"
-                placeholder="45892134"
-                maxLength={8}
-                value={dni}
-                onChange={(e) => setDni(e.target.value.replace(/\D/g, ''))}
-                disabled={isPending}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="edit-rol">Rol Asignado *</Label>
-              <Select
-                items={ROL_LABELS}
-                itemToStringLabel={(val: any) => (val ? ROL_LABELS[String(val)] || String(val) : '')}
-                value={rol}
-                onValueChange={(val: any) => handleRoleChange(val || '')}
-                disabled={isPending}
-              >
-                <SelectTrigger id="edit-rol">
-                  <SelectValue placeholder="Seleccione un rol" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="MESA_PARTES">Mesa de Partes</SelectItem>
-                  <SelectItem value="ESPECIALISTA">Especialista</SelectItem>
-                  <SelectItem value="JEFE_AREA">Jefe de Área</SelectItem>
-                  <SelectItem value="ADMIN_TI">Administrador TI</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Fila 3: Área de Adscripción */}
-          <div className="space-y-1.5">
-            <Label htmlFor="edit-area_id">
-              Área de Adscripción {rol !== 'ADMIN_TI' ? '*' : ''}
-            </Label>
-            <Select
-              items={areaItems}
-              itemToStringLabel={(val: any) => (val ? areaItems[String(val)] || String(val) : '')}
-              value={rol === 'ADMIN_TI' ? '' : areaId}
-              onValueChange={(val: any) => setAreaId(val || '')}
-              disabled={rol === 'MESA_PARTES' || rol === 'ADMIN_TI' || isPending}
-            >
-              <SelectTrigger id="edit-area_id" className={rol === 'ADMIN_TI' ? 'bg-slate-50 text-slate-400' : ''}>
-                <SelectValue placeholder={rol === 'ADMIN_TI' ? 'No aplica (Administrador Global)' : 'Seleccione el área municipal'} />
-              </SelectTrigger>
-              <SelectContent>
-                {areas.map((area) => (
-                  <SelectItem key={area.id} value={String(area.id)}>
-                    {area.nombre}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {rol === 'MESA_PARTES' && (
-              <p className="text-[11px] text-emerald-600 font-medium">
-                Área bloqueada y asignada automáticamente a Mesa de Partes para este rol.
-              </p>
-            )}
-            {rol === 'ADMIN_TI' && (
-              <p className="text-[11px] text-purple-600 font-medium">
-                No aplica: Los Administradores TI no pertenecen a un área específica y tienen alcance global.
-              </p>
-            )}
-          </div>
-
-          {/* Botones de acción */}
-          <div className="flex justify-end gap-2 pt-4 border-t">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={isPending}
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              disabled={isPending}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white"
-            >
-              {isPending ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Actualizando...
-                </>
-              ) : (
-                'Guardar Cambios'
-              )}
-            </Button>
-          </div>
-        </form>
       </DialogContent>
     </Dialog>
   )

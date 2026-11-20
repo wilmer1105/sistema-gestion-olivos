@@ -1,8 +1,12 @@
+// components/expedientes/FinalizarExpedienteModal.tsx
 'use client'
 
 import { useState, useTransition, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { finalizarExpedienteAction, type FinalizarEstado } from '@/app/actions/expedientes'
+import {
+  finalizarExpedienteAction,
+  type FinalizarEstado,
+} from '@/app/actions/expedientes'
 
 import {
   Dialog,
@@ -28,6 +32,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 interface Props {
   expedienteId: string
   cut?: string | null
+  disabled?: boolean
 }
 
 const ESTADOS_DISPONIBLES: Record<string, string> = {
@@ -35,7 +40,11 @@ const ESTADOS_DISPONIBLES: Record<string, string> = {
   ARCHIVADO: 'ARCHIVADO - Trámite concluido y enviado al archivo',
 }
 
-export function FinalizarExpedienteModal({ expedienteId, cut }: Props) {
+export function FinalizarExpedienteModal({
+  expedienteId,
+  cut,
+  disabled = false,
+}: Props) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [estadoNuevo, setEstadoNuevo] = useState<FinalizarEstado>('ATENDIDO')
@@ -52,12 +61,20 @@ export function FinalizarExpedienteModal({ expedienteId, cut }: Props) {
       setErrorMsg('Debe seleccionar si desea ATENDER o ARCHIVAR el expediente.')
       return
     }
+    if (!observacion.trim() || observacion.trim().length < 5) {
+      setErrorMsg('El proveído de cierre debe tener al menos 5 caracteres.')
+      return
+    }
 
     setErrorMsg(null)
     setSuccessMsg(null)
 
     startTransition(async () => {
-      const res = await finalizarExpedienteAction(expedienteId, estadoNuevo, observacion)
+      const res = await finalizarExpedienteAction(
+        expedienteId,
+        estadoNuevo,
+        observacion.trim()
+      )
 
       if (!res.success) {
         setErrorMsg(res.error || 'Error al procesar el cierre del expediente.')
@@ -70,6 +87,7 @@ export function FinalizarExpedienteModal({ expedienteId, cut }: Props) {
     })
   }
 
+  const newLocal = "sm:max-w-[500px]"
   return (
     <Dialog
       open={open}
@@ -83,34 +101,49 @@ export function FinalizarExpedienteModal({ expedienteId, cut }: Props) {
       }}
     >
       <DialogTrigger asChild>
-        <Button variant="destructive" className="gap-2 shadow-sm font-medium">
-          <Archive className="w-4 h-4" />
-          Finalizar / Archivar
+        <Button
+          variant="destructive"
+          disabled={disabled}
+          aria-label="Finalizar o archivar expediente"
+          className="gap-2 shadow-sm font-medium"
+        >
+          <Archive className="w-4 h-4" aria-hidden="true" />
+          <span>Finalizar / Archivar</span>
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className={newLocal}>
         <DialogHeader>
-          <DialogTitle className="text-lg">Finalizar o Archivar Expediente</DialogTitle>
+          <DialogTitle className="text-lg">
+            Finalizar o Archivar Expediente
+          </DialogTitle>
           <DialogDescription>
             {cut ? `Expediente: ${cut}. ` : ''}
-            Esta acción concluirá el ciclo de vida del expediente registrando la resolución en la hoja de ruta.
+            Esta acción concluirá el ciclo de vida del expediente registrando la
+            resolución en la hoja de ruta.
           </DialogDescription>
         </DialogHeader>
 
         {errorMsg && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4 shrink-0" />
-            <AlertDescription className="break-words font-medium">
+          <Alert role="alert" aria-live="assertive" variant="destructive">
+            <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <AlertDescription className="wrap-break-word font-medium">
               {errorMsg}
             </AlertDescription>
           </Alert>
         )}
 
         {successMsg && (
-          <Alert className="border-emerald-500 bg-emerald-50 text-emerald-800">
-            <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-            <AlertDescription className="break-words font-medium">
+          <Alert
+            role="status"
+            aria-live="polite"
+            className="border-emerald-600 bg-emerald-50 text-emerald-900"
+          >
+            <CheckCircle2
+              className="h-4 w-4 text-emerald-700 shrink-0"
+              aria-hidden="true"
+            />
+            <AlertDescription className="wrap-break-word font-medium">
               {successMsg}
             </AlertDescription>
           </Alert>
@@ -121,12 +154,16 @@ export function FinalizarExpedienteModal({ expedienteId, cut }: Props) {
             <Label htmlFor="estado_cierre">Acción de Cierre *</Label>
             <Select
               items={estadoItems}
-              itemToStringLabel={(val: any) => (val ? estadoItems[String(val)] || String(val) : '')}
+              itemToStringLabel={(val: string | null) =>
+                val ? estadoItems[String(val)] || String(val) : ''
+              }
               value={estadoNuevo}
-              onValueChange={(val: any) => setEstadoNuevo(val as FinalizarEstado)}
+              onValueChange={(val: string | null) =>
+                setEstadoNuevo((val as FinalizarEstado) || 'ATENDIDO')
+              }
               disabled={isPending}
             >
-              <SelectTrigger id="estado_cierre">
+              <SelectTrigger id="estado_cierre" aria-required="true">
                 <SelectValue placeholder="Seleccione el estado de resolución" />
               </SelectTrigger>
               <SelectContent>
@@ -141,7 +178,7 @@ export function FinalizarExpedienteModal({ expedienteId, cut }: Props) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="observacion">Observación / Proveído Final</Label>
+            <Label htmlFor="observacion">Observación / Proveído de Cierre *</Label>
             <Textarea
               id="observacion"
               rows={4}
@@ -149,6 +186,8 @@ export function FinalizarExpedienteModal({ expedienteId, cut }: Props) {
               value={observacion}
               onChange={(e) => setObservacion(e.target.value)}
               disabled={isPending}
+              required
+              aria-required="true"
             />
           </div>
 
@@ -161,9 +200,19 @@ export function FinalizarExpedienteModal({ expedienteId, cut }: Props) {
             >
               Cancelar
             </Button>
-            <Button type="submit" variant="destructive" disabled={isPending}>
-              {isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-              Confirmar Cierre
+            <Button
+              type="submit"
+              variant="destructive"
+              disabled={isPending}
+              aria-busy={isPending}
+            >
+              {isPending ? (
+                <Loader2
+                  className="w-4 h-4 mr-2 animate-spin"
+                  aria-hidden="true"
+                />
+              ) : null}
+              <span>Confirmar Cierre</span>
             </Button>
           </div>
         </form>

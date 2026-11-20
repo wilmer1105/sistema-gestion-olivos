@@ -1,19 +1,22 @@
+// components/modules/bandeja/BandejaTabsNav.tsx
 'use client'
 
 import { useTransition } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Clock, CheckCheck, Loader2 } from 'lucide-react'
+import { Clock, Send, CheckCheck, Loader2 } from 'lucide-react'
 
 interface Props {
-  currentTab: string
+  currentTab: 'pendientes' | 'enviados' | 'finalizados' | string
   pendientesCount?: number
+  enviadosCount?: number
   finalizadosCount?: number
 }
 
 export function BandejaTabsNav({
   currentTab,
   pendientesCount,
+  enviadosCount,
   finalizadosCount,
 }: Props) {
   const router = useRouter()
@@ -25,7 +28,7 @@ export function BandejaTabsNav({
     const params = new URLSearchParams(searchParams.toString())
     params.set('tab', value)
     params.set('page', '1')
-    params.delete('estado') // Reinicia el filtro de estado específico al cambiar de pestaña
+    params.delete('estado')
     startTransition(() => {
       router.push(`${pathname}?${params.toString()}`)
     })
@@ -33,11 +36,15 @@ export function BandejaTabsNav({
 
   return (
     <div className="flex items-center gap-3">
-      <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full sm:w-auto">
-        <TabsList className="grid w-full sm:w-[380px] grid-cols-2">
-          <TabsTrigger value="pendientes" disabled={isPending} className="gap-2">
-            <Clock className="w-4 h-4 text-amber-500" />
-            Pendientes
+      <Tabs
+        value={currentTab}
+        onValueChange={handleTabChange}
+        className="w-full sm:w-auto"
+      >
+        <TabsList className="grid w-full sm:w-[540px] grid-cols-3">
+          <TabsTrigger value="pendientes" disabled={isPending} className="gap-1.5">
+            <Clock className="w-4 h-4 text-amber-600" aria-hidden="true" />
+            <span>Pendientes</span>
             {typeof pendientesCount === 'number' && (
               <span className="text-xs px-2 py-0.5 rounded-full bg-slate-200/80 font-semibold text-slate-700">
                 {pendientesCount}
@@ -45,9 +52,19 @@ export function BandejaTabsNav({
             )}
           </TabsTrigger>
 
-          <TabsTrigger value="finalizados" disabled={isPending} className="gap-2">
-            <CheckCheck className="w-4 h-4 text-emerald-600" />
-            Finalizados
+          <TabsTrigger value="enviados" disabled={isPending} className="gap-1.5">
+            <Send className="w-4 h-4 text-blue-600" aria-hidden="true" />
+            <span>Enviados</span>
+            {typeof enviadosCount === 'number' && (
+              <span className="text-xs px-2 py-0.5 rounded-full bg-slate-200/80 font-semibold text-slate-700">
+                {enviadosCount}
+              </span>
+            )}
+          </TabsTrigger>
+
+          <TabsTrigger value="finalizados" disabled={isPending} className="gap-1.5">
+            <CheckCheck className="w-4 h-4 text-emerald-600" aria-hidden="true" />
+            <span>Finalizados</span>
             {typeof finalizadosCount === 'number' && (
               <span className="text-xs px-2 py-0.5 rounded-full bg-slate-200/80 font-semibold text-slate-700">
                 {finalizadosCount}
@@ -56,7 +73,9 @@ export function BandejaTabsNav({
           </TabsTrigger>
         </TabsList>
       </Tabs>
-      {isPending && <Loader2 className="w-4 h-4 animate-spin text-slate-400" />}
+      {isPending && (
+        <Loader2 className="w-4 h-4 animate-spin text-slate-500" aria-hidden="true" />
+      )}
     </div>
   )
 }

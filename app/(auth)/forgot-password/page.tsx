@@ -5,7 +5,7 @@ import { useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
-import { Building2, KeyRound, Loader2, ArrowLeft, CheckCircle2, ShieldAlert } from 'lucide-react'
+import { KeyRound, Loader2, ArrowLeft, CheckCircle2, ShieldAlert } from 'lucide-react'
 
 import { forgotPasswordAction } from '@/app/actions/auth'
 import { forgotPasswordSchema, type ForgotPasswordInput } from '@/lib/validators/auth.schema'

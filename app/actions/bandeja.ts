@@ -3,85 +3,245 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import {
+  puedeAsignarEspecialista,
+  puedeRecepcionarExpediente,
+} from '@/lib/domain/rbac'
+import { asignacionInternaSchema } from '@/lib/validators/derivacion.schema'
+import {
+  SupabaseExpedienteRepository,
+  SupabaseTrazabilidadRepository,
+} from '@/lib/infrastructure/supabase/SupabaseRepositories'
+import { ExpedienteService } from '@/lib/services/ExpedienteService'
 
+/**
+ * Acusa recepción de un expediente derivado a la bandeja del área actual (RF-11, HU-05).
+ */
 export async function recepcionarExpedienteAction(expedienteId: string) {
-    try {
-        const supabase = await createClient()
+  try {
+    const supabase = await createClient()
 
-        // 0. Validar autenticación
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-        if (authError || !user) {
-            return { success: false, error: 'No autorizado. Debe iniciar sesión.' }
-        }
-
-        // Obtener el área del usuario actual
-        const { data: perfil } = await supabase
-            .from('perfiles')
-            .select('area_id')
-            .eq('id', user.id)
-            .single()
-
-        const areaId = (perfil as any)?.area_id
-
-        // PASO 1: Validación Previa
-        // Haz un SELECT estado del expediente. Si el estado ya es 'RECEPCIONADO', retorna inmediatamente error.
-        const { data: expediente, error: expError } = await (supabase.from('expedientes') as any)
-            .select('estado, area_actual_id')
-            .eq('id', expedienteId)
-            .single()
-
-        if (expError || !expediente) {
-            return { success: false, error: 'Expediente no encontrado.' }
-        }
-
-        if (expediente.estado === 'RECEPCIONADO') {
-            return { success: false, error: 'Este expediente ya fue recepcionado.' }
-        }
-
-        // PASO 2: Actualización Estricta
-        // Ejecuta el UPDATE en expedientes cambiando a 'RECEPCIONADO'. Obligatorio encadenar .select() al final.
-        const { data, error } = await (supabase.from('expedientes') as any)
-            .update({
-                estado: 'RECEPCIONADO',
-                fecha_actualizacion: new Date().toISOString(),
-            })
-            .eq('id', expedienteId)
-            .select()
-
-        // PASO 3: Verificación de Éxito
-        // Si el update da error o no retorna datos (!data || data.length === 0), retorna error y se detiene la ejecución.
-        if (error || !data || (data as any[]).length === 0) {
-            return {
-                success: false,
-                error: error?.message || 'Error de permisos o RLS. No se pudo actualizar el estado.',
-            }
-        }
-
-        // PASO 4: Inserción de Trazabilidad
-        // SOLO SI el paso 3 fue exitoso, ejecuta el INSERT en la tabla trazabilidad.
-        const payloadTrazabilidad = {
-            expediente_id: expedienteId,
-            area_origen_id: expediente.area_actual_id || areaId,
-            area_destino_id: areaId,
-            emisor_id: user.id,
-            accion: 'RECEPCION',
-            proveido: 'Expediente recepcionado en bandeja de entrada',
-            estado_previo: expediente.estado,
-            estado_nuevo: 'RECEPCIONADO',
-            fecha_envio: new Date().toISOString(),
-        } as any
-
-        await (supabase.from('trazabilidad') as any).insert(payloadTrazabilidad)
-
-        // PASO 5: Cierre
-        // Llama a revalidatePath('/dashboard/bandeja') y retorna { success: true }.
-        revalidatePath('/dashboard/bandeja')
-        revalidatePath('/dashboard')
-        revalidatePath(`/dashboard/expedientes/${expedienteId}`)
-
-        return { success: true }
-    } catch (err: any) {
-        console.error('Error en recepcionarExpedienteAction:', err)
-        return { success: false, error: err?.message || 'Error desconocido al recepcionar el expediente.' }
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return { success: false, error: 'No autorizado. Debe iniciar sesión.' }
     }
+
+    const { data: perfil } = await supabase
+      .from('perfiles')
+      .select('id, rol, area_id, activo')
+      .eq('id', user.id)
+      .single()
+
+    if (!perfil || perfil.activo === false) {
+      return {
+        success: false,
+        error: 'Su cuenta se encuentra inactiva.',
+      }
+    }
+
+    const { data: expedienteActual } = await supabase
+      .from('expedientes')
+      .select('id, area_actual_id, estado')
+      .eq('id', expedienteId)
+      .single()
+
+    if (!expedienteActual) {
+      return {
+        success: false,
+        error: 'Expediente no encontrado.',
+      }
+    }
+
+    const permitidoPorRbac =
+      puedeRecepcionarExpediente(
+        {
+          id: perfil.id,
+          rol: perfil.rol,
+          area_id: perfil.area_id,
+          activo: perfil.activo ?? true,
+        },
+        {
+          id: expedienteActual.id,
+          area_actual_id: expedienteActual.area_actual_id,
+          estado: expedienteActual.estado,
+        }
+      ) ||
+      (perfil.rol === 'MESA_PARTES' &&
+        perfil.area_id === expedienteActual.area_actual_id &&
+        expedienteActual.estado === 'REGISTRADO')
+
+    if (!permitidoPorRbac) {
+      return {
+        success: false,
+        error:
+          'No autorizado para recepcionar este expediente (verifique que pertenezca a su área y esté en estado DERIVADO).',
+      }
+    }
+
+    const expedienteRepo = new SupabaseExpedienteRepository(supabase)
+    const trazabilidadRepo = new SupabaseTrazabilidadRepository(supabase)
+    const service = new ExpedienteService(expedienteRepo, trazabilidadRepo)
+
+    const resultado = await service.recepcionarExpediente({
+      expediente_id: expedienteId,
+      area_receptor_id: perfil.area_id,
+      usuario_id: user.id,
+    })
+
+    if (!resultado.success) {
+      return {
+        success: false,
+        error:
+          resultado.error ||
+          'Error de permisos o RLS. No se pudo actualizar el estado.',
+      }
+    }
+
+    revalidatePath('/dashboard/bandeja')
+    revalidatePath('/dashboard')
+    revalidatePath(`/dashboard/expedientes/${expedienteId}`)
+
+    return { success: true }
+  } catch (err: unknown) {
+    const msg =
+      err instanceof Error
+        ? err.message
+        : 'Error desconocido al recepcionar el expediente.'
+    return { success: false, error: msg }
+  }
+}
+
+export interface AsignarEspecialistaPayload {
+  expediente_id: string
+  especialista_id: string
+  proveido?: string | null
+}
+
+/**
+ * Asigna internamente un expediente recepcionado a un Especialista de la misma unidad orgánica
+ * cambiando su estado a 'EN_TRAMITE' (OP-07, RF-12).
+ */
+export async function asignarEspecialistaAction(
+  payload: AsignarEspecialistaPayload
+) {
+  try {
+    const validacion = asignacionInternaSchema.safeParse(payload)
+    if (!validacion.success) {
+      return {
+        success: false,
+        error:
+          validacion.error.issues[0]?.message ||
+          'Datos de asignación interna inválidos.',
+      }
+    }
+
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return { success: false, error: 'No autorizado. Debe iniciar sesión.' }
+    }
+
+    const { data: perfil } = await supabase
+      .from('perfiles')
+      .select('id, rol, area_id, activo')
+      .eq('id', user.id)
+      .single()
+
+    if (!perfil || !perfil.area_id || perfil.activo === false) {
+      return {
+        success: false,
+        error: 'Su cuenta no cuenta con un área activa asignada.',
+      }
+    }
+
+    const { data: expedienteActual } = await supabase
+      .from('expedientes')
+      .select('id, area_actual_id, estado')
+      .eq('id', validacion.data.expediente_id)
+      .single()
+
+    if (!expedienteActual) {
+      return { success: false, error: 'Expediente no encontrado.' }
+    }
+
+    if (
+      !puedeAsignarEspecialista(
+        {
+          id: perfil.id,
+          rol: perfil.rol,
+          area_id: perfil.area_id,
+          activo: perfil.activo ?? true,
+        },
+        {
+          id: expedienteActual.id,
+          area_actual_id: expedienteActual.area_actual_id,
+          estado: expedienteActual.estado,
+        }
+      )
+    ) {
+      return {
+        success: false,
+        error:
+          '403 Forbidden: Solo el Asistente de Área o Jefe de Área puede asignar especialistas a un expediente recepcionado.',
+      }
+    }
+
+    // Verificar que el especialista destino pertenezca a la misma área y esté activo
+    const { data: especialista } = await supabase
+      .from('perfiles')
+      .select('id, nombres, apellidos, rol, area_id, activo')
+      .eq('id', validacion.data.especialista_id)
+      .single()
+
+    if (
+      !especialista ||
+      especialista.activo === false ||
+      especialista.area_id !== perfil.area_id
+    ) {
+      return {
+        success: false,
+        error:
+          'El especialista seleccionado no pertenece a su unidad orgánica o no se encuentra activo.',
+      }
+    }
+
+    const expedienteRepo = new SupabaseExpedienteRepository(supabase)
+    const trazabilidadRepo = new SupabaseTrazabilidadRepository(supabase)
+    const service = new ExpedienteService(expedienteRepo, trazabilidadRepo)
+
+    const nombreEspecialista = `${especialista.nombres} ${especialista.apellidos}`.trim()
+    const proveidoAsignacion =
+      validacion.data.proveido?.trim() ||
+      `Asignado internamente a ${nombreEspecialista} para evaluación y emisión de informe`
+
+    const resultado = await service.asignarEspecialistaInterno({
+      expediente_id: validacion.data.expediente_id,
+      especialista_id: validacion.data.especialista_id,
+      area_id: perfil.area_id,
+      usuario_id: user.id,
+      proveido: proveidoAsignacion,
+    })
+
+    if (!resultado.success) {
+      return { success: false, error: resultado.error }
+    }
+
+    revalidatePath('/dashboard/bandeja')
+    revalidatePath(`/dashboard/expedientes/${validacion.data.expediente_id}`)
+    revalidatePath('/dashboard')
+
+    return { success: true }
+  } catch (err: unknown) {
+    const msg =
+      err instanceof Error
+        ? err.message
+        : 'Error inesperado al asignar especialista.'
+    return { success: false, error: msg }
+  }
 }

@@ -1,8 +1,10 @@
+// components/modules/bandeja/BandejaFiltros.tsx
 'use client'
 
 import { useState, useTransition, useMemo } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -32,8 +34,7 @@ export function BandejaFiltros({
   const [selectedEstado, setSelectedEstado] = useState(estadoDefault)
   const [isPending, startTransition] = useTransition()
 
-  // Opciones de estado según la pestaña activa
-  const estadoOptions = useMemo(() => {
+  const estadoOptions = useMemo((): Record<string, string> => {
     if (currentTab === 'finalizados') {
       return {
         TODOS: 'Todos los finalizados',
@@ -41,11 +42,23 @@ export function BandejaFiltros({
         ARCHIVADO: 'Archivado',
       }
     }
+    if (currentTab === 'enviados') {
+      return {
+        TODOS: 'Todos los enviados',
+        DERIVADO: 'Derivado (En tránsito)',
+        RECEPCIONADO: 'Recepcionado en destino',
+        EN_TRAMITE: 'En trámite en destino',
+        ATENDIDO: 'Atendido',
+        ARCHIVADO: 'Archivado',
+      }
+    }
     return {
       TODOS: 'Todos los pendientes',
       REGISTRADO: 'Registrado',
-      DERIVADO: 'Derivado',
+      DERIVADO: 'Derivado (Por recepcionar)',
       RECEPCIONADO: 'Recepcionado',
+      EN_TRAMITE: 'En Trámite',
+      OBSERVADO: 'Observado',
     }
   }, [currentTab])
 
@@ -79,7 +92,7 @@ export function BandejaFiltros({
     applyFilters()
   }
 
-  const handleEstadoChange = (val: string) => {
+  const handleEstadoChange = (val: string | null) => {
     const estado = val || 'TODOS'
     setSelectedEstado(estado)
     applyFilters(undefined, estado)
@@ -97,16 +110,29 @@ export function BandejaFiltros({
     })
   }
 
-  const hasActiveFilters = Boolean(searchTerm.trim() || (selectedEstado && selectedEstado !== 'TODOS'))
+  const hasActiveFilters = Boolean(
+    searchTerm.trim() || (selectedEstado && selectedEstado !== 'TODOS')
+  )
 
   return (
     <div className="bg-white p-4 rounded-lg border shadow-sm space-y-3">
-      <form onSubmit={handleSearchSubmit} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-        {/* Barra de búsqueda por CUT o Asunto */}
+      <form
+        onSubmit={handleSearchSubmit}
+        role="search"
+        aria-label="Filtrar expedientes en bandeja"
+        className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
+      >
         <div className="relative flex-1">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Label htmlFor="bandeja_search_query" className="sr-only">
+            Buscar por CUT, DNI/RUC o Asunto
+          </Label>
+          <Search
+            className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+            aria-hidden="true"
+          />
           <Input
-            placeholder="Buscar por CUT (ej: EXP-2026-...) o Asunto..."
+            id="bandeja_search_query"
+            placeholder="Buscar por CUT, DNI/RUC o Asunto..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-9 pr-8"
@@ -115,27 +141,32 @@ export function BandejaFiltros({
           {searchTerm && (
             <button
               type="button"
+              aria-label="Limpiar término de búsqueda"
               onClick={() => {
                 setSearchTerm('')
                 applyFilters('', undefined)
               }}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700"
             >
-              <X className="w-4 h-4" />
+              <X className="w-4 h-4" aria-hidden="true" />
             </button>
           )}
         </div>
 
-        {/* Selector de Estado */}
         <div className="w-full sm:w-56">
+          <Label htmlFor="filtro_estado" className="sr-only">
+            Filtrar por estado
+          </Label>
           <Select
             items={estadoOptions}
-            itemToStringLabel={(val: any) => (val ? estadoOptions[val as keyof typeof estadoOptions] || String(val) : '')}
+            itemToStringLabel={(val: string | null) =>
+              val ? estadoOptions[String(val)] || String(val) : ''
+            }
             value={selectedEstado}
             onValueChange={handleEstadoChange}
             disabled={isPending}
           >
-            <SelectTrigger id="filtro_estado">
+            <SelectTrigger id="filtro_estado" aria-label="Filtrar por estado">
               <SelectValue placeholder="Filtrar por estado" />
             </SelectTrigger>
             <SelectContent>
@@ -148,23 +179,30 @@ export function BandejaFiltros({
           </Select>
         </div>
 
-        {/* Botón Buscar */}
-        <Button type="submit" disabled={isPending} className="gap-1.5 shadow-sm">
-          {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-          Buscar
+        <Button
+          type="submit"
+          disabled={isPending}
+          aria-busy={isPending}
+          className="gap-1.5 shadow-sm"
+        >
+          {isPending ? (
+            <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+          ) : (
+            <Search className="w-4 h-4" aria-hidden="true" />
+          )}
+          <span>Buscar</span>
         </Button>
 
-        {/* Botón Limpiar */}
         {hasActiveFilters && (
           <Button
             type="button"
             variant="ghost"
             onClick={handleClear}
             disabled={isPending}
-            className="gap-1 text-slate-500 hover:text-slate-900"
+            className="gap-1 text-slate-600 hover:text-slate-900"
           >
-            <X className="w-4 h-4" />
-            Limpiar
+            <X className="w-4 h-4" aria-hidden="true" />
+            <span>Limpiar</span>
           </Button>
         )}
       </form>

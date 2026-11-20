@@ -1,8 +1,21 @@
 // app/dashboard/expedientes/nuevo/page.tsx
+import { redirect } from 'next/navigation'
 import { ExpedienteCreateForm } from '@/components/modules/expedientes/ExpedienteCreateForm'
 import { BackButton } from '@/components/shared/BackButton'
+import { obtenerPerfilAutenticado } from '@/lib/auth/session'
+import { puedeRadicarExpediente } from '@/lib/domain/rbac'
 
-export default function NuevoExpedientePage() {
+export default async function NuevoExpedientePage() {
+  const perfil = await obtenerPerfilAutenticado()
+
+  if (perfil.rol === 'ADMIN_TI') {
+    redirect('/dashboard/admin')
+  }
+
+  if (!puedeRadicarExpediente(perfil)) {
+    redirect('/dashboard/bandeja')
+  }
+
   return (
     <div className="space-y-6">
       <div>
