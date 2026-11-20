@@ -242,75 +242,96 @@ export function SubirDocumentosDialog({
           </div>
 
           {/* Dropzone */}
-          <div
-            onDragOver={(e) => {
-              e.preventDefault()
-              setIsDragOver(true)
-            }}
-            onDragLeave={() => setIsDragOver(false)}
-            onDrop={handleDrop}
-            onClick={() => fileInputRef.current?.click()}
-            className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
-              isDragOver
-                ? 'border-primary bg-primary/5'
-                : 'border-slate-300 hover:border-slate-400 bg-slate-50/50'
-            }`}
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              accept=".pdf,application/pdf"
-              className="hidden"
-              onChange={(e) => handleFiles(e.target.files)}
-              disabled={isPending}
-            />
-            <UploadCloud
-              className="w-9 h-9 mx-auto text-slate-400 mb-2"
-              aria-hidden="true"
-            />
-            <p className="text-sm font-medium text-slate-700">
-              Haga clic para seleccionar o arrastre sus archivos PDF aquí
-            </p>
-            <p className="text-xs text-slate-500 mt-1">
-              Formato estricto PDF (máx. 10 MB por archivo)
-            </p>
+          <div className="space-y-1.5">
+            <Label htmlFor="archivos_pdf_intermedio">
+              Archivos PDF a Anexar *
+            </Label>
+            <div
+              role="button"
+              tabIndex={0}
+              aria-label="Seleccionar o arrastrar archivos PDF sustentatorios"
+              aria-describedby="pdf-intermedio-ayuda"
+              onDragOver={(e) => {
+                e.preventDefault()
+                setIsDragOver(true)
+              }}
+              onDragLeave={() => setIsDragOver(false)}
+              onDrop={handleDrop}
+              onClick={() => !isPending && fileInputRef.current?.click()}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  if (!isPending) fileInputRef.current?.click()
+                }
+              }}
+              className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                isDragOver
+                  ? 'border-primary bg-primary/5'
+                  : 'border-slate-300 hover:border-slate-400 bg-slate-50/50'
+              }`}
+            >
+              <input
+                id="archivos_pdf_intermedio"
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept=".pdf,application/pdf"
+                className="hidden"
+                onChange={(e) => handleFiles(e.target.files)}
+                disabled={isPending}
+              />
+              <UploadCloud
+                className="w-9 h-9 mx-auto text-slate-500 mb-2"
+                aria-hidden="true"
+              />
+              <p className="text-sm font-medium text-slate-700">
+                Haga clic, presione Enter o arrastre sus archivos PDF aquí
+              </p>
+              <p
+                id="pdf-intermedio-ayuda"
+                className="text-xs text-slate-600 mt-1"
+              >
+                Formato estricto PDF (máx. 10 MB por archivo)
+              </p>
+            </div>
           </div>
 
           {/* Lista de archivos seleccionados */}
           {selectedFiles.length > 0 && (
-            <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <div className="space-y-2 max-h-48 overflow-y-auto pr-1" aria-live="polite">
+              <p className="text-xs font-semibold text-slate-600 uppercase tracking-wider">
                 Archivos listos para subir ({selectedFiles.length})
               </p>
-              {selectedFiles.map((file, idx) => (
-                <div
-                  key={`${file.name}-${idx}`}
-                  className="flex items-center justify-between p-2 rounded-md bg-slate-100 border text-xs text-slate-800"
-                >
-                  <div className="flex items-center gap-2 truncate min-w-0">
-                    <FileText
-                      className="w-4 h-4 text-primary shrink-0"
-                      aria-hidden="true"
-                    />
-                    <span className="truncate font-medium">{file.name}</span>
-                    <span className="text-slate-500 shrink-0">
-                      ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                    </span>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    aria-label={`Quitar archivo ${file.name}`}
-                    className="h-6 w-6 p-0 hover:bg-slate-200 text-slate-500 hover:text-slate-900"
-                    onClick={() => removeFile(idx)}
-                    disabled={isPending}
+              <ul aria-label="Archivos PDF seleccionados" className="space-y-2">
+                {selectedFiles.map((file, idx) => (
+                  <li
+                    key={`${file.name}-${idx}`}
+                    className="flex items-center justify-between p-2 rounded-md bg-slate-100 border text-xs text-slate-800"
                   >
-                    <X className="w-3.5 h-3.5" aria-hidden="true" />
-                  </Button>
-                </div>
-              ))}
+                    <div className="flex items-center gap-2 truncate min-w-0">
+                      <FileText
+                        className="w-4 h-4 text-primary shrink-0"
+                        aria-hidden="true"
+                      />
+                      <span className="truncate font-medium">{file.name}</span>
+                      <span className="text-slate-600 shrink-0">
+                        ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                      </span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      aria-label={`Quitar archivo ${file.name}`}
+                      className="h-6 w-6 p-0 hover:bg-slate-200 text-slate-600 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-primary"
+                      onClick={() => removeFile(idx)}
+                      disabled={isPending}
+                    >
+                      <X className="w-3.5 h-3.5" aria-hidden="true" />
+                    </Button>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
 

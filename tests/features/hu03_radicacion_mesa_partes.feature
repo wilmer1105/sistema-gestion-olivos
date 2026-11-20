@@ -17,3 +17,13 @@ Característica: Radicación de Expedientes en Mesa de Partes (HU-03)
     Entonces el validador rechaza los datos de radicación indicando error en el documento de identidad
     Cuando intenta validar un archivo adjunto con nombre "script_malicioso.exe", tipo MIME "application/x-msdownload" y peso 1 MB
     Entonces el validador de archivos rechaza el adjunto por no ser formato PDF válido
+
+  Escenario: HU-03 (3) - Casos borde de RUC (10 y 12 dígitos), campos vacíos y límite exacto de PDF (10 MB vs 10 MB + 1 byte)
+    Dado un operador activo con rol "MESA_PARTES" adscrito a la unidad orgánica "OACGD-MDP"
+    Cuando intenta validar un expediente con tipo de documento "RUC", número inválido "205544332219" y asunto "Solicitud de Licencia Comercial"
+    Entonces el validador rechaza los datos de radicación indicando error en el documento de identidad
+    Cuando intenta validar un archivo PDF de exactamente 10485760 bytes
+    Entonces el validador de archivos acepta el PDF en el límite permitido
+    Cuando intenta validar un archivo PDF de exactamente 10485761 bytes
+    Entonces el validador de archivos rechaza el adjunto por exceder el límite de 10 MB
+

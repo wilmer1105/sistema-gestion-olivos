@@ -89,4 +89,51 @@ describe('Auditoría de Accesibilidad Web (WCAG 2.1/2.2 AA - axe / WAVE / Lighth
     expect(src).toContain('<ol')
     expect(src).toContain('<li')
   })
+
+  it('app/(auth)/login/page.tsx incluye landmark <main>, alerta aria-live, campos con aria-required/aria-invalid y foco visible', () => {
+    const src = readComponentSource('app/(auth)/login/page.tsx')
+    expect(src).toContain('<main')
+    expect(src).toContain('role="alert"')
+    expect(src).toContain('aria-live="assertive"')
+    expect(src).toContain('autoComplete="email"')
+    expect(src).toContain('autoComplete="current-password"')
+    expect(src).toContain('aria-required="true"')
+    expect(src).toContain('aria-invalid={Boolean(errors.email)}')
+    expect(src).toContain('aria-invalid={Boolean(errors.password)}')
+    expect(src).toContain('aria-busy={isPending}')
+  })
+
+  it('app/consulta/page.tsx implementa landmarks <main> y <header>, ícono decorativo oculto y contraste AA', () => {
+    const src = readComponentSource('app/consulta/page.tsx')
+    expect(src).toContain('<main')
+    expect(src).toContain('<header')
+    expect(src).toContain('aria-hidden="true"')
+    expect(src).toContain('text-slate-600')
+    expect(src).not.toContain('text-slate-500')
+  })
+
+  it('BandejaPaginacion.tsx y BandejaTabsNav.tsx usan landmark <nav>, aria-live y etiquetas accesibles', () => {
+    const pagSrc = readComponentSource('components/modules/bandeja/BandejaPaginacion.tsx')
+    expect(pagSrc).toContain('<nav')
+    expect(pagSrc).toContain('aria-label="Paginación de expedientes"')
+    expect(pagSrc).toContain('aria-label="Ir a la página anterior"')
+    expect(pagSrc).toContain('aria-label="Ir a la página siguiente"')
+    expect(pagSrc).toContain('aria-live="polite"')
+
+    const tabsSrc = readComponentSource('components/modules/bandeja/BandejaTabsNav.tsx')
+    expect(tabsSrc).toContain('<nav')
+    expect(tabsSrc).toContain('aria-label="Vistas de bandeja de expedientes"')
+    expect(tabsSrc).toContain('role="status"')
+  })
+
+  it('SubirDocumentosDialog.tsx ofrece zona PDF operable por teclado, foco visible y lista semántica <ul>', () => {
+    const src = readComponentSource('components/modules/expedientes/SubirDocumentosDialog.tsx')
+    expect(src).toContain('htmlFor="archivos_pdf_intermedio"')
+    expect(src).toContain('id="archivos_pdf_intermedio"')
+    expect(src).toContain('role="button"')
+    expect(src).toContain('tabIndex={0}')
+    expect(src).toContain('onKeyDown=')
+    expect(src).toContain('focus-visible:ring-2')
+    expect(src).toContain('<ul')
+  })
 })

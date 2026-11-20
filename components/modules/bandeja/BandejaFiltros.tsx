@@ -146,7 +146,7 @@ export function BandejaFiltros({
                 setSearchTerm('')
                 applyFilters('', undefined)
               }}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-900 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               <X className="w-4 h-4" aria-hidden="true" />
             </button>

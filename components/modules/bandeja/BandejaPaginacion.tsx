@@ -38,15 +38,18 @@ export function BandejaPaginacion({
   }
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-3 px-1 text-sm text-slate-600">
-      <div>
+    <nav
+      aria-label="Paginación de expedientes"
+      className="flex flex-col sm:flex-row items-center justify-between gap-4 py-3 px-1 text-sm text-slate-600"
+    >
+      <div aria-live="polite">
         Mostrando <span className="font-semibold text-slate-900">{from}</span> a{' '}
         <span className="font-semibold text-slate-900">{to}</span> de{' '}
         <span className="font-semibold text-slate-900">{totalCount}</span> expedientes
       </div>
 
       <div className="flex items-center gap-2">
-        <span className="text-xs text-slate-500 mr-2">
+        <span className="text-xs text-slate-600 mr-2">
           Página {currentPage} de {totalPages}
         </span>
 
@@ -55,10 +58,11 @@ export function BandejaPaginacion({
           size="sm"
           onClick={() => goToPage(currentPage - 1)}
           disabled={currentPage <= 1 || isPending}
+          aria-label="Ir a la página anterior"
           className="gap-1 shadow-sm"
         >
-          <ChevronLeft className="w-4 h-4" />
-          Anterior
+          <ChevronLeft className="w-4 h-4" aria-hidden="true" />
+          <span>Anterior</span>
         </Button>
 
         <Button
@@ -66,12 +70,13 @@ export function BandejaPaginacion({
           size="sm"
           onClick={() => goToPage(currentPage + 1)}
           disabled={currentPage >= totalPages || isPending}
+          aria-label="Ir a la página siguiente"
           className="gap-1 shadow-sm"
         >
-          Siguiente
-          <ChevronRight className="w-4 h-4" />
+          <span>Siguiente</span>
+          <ChevronRight className="w-4 h-4" aria-hidden="true" />
         </Button>
       </div>
-    </div>
+    </nav>
   )
 }

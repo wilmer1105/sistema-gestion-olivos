@@ -35,7 +35,7 @@ export function BandejaTabsNav({
   }
 
   return (
-    <div className="flex items-center gap-3">
+    <nav aria-label="Vistas de bandeja de expedientes" className="flex items-center gap-3">
       <Tabs
         value={currentTab}
         onValueChange={handleTabChange}
@@ -74,8 +74,11 @@ export function BandejaTabsNav({
         </TabsList>
       </Tabs>
       {isPending && (
-        <Loader2 className="w-4 h-4 animate-spin text-slate-500" aria-hidden="true" />
+        <span role="status" aria-live="polite" className="inline-flex items-center">
+          <Loader2 className="w-4 h-4 animate-spin text-slate-600" aria-hidden="true" />
+          <span className="sr-only">Cargando expedientes de la vista seleccionada...</span>
+        </span>
       )}
-    </div>
+    </nav>
   )
 }

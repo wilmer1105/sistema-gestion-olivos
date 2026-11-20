@@ -45,81 +45,104 @@ export default function LoginPage() {
   }
 
   return (
-    <Card className="shadow-lg border-slate-200">
-      <CardHeader className="space-y-2 text-center pb-6">
-        <div className="flex justify-center mb-2">
-          <div className="bg-primary/10 p-3 rounded-full">
-            <Building2 className="w-8 h-8 text-primary" />
-          </div>
-        </div>
-        <CardTitle className="text-2xl font-bold tracking-tight">Acceso Institucional</CardTitle>
-        <CardDescription>
-          Sistema de Gestión Documental - MDLO
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {errorMsg && (
-          <Alert variant="destructive" className="mb-6">
-            <ShieldAlert className="h-4 w-4" />
-            <AlertDescription>{errorMsg}</AlertDescription>
-          </Alert>
-        )}
-
-        {/* Usamos un form HTML nativo controlado por handleSubmit */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          
-          <div className="space-y-2">
-            <Label htmlFor="email" className={errors.email ? "text-destructive" : ""}>
-              Correo Institucional
-            </Label>
-            <Input 
-              id="email" 
-              type="email" 
-              placeholder="usuario@munilosolivos.gob.pe" 
-              disabled={isPending} 
-              {...register("email")} 
-            />
-            {errors.email && (
-              <p className="text-sm font-medium text-destructive">{errors.email.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password" className={errors.password ? "text-destructive" : ""}>
-                Contraseña
-              </Label>
-              <Link
-                href="/forgot-password"
-                className="text-xs text-primary hover:underline font-medium"
-              >
-                ¿Olvidaste tu contraseña?
-              </Link>
+    <main aria-label="Acceso institucional al sistema">
+      <Card className="shadow-lg border-slate-200">
+        <CardHeader className="space-y-2 text-center pb-6">
+          <div className="flex justify-center mb-2">
+            <div className="bg-primary/10 p-3 rounded-full">
+              <Building2 className="w-8 h-8 text-primary" aria-hidden="true" />
             </div>
-            <Input 
-              id="password" 
-              type="password" 
-              placeholder="••••••••" 
-              disabled={isPending} 
-              {...register("password")} 
-            />
-            {errors.password && (
-              <p className="text-sm font-medium text-destructive">{errors.password.message}</p>
-            )}
           </div>
+          <CardTitle className="text-2xl font-bold tracking-tight">Acceso Institucional</CardTitle>
+          <CardDescription>
+            Sistema de Gestión Documental - MDLO
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {errorMsg && (
+            <Alert
+              role="alert"
+              aria-live="assertive"
+              variant="destructive"
+              className="mb-6"
+            >
+              <ShieldAlert className="h-4 w-4" aria-hidden="true" />
+              <AlertDescription>{errorMsg}</AlertDescription>
+            </Alert>
+          )}
 
-          <Button type="submit" className="w-full" disabled={isPending}>
-            {isPending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Verificando...
-              </>
-            ) : (
-              'Iniciar Sesión'
-            )}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+          {/* Usamos un form HTML nativo controlado por handleSubmit */}
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            aria-label="Formulario de inicio de sesión institucional"
+            className="space-y-5"
+          >
+            
+            <div className="space-y-2">
+              <Label htmlFor="email" className={errors.email ? "text-destructive" : ""}>
+                Correo Institucional
+              </Label>
+              <Input 
+                id="email" 
+                type="email" 
+                autoComplete="email"
+                placeholder="usuario@munilosolivos.gob.pe" 
+                disabled={isPending} 
+                aria-required="true"
+                aria-invalid={Boolean(errors.email)}
+                aria-describedby={errors.email ? "login-email-error" : undefined}
+                {...register("email")} 
+              />
+              {errors.email && (
+                <p id="login-email-error" role="alert" className="text-sm font-medium text-destructive">
+                  {errors.email.message}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password" className={errors.password ? "text-destructive" : ""}>
+                  Contraseña
+                </Label>
+                <Link
+                  href="/forgot-password"
+                  className="text-xs text-primary hover:underline font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded-sm"
+                >
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </div>
+              <Input 
+                id="password" 
+                type="password" 
+                autoComplete="current-password"
+                placeholder="••••••••" 
+                disabled={isPending} 
+                aria-required="true"
+                aria-invalid={Boolean(errors.password)}
+                aria-describedby={errors.password ? "login-password-error" : undefined}
+                {...register("password")} 
+              />
+              {errors.password && (
+                <p id="login-password-error" role="alert" className="text-sm font-medium text-destructive">
+                  {errors.password.message}
+                </p>
+              )}
+            </div>
+
+            <Button type="submit" className="w-full" disabled={isPending} aria-busy={isPending}>
+              {isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                  <span>Verificando...</span>
+                </>
+              ) : (
+                'Iniciar Sesión'
+              )}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </main>
   )
 }

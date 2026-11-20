@@ -158,7 +158,11 @@ export function AsignarEspecialistaModal({
               }
               disabled={isPending || especialistas.length === 0}
             >
-              <SelectTrigger id="especialista_id" aria-required="true">
+              <SelectTrigger
+                id="especialista_id"
+                aria-required="true"
+                aria-invalid={Boolean(errorMsg && !especialistaId)}
+              >
                 <SelectValue
                   placeholder={
                     especialistas.length === 0

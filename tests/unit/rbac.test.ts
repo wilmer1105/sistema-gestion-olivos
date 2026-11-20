@@ -381,4 +381,79 @@ describe('Motor de Dominio RBAC y Aislamiento por Unidad Orgánica (lib/domain/r
       expect(formatearRolUsuario('JEFE_AREA')).toBe('Jefe de Área')
     })
   })
+
+  describe('8. Casos Borde Negativos RBAC por Estado Terminal, Área Ajena y Rol Inválido (PC7)', () => {
+    it('bloquea toda operación documental cuando el expediente está en estado terminal ATENDIDO o ARCHIVADO', () => {
+      const estadosTerminales = ['ATENDIDO', 'ARCHIVADO'] as const
+      const perfilesActivos = [
+        perfilMesaPartes,
+        perfilAsistenteSgopcu,
+        perfilEspecialistaSgopcu,
+        perfilJefeSgopcu,
+        perfilAdminTI,
+      ]
+
+      for (const estado of estadosTerminales) {
+        const expCerrado: ExpedienteRBACContext = {
+          id: `exp-cerrado-${estado}`,
+          area_actual_id: AREA_SGOPCU,
+          estado,
+        }
+
+        for (const perfil of perfilesActivos) {
+          expect(puedeRecepcionarExpediente(perfil, expCerrado)).toBe(false)
+          expect(puedeAsignarEspecialista(perfil, expCerrado)).toBe(false)
+          expect(puedeSubirDocumentoIntermedio(perfil, expCerrado)).toBe(false)
+          expect(puedeDerivarExpediente(perfil, expCerrado)).toBe(false)
+          expect(puedeFinalizarExpediente(perfil, expCerrado)).toBe(false)
+        }
+      }
+    })
+
+    it('impide operaciones cruzadas entre unidades orgánicas distintas (aislamiento estricto SGOPCU vs SGFA)', () => {
+      const expSgfaDerivado: ExpedienteRBACContext = {
+        id: 'exp-sgfa-der',
+        area_actual_id: AREA_SGFA,
+        estado: 'DERIVADO',
+      }
+      const expSgfaEnTramite: ExpedienteRBACContext = {
+        id: 'exp-sgfa-tra',
+        area_actual_id: AREA_SGFA,
+        estado: 'EN_TRAMITE',
+      }
+
+      // Ningún miembro de SGOPCU puede operar expedientes ubicados en SGFA
+      for (const perfil of [perfilAsistenteSgopcu, perfilEspecialistaSgopcu, perfilJefeSgopcu]) {
+        expect(puedeRecepcionarExpediente(perfil, expSgfaDerivado)).toBe(false)
+        expect(puedeAsignarEspecialista(perfil, expSgfaEnTramite)).toBe(false)
+        expect(puedeSubirDocumentoIntermedio(perfil, expSgfaEnTramite)).toBe(false)
+        expect(puedeDerivarExpediente(perfil, expSgfaEnTramite)).toBe(false)
+        expect(puedeFinalizarExpediente(perfil, expSgfaEnTramite)).toBe(false)
+      }
+    })
+
+    it('deniega todos los permisos cuando el rol es vacío o desconocido', () => {
+      const perfilDesconocido: PerfilRBACContext = {
+        id: 'u-desconocido',
+        rol: 'ROL_INEXISTENTE',
+        area_id: AREA_SGOPCU,
+        activo: true,
+      }
+      const expRecepcionado: ExpedienteRBACContext = {
+        id: 'exp-rec-x',
+        area_actual_id: AREA_SGOPCU,
+        estado: 'RECEPCIONADO',
+      }
+
+      expect(puedeRadicarExpediente(perfilDesconocido)).toBe(false)
+      expect(puedeRecepcionarExpediente(perfilDesconocido, { ...expRecepcionado, estado: 'DERIVADO' })).toBe(false)
+      expect(puedeAsignarEspecialista(perfilDesconocido, expRecepcionado)).toBe(false)
+      expect(puedeSubirDocumentoIntermedio(perfilDesconocido, expRecepcionado)).toBe(false)
+      expect(puedeDerivarExpediente(perfilDesconocido, expRecepcionado)).toBe(false)
+      expect(puedeFinalizarExpediente(perfilDesconocido, expRecepcionado)).toBe(false)
+      expect(puedeGestionarUsuarios(perfilDesconocido)).toBe(false)
+      expect(obtenerTiposDocumentoPermitidosPorRol('ROL_INEXISTENTE')).toEqual(['OTRO'])
+      expect(obtenerEtiquetaRol('ROL_INEXISTENTE')).toBe('Funcionario Municipal')
+    })
+  })
 })

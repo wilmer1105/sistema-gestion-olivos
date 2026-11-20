@@ -430,7 +430,7 @@ export function ExpedienteCreateForm() {
                       <span>+ Cargar otro archivo</span>
                     </Button>
                     <p className="text-[11px] text-slate-600 text-center">
-                      Formatos: .pdf, .jpg, .png (Máx. 5MB cada uno). Puede
+                      Formatos: .pdf, .jpg, .png (Máx. 10 MB por archivo). Puede
                       agregar los archivos que necesite.
                     </p>
                   </div>

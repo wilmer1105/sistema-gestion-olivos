@@ -248,6 +248,113 @@ describe('Validadores Isomórficos Zod y Aserciones Anti-Falsos Positivos (lib/v
       expect(excede10MB.valido).toBe(false)
       expect(excede10MB.error).toMatch(/supera el límite máximo permitido de 10 mb/i)
     })
+
+    it('valida fronteras exactas de PDF (null/undefined, tamaño negativo y exactamente 10 MB)', () => {
+      const nulo = validarArchivoPdf(null)
+      expect(nulo.valido).toBe(false)
+      expect(nulo.error).toMatch(/archivo pdf válido/i)
+
+      const indefinido = validarArchivoPdf(undefined)
+      expect(indefinido.valido).toBe(false)
+
+      const negativo = validarArchivoPdf({
+        name: 'corrupto.pdf',
+        type: 'application/pdf',
+        size: -10,
+      })
+      expect(negativo.valido).toBe(false)
+      expect(negativo.error).toMatch(/vacío/i)
+
+      // Límite superior exacto inclusivo: 10 * 1024 * 1024 = 10,485,760 bytes
+      const limiteExacto10MB = validarArchivoPdf({
+        name: 'limite_exacto.pdf',
+        type: 'application/pdf',
+        size: 10 * 1024 * 1024,
+      })
+      expect(limiteExacto10MB).toEqual({ valido: true })
+    })
+
+    it('rechaza entradas vacías o solo espacios y folios no positivos en expedienteSchema', () => {
+      const vacio = expedienteSchema.safeParse({
+        tipo_doc_remitente: 'DNI',
+        remitente_dni_ruc: '   ',
+        remitente_nombres: '   ',
+        asunto: '   ',
+        folios: 0,
+      })
+      expect(vacio.success).toBe(false)
+      if (!vacio.success) {
+        const campos = vacio.error.issues.map((i) => i.path[0])
+        expect(campos).toContain('remitente_dni_ruc')
+        expect(campos).toContain('remitente_nombres')
+        expect(campos).toContain('asunto')
+        expect(campos).toContain('folios')
+      }
+
+      const foliosNegativos = expedienteSchema.safeParse({
+        tipo_doc_remitente: 'DNI',
+        remitente_dni_ruc: '45892134',
+        remitente_nombres: 'Luis Paredes',
+        asunto: 'Solicitud de constancia de posesión',
+        folios: -2,
+      })
+      expect(foliosNegativos.success).toBe(false)
+    })
+
+    it('valida fronteras exactas de RUC (10, 11, 12 dígitos) y Carné de Extranjería CE (7, 8, 12, 13 caracteres)', () => {
+      const ruc12 = expedienteSchema.safeParse({
+        tipo_doc_remitente: 'RUC',
+        remitente_dni_ruc: '205544332219',
+        remitente_nombres: 'Empresa Demo SAC',
+        asunto: 'Solicitud de licencia comercial municipal',
+        folios: 3,
+      })
+      expect(ruc12.success).toBe(false)
+      if (!ruc12.success) {
+        expect(ruc12.error.issues[0]?.message).toBe(
+          'El RUC debe contener exactamente 11 dígitos numéricos'
+        )
+      }
+
+      const ceValido8 = expedienteSchema.safeParse({
+        tipo_doc_remitente: 'CE',
+        remitente_dni_ruc: 'CE123456',
+        remitente_nombres: 'Carlos Foreign',
+        asunto: 'Solicitud de autorización temporal de evento',
+        folios: 2,
+      })
+      expect(ceValido8.success).toBe(true)
+
+      const ceValido12 = expedienteSchema.safeParse({
+        tipo_doc_remitente: 'CE',
+        remitente_dni_ruc: 'CE1234567890',
+        remitente_nombres: 'Carlos Foreign',
+        asunto: 'Solicitud de autorización temporal de evento',
+        folios: 2,
+      })
+      expect(ceValido12.success).toBe(true)
+
+      const ceInvalido13 = expedienteSchema.safeParse({
+        tipo_doc_remitente: 'CE',
+        remitente_dni_ruc: 'CE12345678901',
+        remitente_nombres: 'Carlos Foreign',
+        asunto: 'Solicitud de autorización temporal de evento',
+        folios: 2,
+      })
+      expect(ceInvalido13.success).toBe(false)
+      if (!ceInvalido13.success) {
+        expect(ceInvalido13.error.issues[0]?.message).toMatch(/entre 8 y 12 caracteres/i)
+      }
+
+      const ceConSimbolos = expedienteSchema.safeParse({
+        tipo_doc_remitente: 'CE',
+        remitente_dni_ruc: 'CE-123456',
+        remitente_nombres: 'Carlos Foreign',
+        asunto: 'Solicitud de autorización temporal de evento',
+        folios: 2,
+      })
+      expect(ceConSimbolos.success).toBe(false)
+    })
   })
 
   describe('4. derivacionSchema, asignacionInternaSchema y cierreExpedienteSchema', () => {

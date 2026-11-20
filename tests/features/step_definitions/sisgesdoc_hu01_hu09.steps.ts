@@ -836,3 +836,60 @@ Then(
     assert.equal(keysExpuestas.includes('direccion'), false)
   }
 )
+
+// ============================================================================
+// PC7: Casos borde de PDF (bytes exactos) y RBAC negativo por estado
+// ============================================================================
+
+When(
+  'intenta validar un archivo PDF de exactamente {int} bytes',
+  (tamanoBytes: number) => {
+    const res = validarArchivoPdf({
+      name: 'frontera_10mb.pdf',
+      type: 'application/pdf',
+      size: tamanoBytes,
+    })
+    state.validacionArchivoExito = res.valido
+  }
+)
+
+Then(
+  'el validador de archivos acepta el PDF en el límite permitido',
+  () => {
+    assert.equal(state.validacionArchivoExito, true)
+  }
+)
+
+Then(
+  'el validador de archivos rechaza el adjunto por exceder el límite de 10 MB',
+  () => {
+    assert.equal(state.validacionArchivoExito, false)
+  }
+)
+
+When(
+  'se verifica la autorización de cierre de {string} de {string} sobre el estado actual del expediente',
+  async (rol: string, areaId: string) => {
+    const exp = await state.expRepo.obtenerPorId(state.ultimoExpedienteId)
+    assert.ok(exp)
+    const perfil: PerfilRBACContext = {
+      id: `user-${rol.toLowerCase()}-${areaId}`,
+      rol,
+      area_id: areaId,
+      activo: true,
+    }
+    state.accesoPermitido = puedeFinalizarExpediente(perfil, {
+      id: exp.id,
+      area_actual_id: exp.area_actual_id,
+      estado: exp.estado,
+    })
+  }
+)
+
+Then(
+  'la política RBAC deniega el cierre por estado no habilitado',
+  () => {
+    assert.equal(state.accesoPermitido, false)
+  }
+)
+
