@@ -10,6 +10,7 @@
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
     "test:bdd": "cucumber-js",
+    "test:e2e": "node tests/e2e/flujo_principal.selenium.mjs",
     "test": "vitest run && cucumber-js"
   },
   "dependencies": {
@@ -43,6 +44,7 @@
     "@vitest/coverage-v8": "^5.1.1",
     "eslint": "^9",
     "eslint-config-next": "16.3.7",
+    "selenium-webdriver": "^4.53.0",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
