@@ -216,10 +216,10 @@ export default async function BandejaPage({ searchParams }: Props) {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3 w-full lg:w-auto">
           {puedeRadicar && (
-            <Link href="/dashboard/expedientes/nuevo">
-              <Button className="h-11 px-5 gap-2 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-base font-semibold shadow-sm focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">
+            <Link href="/dashboard/expedientes/nuevo" className="w-full sm:w-auto">
+              <Button className="w-full sm:w-auto h-11 px-5 gap-2 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-base font-semibold shadow-sm focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">
                 <FilePlus2 className="w-5 h-5" aria-hidden="true" />
                 <span>Nuevo Expediente</span>
               </Button>

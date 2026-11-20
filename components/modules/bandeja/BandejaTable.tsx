@@ -194,7 +194,7 @@ export function BandejaTable({
         </Alert>
       )}
 
-      <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
+      <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-x-auto">
         <Table aria-label="Tabla de expedientes de la unidad orgánica">
           <caption className="sr-only">
             Lista de expedientes asignados a la bandeja de entrada con su estado y acciones disponibles
@@ -242,7 +242,7 @@ export function BandejaTable({
                   key={expediente.id}
                   className="hover:bg-blue-50/40 transition-colors border-b border-slate-200/80"
                 >
-                  <TableCell className="py-3.5 px-4 font-semibold">
+                  <TableCell className="py-3.5 px-4 font-semibold whitespace-nowrap">
                     <Link
                       href={`/dashboard/expedientes/${expediente.id}`}
                       className="font-mono text-base font-bold text-blue-800 hover:text-blue-900 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 rounded-sm"
@@ -266,60 +266,62 @@ export function BandejaTable({
                       </div>
                     )}
                   </TableCell>
-                  <TableCell className="py-3.5 px-4">{getStatusBadge(expediente.estado)}</TableCell>
-                  <TableCell className="py-3.5 px-4 text-slate-700 text-sm font-medium">
+                  <TableCell className="py-3.5 px-4 whitespace-nowrap">{getStatusBadge(expediente.estado)}</TableCell>
+                  <TableCell className="py-3.5 px-4 text-slate-700 text-sm font-medium whitespace-nowrap">
                     {format(
                       new Date(expediente.fecha_actualizacion),
                       'dd MMM yyyy, HH:mm',
                       { locale: es }
                     )}
                   </TableCell>
-                  <TableCell className="py-3.5 px-4 text-right space-x-2 whitespace-nowrap">
-                    {!esPestanaEnviados &&
-                      expediente.estado === 'DERIVADO' &&
-                      puedeRecepcionarRow && (
+                  <TableCell className="py-3.5 px-4 text-right whitespace-nowrap">
+                    <div className="inline-flex items-center justify-end gap-2">
+                      {!esPestanaEnviados &&
+                        expediente.estado === 'DERIVADO' &&
+                        puedeRecepcionarRow && (
+                          <Button
+                            size="sm"
+                            onClick={() =>
+                              handleRecepcionar(expediente.id, expediente.cut)
+                            }
+                            disabled={isLoadingThis}
+                            aria-busy={isLoadingThis}
+                            aria-label={`Recibir expediente ${cutLabel}`}
+                            className="h-10 px-4 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold shadow-2xs"
+                          >
+                            {isLoadingThis ? (
+                              <Loader2
+                                className="w-4 h-4 animate-spin mr-1.5"
+                                aria-hidden="true"
+                              />
+                            ) : (
+                              <CheckCircle2
+                                className="w-4 h-4 mr-1.5"
+                                aria-hidden="true"
+                              />
+                            )}
+                            <span>Recepcionar</span>
+                          </Button>
+                        )}
+
+                      <Link
+                        href={`/dashboard/expedientes/${expediente.id}`}
+                        aria-label={`Ver detalle del expediente ${cutLabel}`}
+                      >
                         <Button
                           size="sm"
-                          onClick={() =>
-                            handleRecepcionar(expediente.id, expediente.cut)
-                          }
-                          disabled={isLoadingThis}
-                          aria-busy={isLoadingThis}
-                          aria-label={`Recibir expediente ${cutLabel}`}
-                          className="h-10 px-4 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold shadow-2xs"
+                          variant="outline"
+                          className="h-10 px-4 gap-1.5 rounded-xl border-slate-300 text-sm font-semibold text-slate-800 hover:bg-slate-100"
                         >
-                          {isLoadingThis ? (
-                            <Loader2
-                              className="w-4 h-4 animate-spin mr-1.5"
-                              aria-hidden="true"
-                            />
-                          ) : (
-                            <CheckCircle2
-                              className="w-4 h-4 mr-1.5"
-                              aria-hidden="true"
-                            />
-                          )}
-                          <span>Recepcionar</span>
+                          <Eye className="w-4 h-4 text-blue-700" aria-hidden="true" />
+                          <span>
+                            {expediente.estado === 'REGISTRADO'
+                              ? 'Ver / Derivar'
+                              : 'Ver Detalle'}
+                          </span>
                         </Button>
-                      )}
-
-                    <Link
-                      href={`/dashboard/expedientes/${expediente.id}`}
-                      aria-label={`Ver detalle del expediente ${cutLabel}`}
-                    >
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-10 px-4 gap-1.5 rounded-xl border-slate-300 text-sm font-semibold text-slate-800 hover:bg-slate-100"
-                      >
-                        <Eye className="w-4 h-4 text-blue-700" aria-hidden="true" />
-                        <span>
-                          {expediente.estado === 'REGISTRADO'
-                            ? 'Ver / Derivar'
-                            : 'Ver Detalle'}
-                        </span>
-                      </Button>
-                    </Link>
+                      </Link>
+                    </div>
                   </TableCell>
                 </TableRow>
               )

@@ -135,7 +135,7 @@ export function EmpleadosTable({ empleados, areas = [] }: Props) {
         </Alert>
       )}
 
-      <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-xs">
+      <div className="rounded-xl border border-slate-200 bg-white overflow-x-auto shadow-xs">
         <Table className="w-full" aria-label="Tabla de funcionarios y usuarios registrados">
           <TableHeader className="bg-slate-100/90 border-b border-slate-200">
             <TableRow className="hover:bg-slate-100/90">

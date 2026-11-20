@@ -121,7 +121,7 @@ export function UserProfileMenu({ user }: Props) {
         <div
           role="menu"
           aria-label="Opciones de cuenta institucional"
-          className="absolute right-0 mt-2 w-80 rounded-xl border border-slate-200 bg-white p-4 shadow-xl z-50 animate-in fade-in-0 zoom-in-95"
+          className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-80 max-w-80 rounded-xl border border-slate-200 bg-white p-4 shadow-xl z-50 animate-in fade-in-0 zoom-in-95"
         >
           {/* Cabecera del Panel */}
           <div className="flex items-center gap-3 pb-3 border-b border-slate-200">

@@ -60,28 +60,28 @@ export default function LoginPage() {
       {/* Panel izquierdo institucional (#0F2A4A) */}
       <section
         aria-label="Información institucional de SISGESDOC"
-        className="lg:col-span-6 xl:col-span-7 bg-[#0F2A4A] text-white flex flex-col justify-between p-8 sm:p-12 lg:p-16 border-b lg:border-b-0 lg:border-r border-slate-800"
+        className="order-2 lg:order-1 lg:col-span-6 xl:col-span-7 bg-[#0F2A4A] text-white flex flex-col justify-between p-6 sm:p-10 lg:p-16 border-t lg:border-t-0 lg:border-r border-slate-800"
       >
         <div className="flex items-center gap-3.5">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600/25 border border-blue-400/40 shadow-sm">
-            <Building2 className="w-7 h-7 text-white" aria-hidden="true" />
+          <div className="flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-blue-600/25 border border-blue-400/40 shadow-sm shrink-0">
+            <Building2 className="w-6 h-6 sm:w-7 sm:h-7 text-white" aria-hidden="true" />
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest text-blue-200">
               Gobierno Digital Municipal
             </p>
-            <p className="text-lg font-bold tracking-tight text-white">
+            <p className="text-base sm:text-lg font-bold tracking-tight text-white">
               Municipalidad Distrital de Los Olivos
             </p>
           </div>
         </div>
 
-        <div className="my-10 lg:my-0 max-w-xl space-y-6">
-          <div className="inline-flex items-center gap-2 rounded-full bg-amber-500/20 border border-amber-300/40 px-3.5 py-1 text-sm font-semibold text-amber-200">
+        <div className="my-8 lg:my-0 max-w-xl space-y-5">
+          <div className="inline-flex items-center gap-2 rounded-full bg-amber-500/20 border border-amber-300/40 px-3.5 py-1 text-xs sm:text-sm font-semibold text-amber-200">
             <span>Plataforma Oficial SISGESDOC</span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white leading-tight">
             SISGESDOC — Municipalidad Distrital de Los Olivos
           </h1>
 
@@ -147,7 +147,7 @@ export default function LoginPage() {
       {/* Panel derecho: Tarjeta de acceso institucional */}
       <section
         aria-label="Formulario de autenticación"
-        className="lg:col-span-6 xl:col-span-5 flex flex-col items-center justify-center p-6 sm:p-10 lg:p-12"
+        className="order-1 lg:order-2 lg:col-span-6 xl:col-span-5 flex flex-col items-center justify-center p-4 sm:p-10 lg:p-12"
       >
         <div className="w-full max-w-md space-y-6">
           <Card className="bg-white rounded-xl border border-slate-200 shadow-md">

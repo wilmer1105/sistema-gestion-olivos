@@ -396,7 +396,7 @@ export default async function ExpedienteDetailPage({
 
           {/* Sección: Archivos Adjuntos Agrupados por Unidad Orgánica Emisora (RF-13, RF-14, HU-06) */}
           <Card className="bg-white rounded-xl border border-slate-200 shadow-xs">
-            <CardHeader className="bg-slate-50/80 border-b border-slate-200 flex flex-row items-center justify-between py-4">
+            <CardHeader className="bg-slate-50/80 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-4">
               <div className="flex items-center gap-2.5">
                 <Paperclip
                   className="w-5 h-5 text-blue-700"
@@ -407,7 +407,7 @@ export default async function ExpedienteDetailPage({
                 </CardTitle>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2.5">
                 <Badge
                   variant="secondary"
                   className="rounded-full bg-slate-200 text-slate-900 font-bold text-xs px-3 py-1"
