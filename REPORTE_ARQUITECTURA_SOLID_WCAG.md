@@ -67,3 +67,18 @@
   - [`tests/features/rbac_y_flujo_expedientes.feature`](file:///home/wilmerabanto/Proyectos/sistema-gestion-olivos/tests/features/rbac_y_flujo_expedientes.feature)
   - [`tests/features/step_definitions/expedientes.steps.ts`](file:///home/wilmerabanto/Proyectos/sistema-gestion-olivos/tests/features/step_definitions/expedientes.steps.ts)
 * **Resultado:** `5 scenarios (5 passed)`, `38 steps (38 passed)`.
+
+---
+
+## 4. Remediación WAVE, Pruebas Visibles, Lighthouse TBT y SonarQube (Fase 4 — Commit `b8880b5`)
+
+* **Alertas WAVE a 0:** Se resolvieron `heading_possible` (encabezados `<h2>` en `CardTitle` y ajuste de marca en `Sidebar.tsx`), `title_redundant`, `label_orphaned` (`EditarEmpleadoDialog.tsx` y `sr-only` en `<input type="file">`), `nested-interactive` (`buttonVariants` en `<Link>` y dropzone en `SubirDocumentosDialog.tsx`), `link_redundant`, contraste AA e íconos decorativos (`aria-hidden="true"`).
+* **Pruebas reales y visibles de accesibilidad:**
+  - [`tests/unit/accessibility-dom.test.tsx`](file:///home/antigravity/wilmer1105/sistema-gestion-olivos/tests/unit/accessibility-dom.test.tsx): **23 pruebas DOM reales** (`jsdom` + `axe-core` + reglas WAVE) incluyendo 7 modales en estado abierto.
+  - [`tests/e2e/accesibilidad.selenium.mjs`](file:///home/antigravity/wilmer1105/sistema-gestion-olivos/tests/e2e/accesibilidad.selenium.mjs): Auditoría en Google Chrome (`npm run test:a11y` / `npm run test:a11y:visible`) con **8/8 escenarios aprobados** (0 violaciones axe-core, 0 errores WAVE, 0 errores de contraste, 0 alertas WAVE) y reporte visual en [`reports/accessibility-report.html`](file:///home/antigravity/wilmer1105/sistema-gestion-olivos/reports/accessibility-report.html).
+* **Optimización Lighthouse (TBT):** Eliminación de `<Toaster />` global, validación nativa sin `react-hook-form`/`zod` en auth, `Intl.DateTimeFormat` en lugar de `date-fns`, `optimizePackageImports`, `<button>`/`<input>` nativos y vía rápida en `proxy.ts`:
+  - `/login`: Performance **97**, TBT **207 ms** (desde 958 ms, **-78.4%**).
+  - `/consulta`: Performance **96**, TBT **238 ms** (desde 503 ms, **-52.7%**).
+  - `/forgot-password`: Performance **98**, TBT **176 ms** (desde 607 ms, **-71.0%**).
+* **Suite actual verificada y SonarQube:** `tsc --noEmit` (0 errores), `npm run lint` (0 errores/0 advertencias), `npm run sonar:report` (**85/85** pruebas Vitest, **75 archivos fuente** en `coverage/lcov.info`, `@sonar/scan` v5.1.0 validado) y `npm run test:bdd` (**32 escenarios, 181 pasos**). Detalle completo en [`documentacion/REPORTE_ACCESIBILIDAD_WAVE_LIGHTHOUSE_SONAR.md`](file:///home/antigravity/wilmer1105/sistema-gestion-olivos/documentacion/REPORTE_ACCESIBILIDAD_WAVE_LIGHTHOUSE_SONAR.md).
+
