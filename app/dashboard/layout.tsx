@@ -17,6 +17,7 @@ export default async function DashboardLayout({
         <Navbar perfil={perfil} />
         <main
           id="main-content"
+          tabIndex={-1}
           aria-label="Contenido principal del sistema"
           className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 pb-24 md:pb-8"
         >

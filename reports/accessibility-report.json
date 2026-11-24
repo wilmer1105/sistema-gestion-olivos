@@ -1,0 +1,165 @@
+{
+  "generatedAt": "2026-11-24T15:24:00.716Z",
+  "baseUrl": "http://127.0.0.1:37257",
+  "headless": true,
+  "totals": {
+    "axeViolations": 0,
+    "waveErrors": 0,
+    "contrastErrors": 0,
+    "waveAlerts": 0
+  },
+  "audits": [
+    {
+      "path": "/login",
+      "label": "Inicio de Sesión Institucional (/login)",
+      "stage": "Carga inicial",
+      "viewport": "Desktop 1280x800",
+      "axePasses": 38,
+      "axeViolations": [],
+      "wave": {
+        "alerts": [],
+        "contrastErrors": [],
+        "errors": [],
+        "stats": {
+          "ariaAttributes": 12,
+          "headings": 5,
+          "labels": 2,
+          "landmarks": 1
+        }
+      }
+    },
+    {
+      "path": "/login",
+      "label": "Inicio de Sesión Institucional (/login)",
+      "stage": "Validación accesible con alertas",
+      "viewport": "Desktop 1280x800",
+      "axePasses": 38,
+      "axeViolations": [],
+      "wave": {
+        "alerts": [],
+        "contrastErrors": [],
+        "errors": [],
+        "stats": {
+          "ariaAttributes": 16,
+          "headings": 5,
+          "labels": 2,
+          "landmarks": 1
+        }
+      }
+    },
+    {
+      "path": "/login",
+      "label": "Inicio de Sesión Institucional (/login)",
+      "stage": "Carga inicial",
+      "viewport": "Móvil 390x844",
+      "axePasses": 38,
+      "axeViolations": [],
+      "wave": {
+        "alerts": [],
+        "contrastErrors": [],
+        "errors": [],
+        "stats": {
+          "ariaAttributes": 12,
+          "headings": 5,
+          "labels": 2,
+          "landmarks": 1
+        }
+      }
+    },
+    {
+      "path": "/consulta",
+      "label": "Consulta Pública Ciudadana (/consulta)",
+      "stage": "Carga inicial",
+      "viewport": "Desktop 1280x800",
+      "axePasses": 39,
+      "axeViolations": [],
+      "wave": {
+        "alerts": [],
+        "contrastErrors": [],
+        "errors": [],
+        "stats": {
+          "ariaAttributes": 9,
+          "headings": 2,
+          "labels": 1,
+          "landmarks": 3
+        }
+      }
+    },
+    {
+      "path": "/consulta",
+      "label": "Consulta Pública Ciudadana (/consulta)",
+      "stage": "Validación accesible con alertas",
+      "viewport": "Desktop 1280x800",
+      "axePasses": 39,
+      "axeViolations": [],
+      "wave": {
+        "alerts": [],
+        "contrastErrors": [],
+        "errors": [],
+        "stats": {
+          "ariaAttributes": 9,
+          "headings": 2,
+          "labels": 1,
+          "landmarks": 3
+        }
+      }
+    },
+    {
+      "path": "/consulta",
+      "label": "Consulta Pública Ciudadana (/consulta)",
+      "stage": "Carga inicial",
+      "viewport": "Móvil 390x844",
+      "axePasses": 39,
+      "axeViolations": [],
+      "wave": {
+        "alerts": [],
+        "contrastErrors": [],
+        "errors": [],
+        "stats": {
+          "ariaAttributes": 9,
+          "headings": 2,
+          "labels": 1,
+          "landmarks": 3
+        }
+      }
+    },
+    {
+      "path": "/forgot-password",
+      "label": "Recuperación de Contraseña (/forgot-password)",
+      "stage": "Carga inicial",
+      "viewport": "Desktop 1280x800",
+      "axePasses": 36,
+      "axeViolations": [],
+      "wave": {
+        "alerts": [],
+        "contrastErrors": [],
+        "errors": [],
+        "stats": {
+          "ariaAttributes": 4,
+          "headings": 1,
+          "labels": 1,
+          "landmarks": 1
+        }
+      }
+    },
+    {
+      "path": "/forgot-password",
+      "label": "Recuperación de Contraseña (/forgot-password)",
+      "stage": "Validación accesible con alertas",
+      "viewport": "Desktop 1280x800",
+      "axePasses": 36,
+      "axeViolations": [],
+      "wave": {
+        "alerts": [],
+        "contrastErrors": [],
+        "errors": [],
+        "stats": {
+          "ariaAttributes": 6,
+          "headings": 1,
+          "labels": 1,
+          "landmarks": 1
+        }
+      }
+    }
+  ]
+}

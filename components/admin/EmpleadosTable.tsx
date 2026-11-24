@@ -36,9 +36,15 @@ import {
   AlertCircle,
   CheckCircle2,
 } from 'lucide-react'
+import dynamic from 'next/dynamic'
 import { EmpleadoItem, cambiarEstadoEmpleado } from '@/app/actions/admin'
 import { EditarEmpleadoDialog } from '@/components/admin/EditarEmpleadoDialog'
 import { toast } from '@/components/ui/toast'
+
+const Toaster = dynamic(
+  () => import('@/components/ui/toast').then((mod) => ({ default: mod.Toaster })),
+  { ssr: false }
+)
 
 interface AreaOption {
   id: string
@@ -103,7 +109,11 @@ export function EmpleadosTable({ empleados, areas = [] }: Props) {
 
   if (!empleados || empleados.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-700">
+      <div
+        role="status"
+        aria-live="polite"
+        className="rounded-xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-700"
+      >
         <User className="mx-auto h-10 w-10 text-slate-600 mb-3" aria-hidden="true" />
         <p className="text-base font-bold text-slate-900">No hay empleados registrados</p>
         <p className="text-sm text-slate-700 mt-1">
@@ -115,6 +125,7 @@ export function EmpleadosTable({ empleados, areas = [] }: Props) {
 
   return (
     <div className="space-y-4">
+      <Toaster />
       {/* Alerta de notificación visual inmediata */}
       {alerta && (
         <Alert
@@ -137,6 +148,9 @@ export function EmpleadosTable({ empleados, areas = [] }: Props) {
 
       <div className="rounded-xl border border-slate-200 bg-white overflow-x-auto shadow-xs">
         <Table className="w-full" aria-label="Tabla de funcionarios y usuarios registrados">
+          <caption className="sr-only">
+            Listado de funcionarios municipales registrados con rol institucional, área de adscripción, estado y acciones disponibles
+          </caption>
           <TableHeader className="bg-slate-100/90 border-b border-slate-200">
             <TableRow className="hover:bg-slate-100/90">
               <TableHead scope="col" className="py-3.5 px-4 text-sm font-bold text-slate-900">

@@ -181,7 +181,7 @@ export function UserProfileMenu({ user }: Props) {
                 <Building className="w-4 h-4 text-slate-600" aria-hidden="true" />
                 Área:
               </span>
-              <span className="font-semibold text-slate-900 text-right truncate max-w-[170px]" title={nombreArea}>
+              <span className="font-semibold text-slate-900 text-right truncate max-w-[170px]">
                 {siglasArea ? `${nombreArea} (${siglasArea})` : nombreArea}
               </span>
             </div>

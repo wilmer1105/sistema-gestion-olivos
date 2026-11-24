@@ -2,7 +2,6 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import { Toaster } from '@/components/ui/toast' // Necesita el componente toaster que vamos a crear si no existe
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -26,7 +25,6 @@ export default function RootLayout({
           Saltar al contenido principal
         </a>
         {children}
-        <Toaster />
       </body>
     </html>
   )

@@ -140,7 +140,7 @@ export function Sidebar({ userRole, perfil }: SidebarProps) {
             <Building2 className="h-6 w-6 text-white" aria-hidden="true" />
           </div>
           <div>
-            <span className="font-extrabold text-lg text-white tracking-tight block leading-tight">
+            <span className="font-extrabold text-base text-white tracking-tight block leading-tight">
               SISGESDOC
             </span>
             <span className="text-xs font-medium text-blue-200 block">

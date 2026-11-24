@@ -169,10 +169,10 @@ function EditarEmpleadoForm({ empleado, areas, onClose }: FormProps) {
 
       {/* Correo Electrónico (Solo Lectura) */}
       <div className="space-y-1.5 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-        <Label className="text-xs font-semibold text-slate-600 flex items-center gap-1.5">
+        <p className="text-xs font-semibold text-slate-600 flex items-center gap-1.5">
           <Mail className="w-4 h-4 text-blue-700" aria-hidden="true" />
           Cuenta de Correo Institucional
-        </Label>
+        </p>
         <p className="text-base font-bold text-slate-900">
           {empleado.email}
         </p>

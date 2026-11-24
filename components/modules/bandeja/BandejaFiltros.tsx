@@ -123,7 +123,7 @@ export function BandejaFiltros({
         className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
       >
         <div className="relative flex-1">
-          <Label htmlFor="bandeja_search_query" className="sr-only">
+          <Label htmlFor="bandeja_search_query" className="sr-only text-slate-900 bg-white">
             Buscar por CUT, DNI/RUC o Asunto
           </Label>
           <Search
@@ -154,7 +154,7 @@ export function BandejaFiltros({
         </div>
 
         <div className="w-full sm:w-64">
-          <Label htmlFor="filtro_estado" className="sr-only">
+          <Label htmlFor="filtro_estado" className="sr-only text-slate-900 bg-white">
             Filtrar por estado
           </Label>
           <Select
@@ -168,7 +168,6 @@ export function BandejaFiltros({
           >
             <SelectTrigger
               id="filtro_estado"
-              aria-label="Filtrar por estado"
               className="h-11 text-base bg-white border-slate-300 text-slate-900 focus-visible:ring-2 focus-visible:ring-blue-600"
             >
               <SelectValue placeholder="Filtrar por estado" />

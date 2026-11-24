@@ -1,8 +1,6 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
 import {
   Building2,
@@ -15,7 +13,6 @@ import {
 } from 'lucide-react'
 
 import { loginAction } from '@/app/actions/auth'
-import { loginSchema, type LoginInput } from '@/lib/validators/auth.schema'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -23,26 +20,43 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
+interface LoginFieldErrors {
+  email?: string
+  password?: string
+}
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 export default function LoginPage() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [errors, setErrors] = useState<LoginFieldErrors>({})
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginInput>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-  })
+  function validateFields(nextEmail: string, nextPassword: string): LoginFieldErrors {
+    const nextErrors: LoginFieldErrors = {}
+    if (!EMAIL_REGEX.test(nextEmail.trim())) {
+      nextErrors.email = 'Debe ingresar un correo electrónico válido'
+    }
+    if (nextPassword.length < 6) {
+      nextErrors.password = 'La contraseña debe tener al menos 6 caracteres'
+    }
+    return nextErrors
+  }
 
-  function onSubmit(data: LoginInput) {
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
     setErrorMsg(null)
+
+    const validationErrors = validateFields(email, password)
+    setErrors(validationErrors)
+    if (validationErrors.email || validationErrors.password) {
+      return
+    }
+
     startTransition(async () => {
-      const response = await loginAction(data)
+      const response = await loginAction({ email: email.trim(), password })
       if (response && !response.success && response.error) {
         setErrorMsg(response.error)
       } else if (response?.redirectUrl) {
@@ -54,6 +68,7 @@ export default function LoginPage() {
   return (
     <main
       id="main-content"
+      tabIndex={-1}
       aria-label="Acceso institucional al sistema"
       className="min-h-screen grid grid-cols-1 lg:grid-cols-12 bg-[#F4F6F9]"
     >
@@ -63,21 +78,21 @@ export default function LoginPage() {
         className="order-2 lg:order-1 lg:col-span-6 xl:col-span-7 bg-[#0F2A4A] text-white flex flex-col justify-between p-6 sm:p-10 lg:p-16 border-t lg:border-t-0 lg:border-r border-slate-800"
       >
         <div className="flex items-center gap-3.5">
-          <div className="flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-blue-600/25 border border-blue-400/40 shadow-sm shrink-0">
+          <div className="flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-[#1B3B61] border border-blue-400/40 shadow-sm shrink-0">
             <Building2 className="w-6 h-6 sm:w-7 sm:h-7 text-white" aria-hidden="true" />
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest text-blue-200">
               Gobierno Digital Municipal
             </p>
-            <p className="text-base sm:text-lg font-bold tracking-tight text-white">
+            <p className="text-sm sm:text-base font-medium tracking-tight text-blue-100">
               Municipalidad Distrital de Los Olivos
             </p>
           </div>
         </div>
 
         <div className="my-8 lg:my-0 max-w-xl space-y-5">
-          <div className="inline-flex items-center gap-2 rounded-full bg-amber-500/20 border border-amber-300/40 px-3.5 py-1 text-xs sm:text-sm font-semibold text-amber-200">
+          <div className="inline-flex items-center gap-2 rounded-full bg-[#1B3B61] border border-amber-300/60 px-3.5 py-1 text-xs sm:text-sm font-semibold text-amber-200">
             <span>Plataforma Oficial SISGESDOC</span>
           </div>
 
@@ -92,7 +107,7 @@ export default function LoginPage() {
 
           <ul className="space-y-4 pt-2" aria-label="Pilares del sistema institucional">
             <li className="flex items-start gap-3.5">
-              <div className="p-2 rounded-lg bg-blue-700/60 border border-blue-400/30 shrink-0 mt-0.5">
+              <div className="p-2 rounded-lg bg-[#1D4ED8] border border-blue-400/40 shrink-0 mt-0.5">
                 <GitBranch className="w-5 h-5 text-white" aria-hidden="true" />
               </div>
               <div>
@@ -107,7 +122,7 @@ export default function LoginPage() {
             </li>
 
             <li className="flex items-start gap-3.5">
-              <div className="p-2 rounded-lg bg-blue-700/60 border border-blue-400/30 shrink-0 mt-0.5">
+              <div className="p-2 rounded-lg bg-[#1D4ED8] border border-blue-400/40 shrink-0 mt-0.5">
                 <ShieldCheck className="w-5 h-5 text-white" aria-hidden="true" />
               </div>
               <div>
@@ -122,7 +137,7 @@ export default function LoginPage() {
             </li>
 
             <li className="flex items-start gap-3.5">
-              <div className="p-2 rounded-lg bg-blue-700/60 border border-blue-400/30 shrink-0 mt-0.5">
+              <div className="p-2 rounded-lg bg-[#1D4ED8] border border-blue-400/40 shrink-0 mt-0.5">
                 <FileSearch className="w-5 h-5 text-white" aria-hidden="true" />
               </div>
               <div>
@@ -153,12 +168,12 @@ export default function LoginPage() {
           <Card className="bg-white rounded-xl border border-slate-200 shadow-md">
             <CardHeader className="space-y-2 text-center pb-6 border-b border-slate-100">
               <div className="flex justify-center mb-2">
-                <div className="bg-blue-700/10 p-3.5 rounded-xl border border-blue-700/20">
+                <div className="bg-blue-50 p-3.5 rounded-xl border border-blue-200">
                   <Building2 className="w-8 h-8 text-blue-700" aria-hidden="true" />
                 </div>
               </div>
               <CardTitle className="text-2xl font-bold tracking-tight text-slate-900">
-                Acceso Institucional
+                <h2>Acceso Institucional</h2>
               </CardTitle>
               <CardDescription className="text-sm text-slate-600">
                 Ingrese sus credenciales oficiales para acceder a su bandeja documental
@@ -181,7 +196,8 @@ export default function LoginPage() {
               )}
 
               <form
-                onSubmit={handleSubmit(onSubmit)}
+                onSubmit={handleSubmit}
+                noValidate
                 aria-label="Formulario de inicio de sesión institucional"
                 className="space-y-5"
               >
@@ -196,15 +212,22 @@ export default function LoginPage() {
                   </Label>
                   <Input
                     id="email"
+                    name="email"
                     type="email"
                     autoComplete="email"
                     placeholder="usuario@munilosolivos.gob.pe"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value)
+                      if (errors.email) {
+                        setErrors((prev) => ({ ...prev, email: undefined }))
+                      }
+                    }}
                     disabled={isPending}
                     aria-required="true"
                     aria-invalid={Boolean(errors.email)}
                     aria-describedby={errors.email ? 'login-email-error' : undefined}
                     className="h-11 text-base bg-white border-slate-300 text-slate-900 placeholder:text-slate-500 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
-                    {...register('email')}
                   />
                   {errors.email && (
                     <p
@@ -212,7 +235,7 @@ export default function LoginPage() {
                       role="alert"
                       className="text-sm font-medium text-red-700"
                     >
-                      {errors.email.message}
+                      {errors.email}
                     </p>
                   )}
                 </div>
@@ -236,15 +259,22 @@ export default function LoginPage() {
                   </div>
                   <Input
                     id="password"
+                    name="password"
                     type="password"
                     autoComplete="current-password"
                     placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value)
+                      if (errors.password) {
+                        setErrors((prev) => ({ ...prev, password: undefined }))
+                      }
+                    }}
                     disabled={isPending}
                     aria-required="true"
                     aria-invalid={Boolean(errors.password)}
                     aria-describedby={errors.password ? 'login-password-error' : undefined}
                     className="h-11 text-base bg-white border-slate-300 text-slate-900 placeholder:text-slate-500 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
-                    {...register('password')}
                   />
                   {errors.password && (
                     <p
@@ -252,7 +282,7 @@ export default function LoginPage() {
                       role="alert"
                       className="text-sm font-medium text-red-700"
                     >
-                      {errors.password.message}
+                      {errors.password}
                     </p>
                   )}
                 </div>

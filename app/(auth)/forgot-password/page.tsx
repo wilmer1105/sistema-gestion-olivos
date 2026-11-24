@@ -2,13 +2,10 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
 import { KeyRound, Loader2, ArrowLeft, CheckCircle2, ShieldAlert } from 'lucide-react'
 
 import { forgotPasswordAction } from '@/app/actions/auth'
-import { forgotPasswordSchema, type ForgotPasswordInput } from '@/lib/validators/auth.schema'
 
 import { Button, buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -17,28 +14,28 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 export default function ForgotPasswordPage() {
+  const [email, setEmail] = useState('')
+  const [emailError, setEmailError] = useState<string | null>(null)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [isPending, startTransition] = useTransition()
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<ForgotPasswordInput>({
-    resolver: zodResolver(forgotPasswordSchema),
-    defaultValues: {
-      email: '',
-    },
-  })
-
-  function onSubmit(data: ForgotPasswordInput) {
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
     setErrorMsg(null)
     setSuccess(false)
 
+    if (!EMAIL_REGEX.test(email.trim())) {
+      setEmailError('Debe ingresar un correo electrónico válido')
+      return
+    }
+    setEmailError(null)
+
     startTransition(async () => {
-      const response = await forgotPasswordAction(data)
+      const response = await forgotPasswordAction({ email: email.trim() })
       if (response?.error) {
         setErrorMsg(response.error)
       } else {
@@ -50,6 +47,7 @@ export default function ForgotPasswordPage() {
   return (
     <main
       id="main-content"
+      tabIndex={-1}
       aria-label="Recuperación de contraseña institucional"
       className="flex min-h-screen items-center justify-center bg-[#F4F6F9] p-6"
     >
@@ -57,7 +55,7 @@ export default function ForgotPasswordPage() {
         <Card className="bg-white rounded-xl shadow-md border border-slate-200">
           <CardHeader className="space-y-2 text-center pb-6 border-b border-slate-100">
             <div className="flex justify-center mb-2">
-              <div className="bg-blue-700/10 p-3.5 rounded-xl border border-blue-700/20">
+              <div className="bg-blue-50 p-3.5 rounded-xl border border-blue-200">
                 <KeyRound className="w-8 h-8 text-blue-700" aria-hidden="true" />
               </div>
             </div>
@@ -108,30 +106,41 @@ export default function ForgotPasswordPage() {
                 </Link>
               </div>
             ) : (
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+              <form
+                onSubmit={handleSubmit}
+                noValidate
+                aria-label="Formulario de recuperación de contraseña"
+                className="space-y-5"
+              >
                 <div className="space-y-2">
                   <Label
                     htmlFor="email"
                     className={`text-sm font-semibold ${
-                      errors.email ? 'text-red-700' : 'text-slate-800'
+                      emailError ? 'text-red-700' : 'text-slate-800'
                     }`}
                   >
                     Correo Institucional
                   </Label>
                   <Input
                     id="email"
+                    name="email"
                     type="email"
                     autoComplete="email"
                     placeholder="usuario@munilosolivos.gob.pe"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value)
+                      if (emailError) setEmailError(null)
+                    }}
                     disabled={isPending}
                     aria-required="true"
-                    aria-invalid={Boolean(errors.email)}
+                    aria-invalid={Boolean(emailError)}
+                    aria-describedby={emailError ? 'forgot-email-error' : undefined}
                     className="h-11 text-base bg-white border-slate-300 text-slate-900 placeholder:text-slate-500 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
-                    {...register('email')}
                   />
-                  {errors.email && (
-                    <p role="alert" className="text-sm font-medium text-red-700">
-                      {errors.email.message}
+                  {emailError && (
+                    <p id="forgot-email-error" role="alert" className="text-sm font-medium text-red-700">
+                      {emailError}
                     </p>
                   )}
                 </div>

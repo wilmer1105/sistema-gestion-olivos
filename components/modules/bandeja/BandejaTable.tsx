@@ -30,7 +30,8 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -243,17 +244,11 @@ export function BandejaTable({
                   className="hover:bg-blue-50/40 transition-colors border-b border-slate-200/80"
                 >
                   <TableCell className="py-3.5 px-4 font-semibold whitespace-nowrap">
-                    <Link
-                      href={`/dashboard/expedientes/${expediente.id}`}
-                      className="font-mono text-base font-bold text-blue-800 hover:text-blue-900 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 rounded-sm"
-                    >
+                    <span className="font-mono text-base font-bold text-slate-900">
                       {expediente.cut}
-                    </Link>
+                    </span>
                   </TableCell>
-                  <TableCell
-                    className="py-3.5 px-4 max-w-[260px] truncate text-base text-slate-900 font-medium"
-                    title={expediente.asunto}
-                  >
+                  <TableCell className="py-3.5 px-4 max-w-[260px] truncate text-base text-slate-900 font-medium">
                     {expediente.asunto}
                   </TableCell>
                   <TableCell className="py-3.5 px-4 truncate max-w-[200px]">
@@ -307,19 +302,17 @@ export function BandejaTable({
                       <Link
                         href={`/dashboard/expedientes/${expediente.id}`}
                         aria-label={`Ver detalle del expediente ${cutLabel}`}
+                        className={cn(
+                          buttonVariants({ size: 'sm', variant: 'outline' }),
+                          'h-10 px-4 gap-1.5 rounded-xl border-slate-300 text-sm font-semibold text-slate-800 hover:bg-slate-100'
+                        )}
                       >
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-10 px-4 gap-1.5 rounded-xl border-slate-300 text-sm font-semibold text-slate-800 hover:bg-slate-100"
-                        >
-                          <Eye className="w-4 h-4 text-blue-700" aria-hidden="true" />
-                          <span>
-                            {expediente.estado === 'REGISTRADO'
-                              ? 'Ver / Derivar'
-                              : 'Ver Detalle'}
-                          </span>
-                        </Button>
+                        <Eye className="w-4 h-4 text-blue-700" aria-hidden="true" />
+                        <span>
+                          {expediente.estado === 'REGISTRADO'
+                            ? 'Ver / Derivar'
+                            : 'Ver Detalle'}
+                        </span>
                       </Link>
                     </div>
                   </TableCell>

@@ -161,7 +161,7 @@ export function ExpedienteCreateForm() {
                   <User className="w-5 h-5" aria-hidden="true" />
                 </div>
                 <CardTitle className="text-lg font-bold text-slate-900">
-                  1. Datos del Solicitante / Administrado
+                  <h2>1. Datos del Solicitante / Administrado</h2>
                 </CardTitle>
               </div>
               <CardDescription className="text-sm text-slate-700">
@@ -187,7 +187,6 @@ export function ExpedienteCreateForm() {
                   >
                     <SelectTrigger
                       id="tipo_documento_identidad"
-                      aria-label="Tipo de documento de identidad"
                       className="h-11 text-base bg-white border-slate-300 text-slate-900"
                     >
                       <SelectValue placeholder="Tipo" />
@@ -286,7 +285,7 @@ export function ExpedienteCreateForm() {
                   <FileText className="w-5 h-5" aria-hidden="true" />
                 </div>
                 <CardTitle className="text-lg font-bold text-slate-900">
-                  2. Datos del Trámite y Adjunto PDF
+                  <h2>2. Datos del Trámite y Adjunto PDF</h2>
                 </CardTitle>
               </div>
               <CardDescription className="text-sm text-slate-700">
@@ -312,7 +311,6 @@ export function ExpedienteCreateForm() {
                   >
                     <SelectTrigger
                       id="tipo_tramite"
-                      aria-label="Tipo de trámite"
                       className="h-11 text-base bg-white border-slate-300 text-slate-900"
                     >
                       <SelectValue placeholder="Seleccione" />
@@ -375,7 +373,8 @@ export function ExpedienteCreateForm() {
                   accept=".pdf,image/*"
                   onChange={handleFileChange}
                   disabled={isPending}
-                  className="hidden"
+                  tabIndex={-1}
+                  className="sr-only"
                 />
 
                 {archivos.length === 0 ? (
@@ -424,10 +423,7 @@ export function ExpedienteCreateForm() {
                               />
                             </div>
                             <div className="truncate">
-                              <p
-                                className="text-sm font-bold text-slate-900 truncate"
-                                title={archivo.name}
-                              >
+                              <p className="text-sm font-bold text-slate-900 truncate">
                                 {archivo.name}
                               </p>
                               <p className="text-xs font-medium text-slate-700">
@@ -441,7 +437,6 @@ export function ExpedienteCreateForm() {
                             disabled={isPending}
                             aria-label={`Eliminar archivo adjunto ${archivo.name}`}
                             className="h-9 w-9 inline-flex items-center justify-center text-slate-700 hover:text-red-700 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 rounded-lg transition-colors shrink-0 cursor-pointer"
-                            title="Eliminar archivo"
                           >
                             <Trash2 className="w-4 h-4" aria-hidden="true" />
                           </button>

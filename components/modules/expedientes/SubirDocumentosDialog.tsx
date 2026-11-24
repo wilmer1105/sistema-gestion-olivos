@@ -249,6 +249,17 @@ export function SubirDocumentosDialog({
             <Label htmlFor="archivos_pdf_intermedio">
               Archivos PDF a Anexar *
             </Label>
+            <input
+              id="archivos_pdf_intermedio"
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept=".pdf,application/pdf"
+              tabIndex={-1}
+              className="sr-only"
+              onChange={(e) => handleFiles(e.target.files)}
+              disabled={isPending}
+            />
             <div
               role="button"
               tabIndex={0}
@@ -273,18 +284,8 @@ export function SubirDocumentosDialog({
                   : 'border-slate-300 hover:border-slate-400 bg-slate-50/50'
               }`}
             >
-              <input
-                id="archivos_pdf_intermedio"
-                ref={fileInputRef}
-                type="file"
-                multiple
-                accept=".pdf,application/pdf"
-                className="hidden"
-                onChange={(e) => handleFiles(e.target.files)}
-                disabled={isPending}
-              />
               <UploadCloud
-                className="w-9 h-9 mx-auto text-slate-500 mb-2"
+                className="w-9 h-9 mx-auto text-slate-600 mb-2"
                 aria-hidden="true"
               />
               <p className="text-sm font-medium text-slate-700">

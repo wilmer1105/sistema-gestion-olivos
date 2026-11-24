@@ -8,7 +8,8 @@ import { BackButton } from '@/components/shared/BackButton'
 import { BandejaTabsNav } from '@/components/modules/bandeja/BandejaTabsNav'
 import { BandejaFiltros } from '@/components/modules/bandeja/BandejaFiltros'
 import { BandejaPaginacion } from '@/components/modules/bandeja/BandejaPaginacion'
-import { Button } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import { Constants, type EstadoExpediente } from '@/types/database.types'
 import { obtenerPerfilAutenticado } from '@/lib/auth/session'
 import { puedeRadicarExpediente } from '@/lib/domain/rbac'
@@ -218,11 +219,15 @@ export default async function BandejaPage({ searchParams }: Props) {
 
         <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3 w-full lg:w-auto">
           {puedeRadicar && (
-            <Link href="/dashboard/expedientes/nuevo" className="w-full sm:w-auto">
-              <Button className="w-full sm:w-auto h-11 px-5 gap-2 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-base font-semibold shadow-sm focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">
-                <FilePlus2 className="w-5 h-5" aria-hidden="true" />
-                <span>Nuevo Expediente</span>
-              </Button>
+            <Link
+              href="/dashboard/expedientes/nuevo"
+              className={cn(
+                buttonVariants(),
+                'w-full sm:w-auto h-11 px-5 gap-2 rounded-xl bg-blue-700 hover:bg-blue-800 text-white text-base font-semibold shadow-sm focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2'
+              )}
+            >
+              <FilePlus2 className="w-5 h-5" aria-hidden="true" />
+              <span>Nuevo Expediente</span>
             </Link>
           )}
 

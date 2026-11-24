@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reporte de Accesibilidad WCAG 2.1 AA y WAVE - Los Olivos</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; margin: 0; background: #f8fafc; color: #0f172a; line-height: 1.5; }
+    header { background: #0f2a4a; color: #ffffff; padding: 28px 32px; border-bottom: 4px solid #f59e0b; }
+    main { max-width: 1180px; margin: 28px auto; padding: 0 24px 48px; }
+    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 14px; margin-bottom: 24px; }
+    .kpi { background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 16px; }
+    .kpi .title { font-size: 12px; font-weight: 700; text-transform: uppercase; color: #475569; }
+    .kpi .val { font-size: 30px; font-weight: 800; margin-top: 6px; }
+    .ok-num { color: #15803d; }
+    .err-num { color: #b91c1c; }
+    .warn-num { color: #b45309; }
+    table { width: 100%; border-collapse: collapse; background: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #cbd5e1; }
+    th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
+    th { background: #f1f5f9; font-weight: 700; color: #1e293b; }
+    td.num { text-align: center; font-weight: 700; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+    .badge-ok { background: #dcfce7; color: #166534; }
+    .badge-err { background: #fee2e2; color: #991b1b; }
+    footer { margin-top: 28px; color: #475569; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Auditoría Automatizada de Accesibilidad (WCAG 2.1 AA + WAVE)</h1>
+    <p>Municipalidad Distrital de Los Olivos &middot; Ejecutado en Google Chrome real el 2026-11-24T15:24:00.716Z</p>
+  </header>
+  <main>
+    <div class="kpis">
+      <div class="kpi"><div class="title">Estado Global</div><div class="val ok-num">APROBADO</div></div>
+      <div class="kpi"><div class="title">Escenarios Auditados</div><div class="val">8</div></div>
+      <div class="kpi"><div class="title">Violaciones axe-core</div><div class="val ok-num">0</div></div>
+      <div class="kpi"><div class="title">Errores WAVE</div><div class="val ok-num">0</div></div>
+      <div class="kpi"><div class="title">Errores Contraste</div><div class="val ok-num">0</div></div>
+      <div class="kpi"><div class="title">Alertas WAVE</div><div class="val ok-num">0</div></div>
+    </div>
+    <h2>Detalle por Ruta, Estado y Viewport</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Ruta / Escenario</th>
+          <th>Viewport</th>
+          <th>Resultado</th>
+          <th>Reglas axe OK</th>
+          <th>Violaciones axe</th>
+          <th>Errores WAVE</th>
+          <th>Contraste</th>
+          <th>Alertas WAVE</th>
+          <th>Landmarks / H / ARIA</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+        <tr>
+          <td><strong>Inicio de Sesión Institucional (/login)</strong><br><small>Carga inicial</small></td>
+          <td>Desktop 1280x800</td>
+          <td><span class="badge badge-ok">APROBADO</span></td>
+          <td class="num">38</td>
+          <td class="num ok-num">0</td>
+          <td class="num ok-num">0</td>
+          <td class="num ok-num">0</td>
+          <td class="num ok-num">0</td>
+          <td class="num">1 / 5 / 12</td>
+        </tr>
+      
+
+        <tr>
+          <td><strong>Inicio de Sesión Institucional (/login)</strong><br><small>Validación accesible con alertas</small></td>
+          <td>Desktop 1280x800</td>
+          <td><span class="badge badge-ok">APROBADO</span></td>
+          <td class="num">38</td>
+          <td class="num ok-num">0</td>
+          <td class="num ok-num">0</td>
+          <td class="num ok-num">0</td>
+          <td class="num ok-num">0</td>
+          <td class="num">1 / 5 / 16</td>
+        </tr>
+      
+
+        <tr>
+          <td><strong>Inicio de Sesión Institucional (/login)</strong><br><small>Carga inicial</small></td>
+          <td>Móvil 390x844</td>
+          <td><span class="badge badge-ok">APROBADO</span></td>
+          <td class="num">38</td>
+          <td class="num ok-num">0</td>
+          <td class="num ok-num">0</td>
+          <td class="num ok-num">0</td>
+          <td class="num ok-num">0</td>
+          <td class="num">1 / 5 / 12</td>
+        </tr>
+      
+
+        <tr>
+          <td><strong>Consulta Pública Ciudadana (/consulta)</strong><br><small>Carga inicial</small></td>
+          <td>Desktop 1280x800</td>
+          <td><span class="badge badge-ok">APROBADO</span></td>
+          <td class="num">39</td>
+          <td class="num ok-num">0</td>
+          <td class="num ok-num">0</td>
+          <td class="num ok-num">0</td>
+          <td class="num ok-num">0</td>
+          <td class="num">3 / 2 / 9</td>
+        </tr>
+      
+
+        <tr>
+          <td><strong>Consulta Pública Ciudadana (/consulta)</strong><br><small>Validación accesible con alertas</small></td>
+          <td>Desktop 1280x800</td>
+          <td><span class="badge badge-ok">APROBADO</span></td>
+          <td class="num">39</td>
+          <td class="num ok-num">0</td>
+          <td class="num ok-num">0</td>
+          <td class="num ok-num">0</td>
+          <td class="num ok-num">0</td>
+          <td class="num">3 / 2 / 9</td>
+        </tr>
+      
+
+        <tr>
+          <td><strong>Consulta Pública Ciudadana (/consulta)</strong><br><small>Carga inicial</small></td>
+          <td>Móvil 390x844</td>
+          <td><span class="badge badge-ok">APROBADO</span></td>
+          <td class="num">39</td>
+          <td class="num ok-num">0</td>
+          <td class="num ok-num">0</td>
+          <td class="num ok-num">0</td>
+          <td class="num ok-num">0</td>
+          <td class="num">3 / 2 / 9</td>
+        </tr>
+      
+
+        <tr>
+          <td><strong>Recuperación de Contraseña (/forgot-password)</strong><br><small>Carga inicial</small></td>
+          <td>Desktop 1280x800</td>
+          <td><span class="badge badge-ok">APROBADO</span></td>
+          <td class="num">36</td>
+          <td class="num ok-num">0</td>
+          <td class="num ok-num">0</td>
+          <td class="num ok-num">0</td>
+          <td class="num ok-num">0</td>
+          <td class="num">1 / 1 / 4</td>
+        </tr>
+      
+
+        <tr>
+          <td><strong>Recuperación de Contraseña (/forgot-password)</strong><br><small>Validación accesible con alertas</small></td>
+          <td>Desktop 1280x800</td>
+          <td><span class="badge badge-ok">APROBADO</span></td>
+          <td class="num">36</td>
+          <td class="num ok-num">0</td>
+          <td class="num ok-num">0</td>
+          <td class="num ok-num">0</td>
+          <td class="num ok-num">0</td>
+          <td class="num">1 / 1 / 6</td>
+        </tr>
+      
+      </tbody>
+    </table>
+    <footer>
+      <p>Generado por <code>tests/e2e/accesibilidad.selenium.mjs</code> (Selenium WebDriver + axe-core + motor heurístico WAVE). Modo visual disponible con <code>HEADLESS=false npm run test:a11y</code>.</p>
+    </footer>
+  </main>
+</body>
+</html>

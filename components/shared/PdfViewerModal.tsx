@@ -33,10 +33,7 @@ export function PdfViewerModal({ url, nombreArchivo }: PdfViewerModalProps) {
 
       <DialogContent className="sm:max-w-4xl md:max-w-5xl w-full max-h-[95vh] flex flex-col p-4 gap-3 rounded-xl">
         <DialogHeader className="flex flex-row items-center justify-between pr-8 border-b border-slate-200 pb-3">
-          <DialogTitle
-            className="text-base font-bold truncate text-slate-900"
-            title={nombreArchivo}
-          >
+          <DialogTitle className="text-base font-bold truncate text-slate-900">
             {nombreArchivo}
           </DialogTitle>
           <a
@@ -45,7 +42,6 @@ export function PdfViewerModal({ url, nombreArchivo }: PdfViewerModalProps) {
             rel="noopener noreferrer"
             aria-label={`Abrir documento ${nombreArchivo} en una pestaña nueva`}
             className="text-sm font-semibold text-blue-700 hover:text-blue-800 flex items-center gap-1.5 shrink-0 ml-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 rounded px-2 py-1"
-            title="Abrir en pestaña nueva"
           >
             <ExternalLink className="w-4 h-4" aria-hidden="true" />
             <span className="hidden sm:inline">Nueva pestaña</span>

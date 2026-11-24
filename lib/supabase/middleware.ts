@@ -9,6 +9,32 @@ export async function updateSession(request: NextRequest) {
     request,
   })
 
+  const pathname = request.nextUrl.pathname
+  const isDashboardRoute = pathname.startsWith('/dashboard')
+  const isAuthRoute =
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/forgot-password')
+
+  const hasSupabaseSessionCookie = request.cookies
+    .getAll()
+    .some((cookie) => cookie.name.startsWith('sb-'))
+
+  if (!hasSupabaseSessionCookie) {
+    if (pathname.startsWith('/dashboard/consulta')) {
+      const consultaUrl = request.nextUrl.clone()
+      consultaUrl.pathname = '/consulta'
+      return NextResponse.redirect(consultaUrl)
+    }
+
+    if (isDashboardRoute) {
+      const loginUrl = request.nextUrl.clone()
+      loginUrl.pathname = '/login'
+      return NextResponse.redirect(loginUrl)
+    }
+
+    return supabaseResponse
+  }
+
   const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -36,13 +62,8 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const isDashboardRoute = request.nextUrl.pathname.startsWith('/dashboard')
-  const isAuthRoute =
-    request.nextUrl.pathname.startsWith('/login') ||
-    request.nextUrl.pathname.startsWith('/forgot-password')
-
   // Redirigir a consulta pública si intenta ir a la consulta del dashboard sin sesión
-  if (request.nextUrl.pathname.startsWith('/dashboard/consulta') && !user) {
+  if (pathname.startsWith('/dashboard/consulta') && !user) {
     const consultaUrl = request.nextUrl.clone()
     consultaUrl.pathname = '/consulta'
     return NextResponse.redirect(consultaUrl)

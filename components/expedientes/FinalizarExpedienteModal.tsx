@@ -87,7 +87,6 @@ export function FinalizarExpedienteModal({
     })
   }
 
-  const newLocal = "sm:max-w-[500px]"
   return (
     <Dialog
       open={open}

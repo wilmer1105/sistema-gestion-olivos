@@ -2,16 +2,18 @@ import Link from 'next/link'
 import { Building2, ArrowLeft, ShieldCheck } from 'lucide-react'
 import { ConsultaTracker } from '@/components/modules/consulta/ConsultaTracker'
 
-export const dynamic = 'force-dynamic'
-
 export default function ConsultaPublicaPage() {
   return (
     <div className="min-h-screen bg-[#F4F6F9] flex flex-col">
       {/* Cabecera Pública tipo Banner Institucional */}
-      <header className="bg-[#0F2A4A] text-white border-b border-slate-800 shadow-sm">
+      <header
+        role="banner"
+        aria-label="Cabecera del portal público ciudadano"
+        className="bg-[#0F2A4A] text-white border-b border-slate-800 shadow-sm"
+      >
         <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3.5">
-            <div className="p-3 bg-blue-600/25 border border-blue-400/40 rounded-xl shrink-0">
+            <div className="p-3 bg-[#1B3B61] border border-blue-400/40 rounded-xl shrink-0">
               <Building2 className="w-7 h-7 text-white" aria-hidden="true" />
             </div>
             <div>
@@ -21,7 +23,7 @@ export default function ConsultaPublicaPage() {
               <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
                 Consulta de Trámites
               </h1>
-              <p className="text-sm text-slate-600 sr-only">
+              <p className="text-sm text-blue-100 mt-0.5">
                 Portal público ciudadano de seguimiento documental
               </p>
             </div>
@@ -30,7 +32,7 @@ export default function ConsultaPublicaPage() {
           <div className="flex items-center gap-3">
             <Link
               href="/login"
-              className="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-white/10 hover:bg-white/20 border border-white/25 text-sm font-semibold text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0F2A4A]"
+              className="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-[#1B3B61] hover:bg-[#234977] border border-blue-300/40 text-sm font-semibold text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0F2A4A]"
             >
               <ArrowLeft className="w-4 h-4" aria-hidden="true" />
               <span>Acceso Funcionarios</span>
@@ -41,6 +43,7 @@ export default function ConsultaPublicaPage() {
 
       <main
         id="main-content"
+        tabIndex={-1}
         aria-label="Portal público de consulta de trámites"
         className="flex-1 flex flex-col items-center py-10 px-4 sm:px-6 lg:px-8"
       >
@@ -62,7 +65,13 @@ export default function ConsultaPublicaPage() {
           />
         </div>
       </main>
+
+      <footer
+        role="contentinfo"
+        className="border-t border-slate-200 bg-white py-4 px-4 text-center text-sm text-slate-600"
+      >
+        Municipalidad Distrital de Los Olivos · Plataforma SISGESDOC · Transparencia Ciudadana
+      </footer>
     </div>
   )
 }
-

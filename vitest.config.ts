@@ -13,6 +13,8 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'lcov'],
       reportsDirectory: 'coverage',
+      include: ['app/**/*.{ts,tsx}', 'components/**/*.{ts,tsx}', 'lib/**/*.{ts,tsx}'],
+      exclude: ['tests/**', '**/*.d.ts', '**/types/**', 'node_modules/**'],
     },
   },
   resolve: {

@@ -28,20 +28,27 @@ import {
   AlertCircle,
   CheckCircle2,
 } from 'lucide-react'
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
 
 interface ConsultaTrackerProps {
   cardTitle?: string
   cardDescription?: string
 }
 
+const DATE_FORMATTER = new Intl.DateTimeFormat('es-PE', {
+  day: '2-digit',
+  month: 'short',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: true,
+})
+
 export function formatDateSafe(dateStr?: string | null): string {
   if (!dateStr) return 'Fecha no registrada'
   try {
     const d = new Date(dateStr)
     if (isNaN(d.getTime())) return 'Fecha no registrada'
-    return format(d, 'dd MMM yyyy - hh:mm a', { locale: es })
+    return DATE_FORMATTER.format(d)
   } catch {
     return 'Fecha no disponible'
   }
@@ -193,7 +200,7 @@ export function ConsultaTracker({
       <Card className="bg-white rounded-xl shadow-sm border border-slate-200 border-t-4 border-t-blue-700">
         <CardHeader className="pb-4">
           <CardTitle className="text-xl font-bold text-slate-900">
-            {cardTitle}
+            <h2>{cardTitle}</h2>
           </CardTitle>
           <CardDescription id="cut-search-desc" className="text-base text-slate-700">
             {cardDescription}
@@ -204,10 +211,10 @@ export function ConsultaTracker({
             onSubmit={handleBuscar}
             role="search"
             aria-label="Buscador de expediente por código único de trámite"
-            className="flex flex-col sm:flex-row gap-3"
+            className="flex flex-col sm:flex-row sm:items-end gap-3"
           >
-            <div className="flex-1">
-              <Label htmlFor="cut-search-input" className="sr-only">
+            <div className="flex-1 space-y-1.5">
+              <Label htmlFor="cut-search-input" className="block text-sm font-semibold text-slate-800">
                 Código Único de Trámite (CUT)
               </Label>
               <Input
@@ -215,7 +222,6 @@ export function ConsultaTracker({
                 placeholder="Ej. EXP-2026-000001-MDLO"
                 value={cut}
                 onChange={(e) => setCut(e.target.value.toUpperCase())}
-                aria-label="Código Único de Trámite (CUT)"
                 aria-required="true"
                 aria-invalid={Boolean(errorMsg)}
                 aria-describedby={

@@ -483,10 +483,7 @@ export default async function ExpedienteDetailPage({
                                   />
                                 </div>
                                 <div className="truncate min-w-0">
-                                  <p
-                                    className="text-sm font-bold text-slate-900 truncate"
-                                    title={adjunto.nombre_archivo}
-                                  >
+                                  <p className="text-sm font-bold text-slate-900 truncate">
                                     {adjunto.nombre_archivo}
                                   </p>
                                   <div className="flex items-center gap-2 mt-1">
